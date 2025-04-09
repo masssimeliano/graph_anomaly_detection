@@ -1,18 +1,17 @@
 from typing import List
+from dataclasses import dataclass, field
 
+@dataclass
 class Node:
-    def __init__(self, id: int, label: int, neighbours: List['Node'], features: List[float], is_str_anomaly: bool, is_attr_anomaly: bool):
-        self.id = id
-        self.label = label
-        self.neighbours = neighbours
-        self.features = features
-        self.is_str_anomaly = is_str_anomaly
-        self.is_attr_anomaly = is_attr_anomaly
+    id: int
+    label: int
+    neighbours: List['Node'] = field(default_factory=list)
+    features: List[float] = field(default_factory=list)
+    is_str_anomaly: bool = False
+    is_attr_anomaly: bool = False
 
     def __repr__(self):
-        return (
-            f"Node(id={self.id}, "
-            f"neighbours={[neighbour.id for neighbour in self.neighbours]}, "
-            f"str_anom={self.is_str_anomaly}, "
-            f"attr_anom={self.is_attr_anomaly})"
-        )
+        neighbour_ids = [n.id for n in self.neighbours]
+        return (f"Node(id={self.id}, label={self.label}, "
+                f"neighbours={neighbour_ids}, "
+                f"str_anom={self.is_str_anomaly}, attr_anom={self.is_attr_anomaly})")
