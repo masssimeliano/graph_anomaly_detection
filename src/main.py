@@ -2,8 +2,10 @@ import random
 
 import numpy as np
 import torch
+from sklearn.metrics import roc_auc_score
 
 from src.helpers.data_loader import load_graph_from_mat
+from src.helpers.emd_loader import load_emd_model
 from src.helpers.graph_plotter import to_networkx_graph
 from src.helpers.logs_parser import open_logs, sort_logs
 from src.models.unsupervised.anomalydae import (
@@ -20,12 +22,22 @@ HID_DIM = [16, 32, 64]
 
 def main():
     # analyze_logs()
-    train_models()
+    # train_models()
+    check_embedded_model()
 
 
 def analyze_logs():
     open_logs()
     sort_logs()
+
+
+def check_embedded_model():
+    emd_model, labels = load_emd_model()
+
+    scores = emd_model.decision_score_
+    auc = roc_auc_score(labels, scores)
+
+    print(f"Epoch: {100} - AUC-ROC (Embedding 1 (Attr + Str)): {auc:.4f}")
 
 
 def train_models():
