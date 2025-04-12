@@ -1,6 +1,5 @@
 import random
 
-import networkx as nx
 import numpy as np
 import torch
 
@@ -12,6 +11,7 @@ from src.models.unsupervised.anomalydae import (
     structure_and_feature_model as structure_and_feature
 )
 
+# Training model on the "book.mat" dataset
 DATASETS = ["book.mat"]
 EPOCHS = [25, 50, 75, 100, 125, 150, 175, 200]
 LEARNING_RATE = [0.0005, 0.001, 0.01]
@@ -19,23 +19,13 @@ HID_DIM = [16, 32, 64]
 
 
 def main():
-    analyze_logs()
-    # train_models()
-    # check_trained_model()
+    # analyze_logs()
+    train_models()
+
 
 def analyze_logs():
     open_logs()
     sort_logs()
-
-
-def check_trained_model():
-    labels, graph = load_graph_from_mat("photo.mat")
-    nx_graph = to_networkx_graph(graph)
-
-    baseline.train(nx_graph, labels,
-                   learning_rate=5,
-                   hid_dim=5,
-                   current_epoch=5)
 
 
 def train_models():
@@ -64,6 +54,7 @@ def train_models():
                                                 learning_rate=rate,
                                                 hid_dim=dim,
                                                 current_epoch=epoch)
+
 
 if __name__ == "__main__":
     main()

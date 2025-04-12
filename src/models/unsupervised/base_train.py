@@ -36,7 +36,7 @@ def base_train(graph: nx.Graph, labels: List[int],
         def write(msg):
             log.write(msg + "\n")
 
-        print("Training")
+        print(f"Training a model with lr={learning_rate}, hid={hid_dim}, current={current_epoch}")
         start_time = time.time()
 
         di_graph = from_networkx(graph)

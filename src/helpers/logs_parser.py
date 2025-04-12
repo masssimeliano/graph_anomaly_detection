@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+
 
 log_dir =  Path(__file__).resolve().parents[2] / "results" / "unsupervised" / "anomalyedae"
 results = []
