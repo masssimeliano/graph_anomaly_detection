@@ -13,13 +13,15 @@ def base_train(graph: nx.Graph,
                learning_rate: float,
                hid_dim: int,
                current_epoch: int,
-               save_results: bool):
+               save_results: bool,
+               data_set: str,
+               alpha: float = 0.5):
     if save_results:
         log_file = RESULTS_DIR / (
-            f"{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+            f"{data_set.replace(".mat", "")}_{str(title_prefix)}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         )
         emd_file = RESULTS_DIR / (
-            f"emd_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}"
+            f"emd_{data_set.replace(".mat", "")}_{str(title_prefix)}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.pt"
         )
 
         with open(log_file, "w") as log:
@@ -31,7 +33,7 @@ def base_train(graph: nx.Graph,
 
             di_graph = from_networkx(graph)
 
-            model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, save_emb=True)
+            model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True)
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
             print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
             model.fit(di_graph)
