@@ -17,7 +17,8 @@ LEARNING_RATE = [0.001]
 HID_DIM = [16, 32]
 
 def main():
-    general_pipeline()
+    import torch_sparse
+    train_models()
 
 def analyze_logs():
     parser = LogParser()
