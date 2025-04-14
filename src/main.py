@@ -1,44 +1,31 @@
 import random
-
 import numpy as np
 import torch
-from sklearn.metrics import roc_auc_score
 
-from src.helpers.data_loader import load_graph_from_mat
-from src.helpers.emd_loader import load_emd_model
-from src.helpers.graph_plotter import to_networkx_graph
-from src.helpers.logs_parser import open_logs, sort_logs
+from src.helpers.loaders.mat_loader import load_graph_from_mat
+from src.helpers.plotters.graph_plotter import to_networkx_graph
+from src.helpers.logs.log_parser import LogParser
 from src.models.unsupervised.anomalydae import (
     baseline_model as baseline,
     structure_and_feature_model as structure_and_feature
 )
+from src.structure.data_set import DataSetSize
 
-# Training model on the "book.mat" dataset
 DATASETS = ["book.mat"]
-EPOCHS = [25, 50, 75, 100, 125, 150, 175, 200]
+EPOCHS = [25, 50, 75, 100, 125, 150]
 LEARNING_RATE = [0.0005, 0.001, 0.01]
 HID_DIM = [16, 32, 64]
 
-
 def main():
-    # analyze_logs()
-    # train_models()
-    check_embedded_model()
-
+    analyze_logs()
 
 def analyze_logs():
-    open_logs()
-    sort_logs()
+    parser = LogParser()
+    parser.parse_logs()
 
-
-def check_embedded_model():
-    emd_model, labels = load_emd_model()
-
-    scores = emd_model.decision_score_
-    auc = roc_auc_score(labels, scores)
-
-    print(f"Epoch: {100} - AUC-ROC (Embedding 1 (Attr + Str)): {auc:.4f}")
-
+    best_model, worst_model = parser.get_best_and_worst()
+    print("Best model:", best_model)
+    print("Worst model:", worst_model)
 
 def train_models():
     torch.manual_seed(42)
@@ -50,23 +37,19 @@ def train_models():
         print("Working with " + dataset)
         print("---------------------------------------\n")
 
-        labels, graph = load_graph_from_mat(dataset)
-        nx_graph = to_networkx_graph(graph)
+        labels, graph = load_graph_from_mat(name="book.mat", size=DataSetSize.SMALL)
+        nx_graph = to_networkx_graph(graph=graph, visualize=False)
 
         for rate in LEARNING_RATE:
             print("Learning rate = ", rate)
             for epoch in EPOCHS:
                 print("Epoch = ", epoch)
                 for dim in HID_DIM:
-                    # baseline.train(nx_graph, labels,
-                                   # learning_rate=rate,
-                                   # hid_dim=dim,
-                                   # current_epoch=epoch)
+                    # baseline.train(...)
                     structure_and_feature.train(nx_graph, labels,
                                                 learning_rate=rate,
                                                 hid_dim=dim,
                                                 current_epoch=epoch)
-
 
 if __name__ == "__main__":
     main()

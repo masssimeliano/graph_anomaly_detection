@@ -1,35 +1,23 @@
 import time
-from pathlib import Path
 from typing import List
-
-import networkx as nx
 import torch
+import networkx as nx
 from sklearn.metrics import roc_auc_score
 from pygod.detector import AnomalyDAE
 from torch_geometric.utils import from_networkx
+from src.helpers.config import RESULTS_DIR
 
-
-def base_train(graph: nx.Graph, labels: List[int],
-               title_prefix: str = "",
-               learning_rate: float = 0.005, hid_dim: int = 16,
-               current_epoch: int = 100):
-    log_file = (
-        Path(__file__).resolve().parents[3] / "results" / "unsupervised" / "anomalyedae" /
-            (
-                    str(learning_rate).replace(".", "") +
-                    "_" + str(hid_dim) +
-                    "_" + str(current_epoch) +
-                    ".txt"
-            )
-        )
-
-    emd_file = (
-            Path(__file__).resolve().parents[3] / "results" / "unsupervised" / "anomalyedae" /
-            (
-                    "emd_" + str(learning_rate).replace(".", "") +
-                    "_" + str(hid_dim) +
-                    "_" + str(current_epoch)
-            )
+def base_train(graph: nx.Graph,
+               labels: List[int],
+               title_prefix: str,
+               learning_rate: float,
+               hid_dim: int,
+               current_epoch: int):
+    log_file = RESULTS_DIR / (
+        f"{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+    )
+    emd_file = RESULTS_DIR / (
+        f"emd_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}"
     )
 
     with open(log_file, "w") as log:
@@ -52,4 +40,3 @@ def base_train(graph: nx.Graph, labels: List[int],
 
         write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
         write(f"Execution time: {(time.time() - start_time):.4f} sec\n")
-

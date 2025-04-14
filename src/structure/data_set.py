@@ -1,14 +1,12 @@
 from enum import Enum
 from pathlib import Path
-
-DATASETS_DIR = Path(__file__).resolve().parents[2] / "datasets"
+from src.helpers.config import DATASETS_DIR
 
 
 class DataSetSize(Enum):
     SMALL = "small"
     MEDIUM = "medium"
     LARGE = "large"
-
 
 class DataSet:
     def __init__(self, name: str, size: DataSetSize):

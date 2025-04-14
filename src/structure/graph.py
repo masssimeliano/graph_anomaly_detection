@@ -1,7 +1,6 @@
 from typing import List, Optional
 from src.structure.node import Node
 
-
 class Graph:
     def __init__(self, nodes: List[Node]):
         self.nodes = nodes
