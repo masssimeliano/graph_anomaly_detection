@@ -1,23 +1,23 @@
 import random
 import numpy as np
 import torch
-
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.graph_plotter import to_networkx_graph
 from src.helpers.logs.log_parser import LogParser
 from src.models.unsupervised.anomalydae import (
     baseline_model as baseline,
-    structure_and_feature_model as structure_and_feature
+    structure_and_feature_model as structure_and_feature,
+    structure_model as structure
 )
 from src.structure.data_set import DataSetSize
 
 DATASETS = ["book.mat"]
-EPOCHS = [25, 50, 75, 100, 125, 150]
-LEARNING_RATE = [0.0005, 0.001, 0.01]
-HID_DIM = [16, 32, 64]
+EPOCHS = [25, 50, 75, 100, 125]
+LEARNING_RATE = [0.001]
+HID_DIM = [16, 32]
 
 def main():
-    analyze_logs()
+    general_pipeline()
 
 def analyze_logs():
     parser = LogParser()
@@ -45,11 +45,25 @@ def train_models():
             for epoch in EPOCHS:
                 print("Epoch = ", epoch)
                 for dim in HID_DIM:
-                    # baseline.train(...)
-                    structure_and_feature.train(nx_graph, labels,
+                    baseline.train(nx_graph,
+                                   labels,
+                                    learning_rate=rate,
+                                    hid_dim=dim,
+                                    current_epoch=epoch,
+                                    save_results=False)
+                    structure_and_feature.train(nx_graph,
+                                                labels,
                                                 learning_rate=rate,
                                                 hid_dim=dim,
-                                                current_epoch=epoch)
+                                                current_epoch=epoch,
+                                                save_results=False)
+                    structure.train(nx_graph,
+                                   labels,
+                                   learning_rate=rate,
+                                   hid_dim=dim,
+                                   current_epoch=epoch,
+                                   save_results=False)
+                    print("\n")
 
 if __name__ == "__main__":
     main()

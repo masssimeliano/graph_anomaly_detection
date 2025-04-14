@@ -11,7 +11,7 @@ def train(graph: nx.Graph,
           current_epoch: int,
           save_results: bool):
     extract_structure_features(graph)
-    base_train(graph, labels, "Attr + Str", learning_rate, hid_dim, current_epoch, save_results)
+    base_train(graph, labels, "Str", learning_rate, hid_dim, current_epoch, save_results)
 
 def extract_structure_features(graph: nx.Graph):
     print("Adding features")
@@ -20,7 +20,6 @@ def extract_structure_features(graph: nx.Graph):
     F = F.reindex(node_list)
 
     for i, node in enumerate(node_list):
-        features = graph.nodes[node]['x']
         graphlet_vals = F.iloc[i].values
         graphlet_tensor = torch.tensor(graphlet_vals, dtype=torch.float)
-        graph.nodes[node]['x'] = torch.cat([features, graphlet_tensor])
+        graph.nodes[node]['x'] = graphlet_tensor

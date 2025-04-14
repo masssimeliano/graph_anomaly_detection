@@ -4,8 +4,8 @@ from typing import List, Optional
 def plot_auc_curve(epochs: List[int],
                    aucs: List[float],
                    file_name: str,
-                   title_prefix: str = "",
-                   save_fig: bool = False,
+                   title_prefix: str,
+                   save_fig: bool,
                    save_path: Optional[str] = None):
     plt.figure(figsize=(10, 6))
     plt.plot(epochs, aucs, marker='o')

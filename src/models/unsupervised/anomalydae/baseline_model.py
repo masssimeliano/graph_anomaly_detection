@@ -6,5 +6,6 @@ def train(graph: nx.Graph,
           labels: List[int],
           learning_rate: float,
           hid_dim: int,
-          current_epoch: int):
-    base_train(graph, labels, "Attr", learning_rate, hid_dim, current_epoch)
+          current_epoch: int,
+          save_results: bool):
+    base_train(graph, labels, "Attr", learning_rate, hid_dim, current_epoch, save_results)
