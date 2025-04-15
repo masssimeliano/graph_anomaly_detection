@@ -1,15 +1,22 @@
 import networkx as nx
 import torch
 import matplotlib.pyplot as plt
+
 from src.structure.graph import Graph
 
 def visualize_graph(nx_graph: nx.Graph, node_color: list[str]):
     pos = nx.spring_layout(nx_graph, seed=42, k=0.2)
-    nx.draw(nx_graph, pos=pos, with_labels=True, font_size=8, node_color=node_color, node_size=300)
+    nx.draw(
+        nx_graph,
+        pos=pos,
+        with_labels=True,
+        font_size=8,
+        node_color=node_color,
+        node_size=300
+    )
     plt.show()
 
-def to_networkx_graph(graph: Graph,
-                      visualize: bool) -> nx.Graph:
+def to_networkx_graph(graph: Graph, visualize: bool = False) -> nx.Graph:
     nx_graph = nx.Graph()
     node_color = []
 

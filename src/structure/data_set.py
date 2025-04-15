@@ -2,7 +2,6 @@ from enum import Enum
 from pathlib import Path
 from src.helpers.config import DATASETS_DIR
 
-
 class DataSetSize(Enum):
     SMALL = "small"
     MEDIUM = "medium"
@@ -16,3 +15,9 @@ class DataSet:
 
     def __repr__(self):
         return f"DataSet(name={self.name}, size={self.size.value}, location={self.location})"
+
+    def get_path(self) -> Path:
+        return self.location
+
+    def exists(self) -> bool:
+        return self.location.exists()

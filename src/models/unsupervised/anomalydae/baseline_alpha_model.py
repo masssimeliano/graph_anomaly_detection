@@ -1,5 +1,6 @@
 from typing import List
 import networkx as nx
+from sympy.abc import alpha
 
 from src.models.unsupervised.base_train import base_train
 
@@ -15,10 +16,11 @@ def train(
     base_train(
         graph,
         labels,
-        title_prefix="Attr",
+        title_prefix="Attr + Alpha",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         current_epoch=current_epoch,
         save_results=save_results,
-        data_set=data_set
+        data_set=data_set,
+        alpha=1
     )

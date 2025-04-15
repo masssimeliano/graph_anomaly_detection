@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 from src.helpers.config import RESULTS_DIR
 
 logging.basicConfig(level=logging.INFO)
@@ -19,17 +20,17 @@ class LogParser:
 
                 if "Attr + Str" in name:
                     features = "Attr + Str"
+                elif "Attr + Alpha" in name:
+                    features = "Attr + Alpha"
                 elif "Attr" in name:
                     features = "Attr"
                 else:
                     features = "Emd + Feature"
-                feature_index = 2
 
-                lr_raw = parts[feature_index]
+                lr_raw = parts[2]
                 lr = int(lr_raw) / (10 ** (len(lr_raw) - 1))
-
-                hid_dim = int(parts[feature_index + 1])
-                epoch = int(parts[feature_index + 2])
+                hid_dim = int(parts[3])
+                epoch = int(parts[4])
 
                 with open(file, "r") as f:
                     lines = f.readlines()
@@ -56,16 +57,19 @@ class LogParser:
         return max(filtered, key=lambda x: x["auc_roc"], default=None)
 
     def get_best_and_worst(self):
-        return max(self.results, key=lambda x: x["auc_roc"]), min(self.results, key=lambda x: x["auc_roc"])
+        return (
+            max(self.results, key=lambda x: x["auc_roc"]),
+            min(self.results, key=lambda x: x["auc_roc"])
+        )
 
     def get_result_by_params(self, dataset=None, features=None, lr=None, hid_dim=None, epoch=None):
         for result in self.results:
             if (
-                    (dataset is None or result["dataset"] == dataset) and
-                    (features is None or result["features"] == features) and
-                    (lr is None or result["lr"] == lr) and
-                    (hid_dim is None or result["hid_dim"] == hid_dim) and
-                    (epoch is None or result["epoch"] == epoch)
+                (dataset is None or result["dataset"] == dataset) and
+                (features is None or result["features"] == features) and
+                (lr is None or result["lr"] == lr) and
+                (hid_dim is None or result["hid_dim"] == hid_dim) and
+                (epoch is None or result["epoch"] == epoch)
             ):
                 return result
         return None

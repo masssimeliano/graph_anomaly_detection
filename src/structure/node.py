@@ -11,7 +11,11 @@ class Node:
     is_attr_anomaly: bool = False
 
     def __repr__(self):
-        neighbour_ids = [n.id for n in self.neighbours]
-        return (f"Node(id={self.id}, label={self.label}, "
-                f"neighbours={neighbour_ids}, "
-                f"str_anom={self.is_str_anomaly}, attr_anom={self.is_attr_anomaly})")
+        return (
+            f"Node(id={self.id}, label={self.label}, "
+            f"neighbours={[n.id for n in self.neighbours]}, "
+            f"str_anom={self.is_str_anomaly}, attr_anom={self.is_attr_anomaly})"
+        )
+
+    def add_neighbour(self, neighbour: 'Node'):
+        self.neighbours.append(neighbour)

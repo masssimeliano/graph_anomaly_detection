@@ -10,42 +10,42 @@ from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.graph_plotter import to_networkx_graph
 from src.helpers.logs.log_parser import LogParser
 from src.models.unsupervised.anomalydae import (
-    baseline_model as baseline,
-    structure_and_feature_model as structure_and_feature,
-    embedding_and_feature_model as embedding_and_feature
+    baseline_model,
+    structure_and_feature_model,
+    embedding_and_feature_model,
+    baseline_alpha_model
 )
 from src.structure.data_set import DataSetSize
 
-DATASETS = ["book.mat", "citeseer.mat", "photo.mat"]
-EPOCHS = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
-LEARNING_RATE = [0.001]
-HID_DIM = [16]
+CONFIG = {
+    "datasets": ["cs.mat", "photo.mat", "BlogCatalog.mat", "book.mat", "citeseer.mat", "photo.mat"],
+    "epochs": [25, 50, 75, 100, 125, 150, 175, 200, 225, 250],
+    "learning_rates": [0.001],
+    "hidden_dims": [16],
+}
+
+FEATURE_TYPES = ["Attr", "Attr + Str", "Emd + Feature", "Attr + Alpha"]
+FEATURE_COLORS = {
+    "Attr": "blue",
+    "Attr + Str": "green",
+    "Attr + Alpha": "yellow",
+    "Emd + Feature": "red"
+}
 
 def main():
-    plot_auc_all_models()
+    train_models()
 
 def plot_auc_all_models():
     parser = LogParser()
     parser.parse_logs()
 
     datasets = set(r["dataset"] for r in parser.results)
-    feature_types = ["Attr", "Attr + Str", "Emd + Feature"]
-    feature_labels = {
-        "Attr": "Baseline",
-        "Attr + Str": "Attr + Str",
-        "Emd + Feature": "Emd + Feature"
-    }
-    feature_colors = {
-        "Attr": "blue",
-        "Attr + Str": "green",
-        "Emd + Feature": "red"
-    }
 
     for dataset in datasets:
         plt.figure(figsize=(10, 6))
         has_plot = False
 
-        for feature in feature_types:
+        for feature in FEATURE_TYPES:
             filtered = [
                 r for r in parser.results
                 if r["dataset"] == dataset and r["features"] == feature
@@ -66,9 +66,7 @@ def plot_auc_all_models():
 
             epochs = sorted(epoch_auc.keys())
             aucs = [epoch_auc[e] for e in epochs]
-            label = feature_labels[feature]
-            color = feature_colors[feature]
-            plt.plot(epochs, aucs, marker='o', label=label, color=color)
+            plt.plot(epochs, aucs, marker='o', label=feature, color=FEATURE_COLORS[feature])
             has_plot = True
 
         if has_plot:
@@ -88,53 +86,71 @@ def analyze_logs():
     print("Best model:", best_model["auc_roc"], " ", best_model["filename"])
     print("Worst model:", worst_model["auc_roc"], " ", worst_model["filename"])
 
-    for epoch in EPOCHS:
+    for epoch in CONFIG["epochs"]:
         best_model = None
         best_auc = -1
         best_dataset = None
-        for feature in ["Attr", "Attr + Str", "Emd + Feature"]:
-            for dataset in DATASETS:
-                model = parser.get_result_by_params(
+
+        for feature in FEATURE_TYPES:
+            for dataset in CONFIG["datasets"]:
+                result = parser.get_result_by_params(
                     dataset=dataset.replace(".mat", ""),
                     features=feature,
-                    lr=LEARNING_RATE[0],
-                    hid_dim=HID_DIM[0],
-                    epoch=epoch)
+                    lr=CONFIG["learning_rates"][0],
+                    hid_dim=CONFIG["hidden_dims"][0],
+                    epoch=epoch
+                )
 
-                if model["auc_roc"] > best_auc:
-                    best_auc = model["auc_roc"]
-                    best_model = model
+                if result and result["auc_roc"] > best_auc:
+                    best_auc = result["auc_roc"]
+                    best_model = result
                     best_dataset = dataset
 
         if best_model:
-             print(f"Epoch: {epoch} → Best dataset: {best_dataset} | AUC: {best_auc:.4f} | name: {best_model["filename"]}")
+            print(f"Epoch: {epoch} → Best dataset: {best_dataset} | AUC: {best_auc:.4f} | name: {best_model['filename']}")
 
 def train_models():
     torch.manual_seed(42)
     np.random.seed(42)
     random.seed(42)
 
-    for dataset in DATASETS:
-        print("---------------------------------------")
-        print("Working with " + dataset)
-        print("---------------------------------------\n")
+    for dataset in CONFIG["datasets"]:
+        print(f"--- Training on {dataset} ---\n")
 
-        labels, graph = load_graph_from_mat(name="book.mat", size=DataSetSize.SMALL)
+        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
 
-        for rate in LEARNING_RATE:
-            print("Learning rate = ", rate)
-            for epoch in EPOCHS:
-                print("Epoch = ", epoch)
-                for dim in HID_DIM:
-                    embedding_and_feature.train(nx_graph,
-                                   labels,
-                                    learning_rate=rate,
-                                    hid_dim=dim,
-                                    current_epoch=epoch,
-                                    save_results=True,
-                                    data_set=dataset)
-                    print("\n")
+        for rate in CONFIG["learning_rates"]:
+            for epoch in CONFIG["epochs"]:
+                for dim in CONFIG["hidden_dims"]:
+                    baseline_alpha_model.train(
+                        nx_graph,
+                        labels,
+                        learning_rate=rate,
+                        hid_dim=dim,
+                        current_epoch=epoch,
+                        save_results=True,
+                        data_set=dataset
+                    )
+                    baseline_model.train(
+                        nx_graph,
+                        labels,
+                        learning_rate=rate,
+                        hid_dim=dim,
+                        current_epoch=epoch,
+                        save_results=True,
+                        data_set=dataset
+                    )
+                    structure_and_feature_model.train(
+                        nx_graph,
+                        labels,
+                        learning_rate=rate,
+                        hid_dim=dim,
+                        current_epoch=epoch,
+                        save_results=True,
+                        data_set=dataset
+                    )
+                    print()
 
 if __name__ == "__main__":
     main()

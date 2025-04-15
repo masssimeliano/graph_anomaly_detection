@@ -1,4 +1,0 @@
-AnomalyDAE(epoch=250, lr=0.001, hid_dim=16)
-Epoch: 250 - AUC-ROC (Emd + Feature): 0.5160
-Execution time: 8.8816 sec
-

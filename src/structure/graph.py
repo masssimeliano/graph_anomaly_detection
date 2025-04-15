@@ -17,3 +17,6 @@ class Graph:
 
     def __iter__(self):
         return iter(self.nodes)
+
+    def get_ids(self) -> List[int]:
+        return list(self.node_map.keys())
