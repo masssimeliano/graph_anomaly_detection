@@ -5,6 +5,7 @@ from collections import defaultdict
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from torch_geometric.utils import from_networkx
 
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.graph_plotter import to_networkx_graph
@@ -15,10 +16,11 @@ from src.models.unsupervised.anomalydae import (
     embedding_and_feature_model,
     baseline_alpha_model
 )
+from src.models.unsupervised.anomalydae.structure_and_feature_model import extract_structure_features
 from src.structure.data_set import DataSetSize
 
 CONFIG = {
-    "datasets": ["cs.mat", "photo.mat", "BlogCatalog.mat", "book.mat", "citeseer.mat", "photo.mat"],
+    "datasets": ["book.mat", "photo.mat", "BlogCatalog.mat", "cs.mat", "citeseer.mat"],
     "epochs": [25, 50, 75, 100, 125, 150, 175, 200, 225, 250],
     "learning_rates": [0.001],
     "hidden_dims": [16],
@@ -119,38 +121,34 @@ def train_models():
 
         labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
-
+        di_graph = from_networkx(nx_graph)
         for rate in CONFIG["learning_rates"]:
-            for epoch in CONFIG["epochs"]:
-                for dim in CONFIG["hidden_dims"]:
-                    baseline_alpha_model.train(
-                        nx_graph,
-                        labels,
-                        learning_rate=rate,
-                        hid_dim=dim,
-                        current_epoch=epoch,
-                        save_results=True,
-                        data_set=dataset
-                    )
-                    baseline_model.train(
-                        nx_graph,
-                        labels,
-                        learning_rate=rate,
-                        hid_dim=dim,
-                        current_epoch=epoch,
-                        save_results=True,
-                        data_set=dataset
-                    )
-                    structure_and_feature_model.train(
-                        nx_graph,
-                        labels,
-                        learning_rate=rate,
-                        hid_dim=dim,
-                        current_epoch=epoch,
-                        save_results=True,
-                        data_set=dataset
-                    )
-                    print()
+            for dim in CONFIG["hidden_dims"]:
+                baseline_alpha_model.train(
+                    di_graph,
+                    labels,
+                    learning_rate=rate,
+                    hid_dim=dim,
+                    save_results=True,
+                    data_set=dataset
+                )
+                baseline_model.train(
+                    di_graph,
+                    labels,
+                    learning_rate=rate,
+                    hid_dim=dim,
+                    save_results=True,
+                    data_set=dataset
+                )
+                structure_and_feature_model.train(
+                    nx_graph,
+                    labels,
+                    learning_rate=rate,
+                    hid_dim=dim,
+                    save_results=True,
+                    data_set=dataset
+                )
+                print()
 
 if __name__ == "__main__":
     main()

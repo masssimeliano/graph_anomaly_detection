@@ -2,6 +2,8 @@ import torch
 import networkx as nx
 from typing import List
 
+from torch_geometric.utils import from_networkx
+
 from src.helpers.loaders.emd_loader import load_emd_model
 from src.models.unsupervised.base_train import base_train
 
@@ -10,18 +12,16 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    current_epoch: int,
     save_results: bool,
     data_set: str
 ):
-    extract_embedding_features(graph, learning_rate, hid_dim, current_epoch, data_set)
-    base_train(graph, labels, "Emd + Feature", learning_rate, hid_dim, current_epoch, save_results, data_set)
+    extract_embedding_features(graph, learning_rate, hid_dim, data_set)
+    base_train(from_networkx(graph), labels, "Emd + Feature", learning_rate, hid_dim, save_results, data_set)
 
 def extract_embedding_features(
     graph: nx.Graph,
     learning_rate: float,
     hid_dim: int,
-    current_epoch: int,
     data_set: str
 ):
     print("Adding embedding features to graph nodes...")
@@ -30,7 +30,7 @@ def extract_embedding_features(
         feature="Attr",
         lr=learning_rate,
         hid_dim=hid_dim,
-        epoch=current_epoch
+        epoch=25
     )
 
     for i, node in enumerate(graph.nodes()):
