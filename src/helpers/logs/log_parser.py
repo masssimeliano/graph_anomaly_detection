@@ -22,10 +22,10 @@ class LogParser:
                     features = "Attr + Str"
                 elif "Attr + Alpha" in name:
                     features = "Attr + Alpha"
-                elif "Attr" in name:
-                    features = "Attr"
+                elif "Attr + Emd" in name:
+                    features = "Attr + Emd"
                 else:
-                    features = "Emd + Feature"
+                    features = "Attr"
 
                 lr_raw = parts[2]
                 lr = int(lr_raw) / (10 ** (len(lr_raw) - 1))

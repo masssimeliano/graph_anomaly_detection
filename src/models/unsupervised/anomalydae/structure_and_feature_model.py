@@ -12,20 +12,22 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    save_results: bool,
+    save_emb: bool,
     data_set: str
 ):
-    extract_structure_features(graph)
+    add_structure_features(graph)
+    di_graph = from_networkx(graph)
+
     base_train(
-        from_networkx(graph),
+        di_graph,
         labels,
         title_prefix="Attr + Str",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
-        save_results=save_results,
+        save_emb=save_emb,
         data_set=data_set
     )
-def extract_structure_features(graph: nx.Graph):
+def add_structure_features(graph: nx.Graph):
     print("Adding structural graphlet features to graph nodes...")
     F = fg.compute(graph).reindex(list(graph.nodes()))
 
