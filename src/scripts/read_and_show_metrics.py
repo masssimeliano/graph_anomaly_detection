@@ -30,7 +30,9 @@ DATASET_AUC_PAPER = {
     "cora": 0.762,
     "citeseer": 0.727,
     "BlogCatalog": 0.783,
-    "weibo": 0.915
+    "weibo": 0.915,
+    "Flickr": 0.751,
+    "Reddit": 0.557
 }
 
 def main():
@@ -61,7 +63,7 @@ def main():
             if not epoch_auc:
                 continue
 
-            epochs = [25, 50, 75, 100, 125, 150]
+            epochs = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
             aucs = [epoch_auc[e] for e in epochs]
             plt.plot(epochs, aucs, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
 

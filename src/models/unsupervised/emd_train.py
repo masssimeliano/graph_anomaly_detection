@@ -20,6 +20,10 @@ def emd_train(
     save_emb: bool,
     data_set: str,
     alpha: float = 0.5):
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Device : ", device)
+
     measure_time = time.time()
     for current_epoch in  [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]:
         start_time = time.time()
@@ -27,7 +31,7 @@ def emd_train(
         extract_embedding_features(nx_graph, learning_rate, hid_dim, current_epoch, data_set)
         di_graph = from_networkx(nx_graph)
 
-        model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True)
+        model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True, gpu=0)
 
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:

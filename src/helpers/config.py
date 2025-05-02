@@ -13,12 +13,12 @@ SMALL_DATASETS = ["BlogCatalog.mat",
                   "Disney.mat",
                   "photo.mat",
                   "weibo.mat"]
-MEDIUM_DATASETS = ["ACM.mat",
-                  "Enron.mat",
-                  "Flickr.mat",
+MEDIUM_DATASETS = ["Flickr.mat",
                   "Reddit.mat"]
 
-CURRENT_DATASETS = SMALL_DATASETS
+TO_EMD_DATASETS = SMALL_DATASETS
+
+CURRENT_DATASETS = MEDIUM_DATASETS
 
 LEARNING_RATE = 0.001
 HIDDEN_DIMS = 16

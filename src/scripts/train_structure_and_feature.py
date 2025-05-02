@@ -27,7 +27,7 @@ def main():
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")
 
-        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
+        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
         structure_and_feature_model.train(
             nx_graph,
