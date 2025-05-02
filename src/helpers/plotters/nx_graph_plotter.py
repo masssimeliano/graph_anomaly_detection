@@ -4,19 +4,35 @@ import matplotlib.pyplot as plt
 
 from src.structure.graph import Graph
 
-def visualize_graph(nx_graph: nx.Graph, node_color: list[str]):
-    pos = nx.spring_layout(nx_graph, seed=42, k=0.2)
+def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title):
+    fig, ax = plt.subplots(figsize=(12, 10))
+    pos = nx.spring_layout(nx_graph, seed=42, k=0.15)
+
     nx.draw(
         nx_graph,
         pos=pos,
-        with_labels=True,
-        font_size=8,
+        ax=ax,
+        with_labels=False,
         node_color=node_color,
-        node_size=300
+        node_size=20,
+        edge_color='gray',
+        width=0.3,
+        alpha=0.7
     )
+
+    # Используем отдельный вызов над ax
+    ax.set_title(
+        title,
+        fontsize=20,
+        fontweight='bold',
+        pad=20
+    )
+
+    ax.set_axis_off()
+    plt.tight_layout()
     plt.show()
 
-def to_networkx_graph(graph: Graph, visualize: bool = False) -> nx.Graph:
+def to_networkx_graph(graph: Graph, visualize: bool = False, title: str = "Graph Visualization") -> nx.Graph:
     nx_graph = nx.Graph()
     node_color = []
 
@@ -24,17 +40,17 @@ def to_networkx_graph(graph: Graph, visualize: bool = False) -> nx.Graph:
         nx_graph.add_node(node.id, x=torch.tensor(node.features, dtype=torch.float))
         if visualize:
             if node.is_attr_anomaly:
-                node_color.append("orange")
+                node_color.append("red")
             elif node.is_str_anomaly:
-                node_color.append("yellow")
-            else:
                 node_color.append("blue")
+            else:
+                node_color.append("green")
 
     for node in graph.nodes:
         for neighbour in node.neighbours:
             nx_graph.add_edge(node.id, neighbour.id)
 
     if visualize:
-        visualize_graph(nx_graph, node_color)
+        visualize_graph(nx_graph, node_color, title)
 
     return nx_graph

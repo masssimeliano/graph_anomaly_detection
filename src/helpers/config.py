@@ -4,13 +4,13 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 RESULTS_DIR = BASE_DIR / "results" / "unsupervised" / "anomalyedae"
 DATASETS_DIR = BASE_DIR / "datasets"
 
-SMALL_DATASETS = ["BlogCatalog.mat",
+SMALL_DATASETS = ["Disney.mat",
                   "book.mat",
+                  "BlogCatalog.mat",
                   "citeseer.mat",
                   "computers.mat",
                   "cora.mat",
                   "cs.mat",
-                  "Disney.mat",
                   "photo.mat",
                   "weibo.mat"]
 MEDIUM_DATASETS = ["Flickr.mat",
@@ -18,7 +18,7 @@ MEDIUM_DATASETS = ["Flickr.mat",
 
 TO_EMD_DATASETS = SMALL_DATASETS
 
-CURRENT_DATASETS = MEDIUM_DATASETS
+CURRENT_DATASETS = SMALL_DATASETS
 
 LEARNING_RATE = 0.001
 HIDDEN_DIMS = 16
