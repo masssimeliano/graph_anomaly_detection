@@ -6,7 +6,8 @@ import torch_geometric
 from sklearn.metrics import roc_auc_score
 from pygod.detector import AnomalyDAE
 
-from src.helpers.config import RESULTS_DIR
+from src.helpers.config import RESULTS_DIR, EPOCHS
+
 
 def base_train(
     di_graph: torch_geometric.data.Data,
@@ -22,7 +23,7 @@ def base_train(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device : ", device)
 
-    for current_epoch in  [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]:
+    for current_epoch in EPOCHS:
         start_time = time.time()
 
         model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True, gpu=0)

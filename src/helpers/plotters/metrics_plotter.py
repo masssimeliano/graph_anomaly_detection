@@ -7,8 +7,8 @@ def plot_auc_curve(
     file_name: str,
     title_prefix: str,
     save_fig: bool,
-    save_path: Optional[str] = None
-):
+    save_path: Optional[str] = None):
+
     plt.figure(figsize=(10, 6))
     plt.plot(epochs, aucs, marker='o')
     plt.title(f"AUC-ROC vs Epochs ({title_prefix} AnomalyDAE): {file_name}")

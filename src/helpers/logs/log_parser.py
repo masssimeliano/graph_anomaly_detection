@@ -18,12 +18,14 @@ class LogParser:
 
                 dataset = parts[0]
 
-                if "Attr + Str" in name:
-                    features = "Attr + Str"
+                if "Attr + Str2" in name:
+                    features = "Attr + Str2"
                 elif "Attr + Alpha" in name:
                     features = "Attr + Alpha"
                 elif "Attr + Emd" in name:
                     features = "Attr + Emd"
+                elif "Attr + Str" in name:
+                    features = "Attr + Str"
                 else:
                     features = "Attr"
 

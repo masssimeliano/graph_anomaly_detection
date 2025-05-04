@@ -7,7 +7,7 @@ import networkx as nx
 from sklearn.metrics import roc_auc_score
 from pygod.detector import AnomalyDAE
 
-from src.helpers.config import RESULTS_DIR
+from src.helpers.config import RESULTS_DIR, EPOCHS
 from src.helpers.loaders.emd_loader import load_emd_model
 
 
@@ -25,7 +25,7 @@ def emd_train(
     print("Device : ", device)
 
     measure_time = time.time()
-    for current_epoch in  [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]:
+    for current_epoch in EPOCHS:
         start_time = time.time()
 
         extract_embedding_features(nx_graph, learning_rate, hid_dim, current_epoch, data_set)

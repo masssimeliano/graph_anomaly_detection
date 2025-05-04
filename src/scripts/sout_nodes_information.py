@@ -46,7 +46,7 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> tuple[torch.Tensor, list
             idx = node_index[node_id]
             features_tensor[idx, i] = val
 
-    return features_tensor, feature_names, nodes
+    return features_tensor
 
 def summarize_structural_features(
     nx_graph: nx.Graph,

@@ -2,29 +2,23 @@ from collections import defaultdict
 
 from matplotlib import pyplot as plt
 
+from src.helpers.config import EPOCHS
 from src.helpers.logs.log_parser import LogParser
 
-CONFIG = {
-    "epochs": [25, 50, 75, 100, 125, 150, 175, 200, 225, 250],
-}
-
-FEATURE_TYPES = ["Attr",
-                 "Attr + Str",
-                 "Attr + Str2",
-                 "Attr + Emd"]
+FEATURE_TYPES = [
+    "Attr + Str",
+    "Attr + Str2"]
 FEATURE_COLORS = {
-    "Attr": "blue",
+    # "Attr": "blue",
     "Attr + Str": "green",
-    "Attr + Str2": "brown",
-    "Attr + Alpha": "yellow",
-    "Attr + Emd": "red",
+    "Attr + Str2": "orange",
+    # "Attr + Emd": "red",
 }
 FEATURE_LABELS = {
-    "Attr": "Attribute (alpha = 0.5)",
+    # "Attr": "Attribute (alpha = 0.5)",
     "Attr + Str": "Attribute + Structure",
     "Attr + Str2": "Attribute + Structure 2",
-    "Attr + Alpha": "Attribute (alpha = 0)",
-    "Attr + Emd": "Attribute + Embedding"
+    # "Attr + Emd": "Attribute + Embedding"
 }
 DATASET_AUC_PAPER = {
     "cora": 0.762,
@@ -63,9 +57,8 @@ def main():
             if not epoch_auc:
                 continue
 
-            epochs = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
-            aucs = [epoch_auc[e] for e in epochs]
-            plt.plot(epochs, aucs, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            aucs = [epoch_auc[e] for e in EPOCHS]
+            plt.plot(EPOCHS, aucs, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
 
         plt.title(f'AUC-ROC vs Epochs ({dataset})')
         plt.xlabel('Epochs')

@@ -2,41 +2,34 @@ import random
 
 import numpy as np
 import torch
-from torch_geometric.utils import from_networkx
 
-from src.helpers.config import CURRENT_DATASETS
+from src.helpers.config import CURRENT_DATASETS, SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.unsupervised.anomalydae import embedding_and_feature_model
 from src.structure.data_set import DataSetSize
 
-CONFIG = {
-    "learning_rate": 0.001,
-    "hidden_dims": 16,
-}
-
 FEATURE_TYPE = "Attr + Emd"
 
 def main():
-    torch.manual_seed(42)
-    np.random.seed(42)
-    random.seed(42)
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    random.seed(SEED)
 
     for dataset in CURRENT_DATASETS:
         print(f"-------------------------------")
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")
 
-        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)
+        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
         embedding_and_feature_model.train(
             nx_graph,
             labels,
-            learning_rate=CONFIG["learning_rate"],
-            hid_dim=CONFIG["hidden_dims"],
+            learning_rate=LEARNING_RATE,
+            hid_dim=HIDDEN_DIMS,
             save_emb=False,
-            data_set=dataset
-        )
+            data_set=dataset)
 
         print(f"-------------------------------")
         print(f"--- End training on {dataset} ({FEATURE_TYPE}) ---")

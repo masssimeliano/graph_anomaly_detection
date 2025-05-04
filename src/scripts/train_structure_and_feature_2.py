@@ -2,31 +2,29 @@ import random
 
 import numpy as np
 import torch
-from torch_geometric.utils import from_networkx
 
-from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
+from src.helpers.config import CURRENT_DATASETS, MEDIUM_DATASETS, SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.unsupervised.anomalydae import baseline_model
+from src.models.unsupervised.anomalydae import structure_and_feature_model_2
 from src.structure.data_set import DataSetSize
 
-FEATURE_TYPE = "Attr"
+FEATURE_TYPE = "Attr + Str2"
 
 def main():
     torch.manual_seed(SEED)
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for dataset in CURRENT_DATASETS:
+    for dataset in MEDIUM_DATASETS:
         print(f"-------------------------------")
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")
 
         labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
-        di_graph = from_networkx(nx_graph)
-        baseline_model.train(
-            di_graph,
+        structure_and_feature_model_2.train(
+            nx_graph,
             labels,
             learning_rate=LEARNING_RATE,
             hid_dim=HIDDEN_DIMS,
