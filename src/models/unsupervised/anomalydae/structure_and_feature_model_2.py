@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import networkx as nx
 from typing import List
@@ -5,8 +6,6 @@ from typing import List
 from torch_geometric.utils import from_networkx
 
 from src.models.unsupervised.base_train import base_train
-from src.scripts.sout_nodes_information import extract_node_features_tensor
-
 
 def train(
     graph: nx.Graph,
@@ -28,6 +27,38 @@ def train(
         save_emb=save_emb,
         data_set=data_set
     )
+
+def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
+    features = []
+    avg_neighbor_degree = nx.average_neighbor_degree(graph)
+    square_clust = nx.square_clustering(graph)
+
+    for node in graph.nodes():
+        neighbors = list(graph.neighbors(node))
+        ego = nx.ego_graph(graph, node)
+
+        degree = graph.degree(node)
+        clustering = nx.clustering(graph, node)
+        triangle_count = nx.triangles(graph, node)
+        avg_deg_of_neighbors = np.mean([graph.degree(n) for n in neighbors]) if neighbors else 0
+        ego_density = nx.density(ego)
+        square_clustering = square_clust[node]
+        num_neighbors = len(neighbors)
+
+        node_features = [
+            degree,
+            clustering,
+            triangle_count,
+            avg_neighbor_degree[node],
+            avg_deg_of_neighbors,
+            ego_density,
+            square_clustering,
+            num_neighbors,]
+        features.append(node_features)
+
+    features_tensor = torch.tensor(features, dtype=torch.float32)
+    return features_tensor
+
 def add_structure_features(graph: nx.Graph):
     print("Adding structural graphlet features to graph nodes...")
     additional_feats = extract_node_features_tensor(graph)
