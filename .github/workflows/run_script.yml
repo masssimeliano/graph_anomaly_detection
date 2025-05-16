@@ -65,7 +65,7 @@ jobs:
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             -d text="Success GitHub Actions!"
           
-            for file in results/anomalydae/graph/dev/*.png; do
+            for file in *.png; do
               curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendPhoto" \
                 -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                 -F photo=@"$file"
