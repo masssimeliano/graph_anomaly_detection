@@ -45,6 +45,11 @@ jobs:
           echo "Checking datasets/small:"
           ls -lh datasets/small || echo "Not found"
 
+      - name: Checking ls
+        run: |
+          echo "Checking ls:"
+          ls -lh . || echo "Not found"
+
       - name: Run training script
         run: |
             PYTHONPATH=. python src/scripts/check.py
