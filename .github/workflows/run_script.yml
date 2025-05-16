@@ -40,6 +40,11 @@ jobs:
             gdown https://drive.google.com/uc?id=${{ secrets.GOOD_DRIVE_FILE_ID }} -O dataset.zip
             unzip -q dataset.zip -d .
 
+      - name: Checking datasets/small
+        run: |
+          echo "Checking datasets/small:"
+          ls -lh datasets/small || echo "Not found"
+
       - name: Run training script
         run: |
             PYTHONPATH=. python src/scripts/check.py
