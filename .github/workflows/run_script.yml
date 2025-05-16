@@ -19,9 +19,13 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install PyTorch first
+      - name: Install torch and torch-* from PyTorch index
         run: |
-          pip install torch==2.2.0
+          pip install torch==2.2.0 \
+            torch-scatter==2.1.2 \
+            torch-sparse==0.6.18 \
+            torch-geometric==2.6.1 \
+            --index-url https://data.pyg.org/whl/torch-2.2.0+cpu.html
 
       - name: Install remaining requirements
         run: |
