@@ -21,22 +21,28 @@ jobs:
 
       - name: Install torch from PyPI
         run: |
-          pip install torch==2.2.0
+            pip install torch==2.2.0
 
       - name: Install PyG modules from specific wheels
         run: |
-          pip install \
-            https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_scatter-2.1.2%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
-            https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_sparse-0.6.18%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
-            torch-geometric==2.6.1
+            pip install \
+              https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_scatter-2.1.2%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+              https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_sparse-0.6.18%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+              torch-geometric==2.6.1
 
       - name: Install remaining requirements
         run: |
-          pip install -r requirements.txt
+            pip install -r requirements.txt
+
+      - name: Download dataset from Google Drive
+        run: |
+            pip install gdown
+            gdown https://drive.google.com/uc?id=${{ secrets.GOOD_DRIVE_FILE_ID }} -O dataset.zip
+            unzip -q dataset.zip -d .
 
       - name: Run training script
         run: |
-          PYTHONPATH=. python src/scripts/check.py
+            PYTHONPATH=. python src/scripts/check.py
 
       - name: Notify success via Telegram
         if: success()
