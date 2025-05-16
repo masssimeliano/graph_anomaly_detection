@@ -38,7 +38,7 @@ def main():
     parser = LogParser()
     parser.parse_logs()
 
-    save_dir = "results" / "anomalyedae" / "graph" / "dev"
+    save_dir = Path(__file__).resolve().parents[0]
 
     datasets = set(r["dataset"] for r in parser.results)
 
