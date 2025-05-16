@@ -70,6 +70,13 @@ jobs:
                 -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                 -F photo=@"$file"
             done
+          
+            for file in results/anomalydae/*; do
+              [ -e "$file" ] || continue
+              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendPhoto" \
+                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+                -F photo=@"$file"
+            done
 
       - name: Notify failure via Telegram
         if: failure()
