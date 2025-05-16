@@ -1,8 +1,10 @@
+import train_baseline
 import train_structure_and_feature
 import train_structure_and_feature_2
 import train_structure_and_feature_3
 
 def main():
+    train_baseline.main()
     train_structure_and_feature.main()
     train_structure_and_feature_2.main()
     train_structure_and_feature_3.main()
