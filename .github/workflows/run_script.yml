@@ -36,4 +36,4 @@ jobs:
 
       - name: Run training script
         run: |
-          python src/scripts/checking.py
+          PYTHONPATH=. python src/scripts/checking.py
