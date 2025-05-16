@@ -1,0 +1,90 @@
+name: Run Python Script Manually or on Push
+
+on:
+  workflow_dispatch:  # GitHub UI
+  push:
+    branches:
+      - master
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install torch from PyPI
+        run: |
+            pip install torch==2.2.0
+
+      - name: Install PyG modules from specific wheels
+        run: |
+            pip install \
+              https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_scatter-2.1.2%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+              https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_sparse-0.6.18%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+              torch-geometric==2.6.1
+
+      - name: Install remaining requirements
+        run: |
+            pip install -r requirements.txt
+
+      - name: Download dataset from Google Drive
+        run: |
+            pip install gdown
+            gdown https://drive.google.com/uc?id=${{ secrets.GOOD_DRIVE_FILE_ID }} -O dataset.zip
+            unzip -q dataset.zip -d .
+
+      - name: Checking datasets/small
+        run: |
+          echo "Checking datasets/small:"
+          ls -lh datasets/small || echo "Not found"
+
+      - name: Checking ls
+        run: |
+          echo "Checking ls:"
+          ls -lh . || echo "Not found"
+
+      - name: Run training script
+        run: |
+            PYTHONPATH=. python src/scripts/check_2.py
+
+      - name: Run training script
+        run: |
+            PYTHONPATH=. python src/scripts/send_txt_to_tg.py
+
+      - name: Run training script
+        run: |
+            PYTHONPATH=. python src/scripts/read_and_show_metrics_github.py
+
+      - name: Notify success via Telegram
+        if: success()
+        run: |
+            curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="Success GitHub Actions!"
+          
+            for file in src/scripts/*.png; do
+              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendPhoto" \
+                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+                -F photo=@"$file"
+            done
+          
+            echo "Checking datasets/small:"
+            ls -lh datasets/small || echo "Not found"
+
+      - name: Notify failure via Telegram
+        if: failure()
+        run: |
+            curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="Error GitHub Actions!"
