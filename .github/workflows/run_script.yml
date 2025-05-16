@@ -23,13 +23,12 @@ jobs:
         run: |
           pip install torch==2.2.0
 
-      - name: Install PyG packages from official CPU repo
+      - name: Install PyG modules from specific wheels
         run: |
           pip install \
-            torch-scatter==2.1.2 \
-            torch-sparse==0.6.18 \
-            torch-geometric==2.6.1 \
-            --extra-index-url https://data.pyg.org/whl/torch-2.2.0+cpu.html
+            https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_scatter-2.1.2%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+            https://data.pyg.org/whl/torch-2.2.0%2Bcpu/torch_sparse-0.6.18%2Bpt22cpu-cp310-cp310-linux_x86_64.whl \
+            torch-geometric==2.6.1
 
       - name: Install remaining requirements
         run: |
