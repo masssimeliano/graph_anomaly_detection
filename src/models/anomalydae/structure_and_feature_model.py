@@ -5,7 +5,7 @@ from typing import List
 
 from torch_geometric.utils import from_networkx
 
-from src.models.unsupervised.base_train import base_train
+from src.models.base_train import base_train
 
 def train(
     graph: nx.Graph,

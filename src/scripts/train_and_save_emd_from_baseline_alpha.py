@@ -4,10 +4,10 @@ import numpy as np
 import torch
 from torch_geometric.utils import from_networkx
 
-from src.helpers.config import CURRENT_DATASETS, SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
+from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.unsupervised.anomalydae import baseline_alpha_model
+from src.models.anomalydae import baseline_alpha_model
 from src.structure.data_set import DataSetSize
 
 FEATURE_TYPE = "Attr + Alpha"

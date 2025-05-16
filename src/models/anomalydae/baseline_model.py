@@ -1,9 +1,7 @@
 from typing import List
-import networkx as nx
 import torch_geometric
-from sympy.abc import alpha
 
-from src.models.unsupervised.base_train import base_train
+from src.models.base_train import base_train
 
 def train(
     di_graph: torch_geometric.data.Data,
@@ -15,9 +13,8 @@ def train(
     base_train(
         di_graph,
         labels,
-        title_prefix="Attr + Alpha",
+        title_prefix="Attr",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         save_emb=save_emb,
-        data_set=data_set,
-        alpha=0)
+        data_set=data_set)

@@ -1,7 +1,7 @@
 from typing import List
 import torch_geometric
 
-from src.models.unsupervised.base_train import base_train
+from src.models.base_train import base_train
 
 def train(
     di_graph: torch_geometric.data.Data,
@@ -13,8 +13,9 @@ def train(
     base_train(
         di_graph,
         labels,
-        title_prefix="Attr",
+        title_prefix="Attr + Alpha",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         save_emb=save_emb,
-        data_set=data_set)
+        data_set=data_set,
+        alpha=0)

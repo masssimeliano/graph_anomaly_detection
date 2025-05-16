@@ -1,7 +1,7 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-RESULTS_DIR = BASE_DIR / "results" / "unsupervised" / "anomalyedae"
+RESULTS_DIR = BASE_DIR / "results" / "anomalyedae"
 DATASETS_DIR = BASE_DIR / "datasets"
 
 SMALL_DATASETS = ["Disney.mat",
@@ -18,7 +18,7 @@ MEDIUM_DATASETS = ["Flickr.mat",
 
 TO_EMD_DATASETS = SMALL_DATASETS
 
-CURRENT_DATASETS = SMALL_DATASETS
+CURRENT_DATASETS = ["cora.mat", "book.mat"]
 
 EPOCHS = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
 

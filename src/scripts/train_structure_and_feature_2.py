@@ -1,12 +1,13 @@
 import random
+from tkinter.constants import CURRENT
 
 import numpy as np
 import torch
 
-from src.helpers.config import CURRENT_DATASETS, MEDIUM_DATASETS, SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
+from src.helpers.config import MEDIUM_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.unsupervised.anomalydae import structure_and_feature_model_2
+from src.models.anomalydae import structure_and_feature_model_2
 from src.structure.data_set import DataSetSize
 
 FEATURE_TYPE = "Attr + Str2"
@@ -16,12 +17,12 @@ def main():
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for dataset in MEDIUM_DATASETS:
+    for dataset in CURRENT_DATASETS:
         print(f"-------------------------------")
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")
 
-        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)
+        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
         structure_and_feature_model_2.train(
             nx_graph,

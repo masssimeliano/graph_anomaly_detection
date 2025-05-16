@@ -3,10 +3,10 @@ import random
 import numpy as np
 import torch
 
-from src.helpers.config import CURRENT_DATASETS, SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
+from src.helpers.config import SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.unsupervised.anomalydae import structure_and_feature_model
+from src.models.anomalydae import structure_and_feature_model
 from src.structure.data_set import DataSetSize
 
 FEATURE_TYPE = "Attr + Str"
@@ -16,7 +16,7 @@ def main():
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for dataset in SMALL_DATASETS:
+    for dataset in CURRENT_DATASETS:
         print(f"-------------------------------")
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")

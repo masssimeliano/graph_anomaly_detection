@@ -1,11 +1,7 @@
-import torch
 import networkx as nx
 from typing import List
 
-from torch_geometric.utils import from_networkx
-
-from src.helpers.loaders.emd_loader import load_emd_model
-from src.models.unsupervised.emd_train import emd_train
+from src.models.emd_train import emd_train
 
 def train(
     graph: nx.Graph,

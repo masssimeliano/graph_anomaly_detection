@@ -7,7 +7,7 @@ from torch_geometric.utils import from_networkx
 from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.unsupervised.anomalydae import baseline_model
+from src.models.anomalydae import baseline_model
 from src.structure.data_set import DataSetSize
 
 FEATURE_TYPE = "Attr"
@@ -22,7 +22,7 @@ def main():
         print(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         print(f"-------------------------------")
 
-        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)
+        labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.SMALL)
         nx_graph = to_networkx_graph(graph=graph, visualize=False)
         di_graph = from_networkx(nx_graph)
         baseline_model.train(
