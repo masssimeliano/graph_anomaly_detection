@@ -44,12 +44,22 @@ jobs:
         run: |
             PYTHONPATH=. python src/scripts/check.py
 
+      - name: Run training script
+        run: |
+            PYTHONPATH=. python src/scripts/read_and_show_metrics.py
+
       - name: Notify success via Telegram
         if: success()
         run: |
             curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             -d text="Success GitHub Actions!"
+          
+            for file in results/anomalydae/graph/dev/*.png; do
+              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendPhoto" \
+                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+                -F photo=@"$file"
+            done
 
       - name: Notify failure via Telegram
         if: failure()

@@ -18,7 +18,7 @@ MEDIUM_DATASETS = ["Flickr.mat",
 
 TO_EMD_DATASETS = SMALL_DATASETS
 
-CURRENT_DATASETS = ["cora.mat", "book.mat"]
+CURRENT_DATASETS = ["Disney", "book.mat"]
 
 EPOCHS = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
 

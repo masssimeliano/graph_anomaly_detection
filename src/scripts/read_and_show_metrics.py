@@ -1,8 +1,9 @@
+import os
 from collections import defaultdict
 
 from matplotlib import pyplot as plt
 
-from src.helpers.config import EPOCHS
+from src.helpers.config import EPOCHS, RESULTS_DIR
 from src.helpers.logs.log_parser import LogParser
 
 FEATURE_TYPES = [
@@ -10,18 +11,18 @@ FEATURE_TYPES = [
     "Attr + Str2",
     "Attr + Str3"]
 FEATURE_COLORS = {
-    # "Attr": "blue",
+    "Attr": "blue",
     "Attr + Str": "green",
     "Attr + Str2": "orange",
-    "Attr + Str3": "red"
-    # "Attr + Emd": "red",
+    "Attr + Str3": "red",
+    "Attr + Emd": "pink"
 }
 FEATURE_LABELS = {
-    # "Attr": "Attribute (alpha = 0.5)",
+    "Attr": "Attribute (alpha = 0.5)",
     "Attr + Str": "Attribute + Structure",
     "Attr + Str2": "Attribute + Structure 2",
-    "Attr + Str3": "3",
-    # "Attr + Emd": "Attribute + Embedding"
+    "Attr + Str3": "Attribute + Structure 3",
+    "Attr + Emd": "Attribute + Embedding"
 }
 DATASET_AUC_PAPER = {
     "cora": 0.762,
@@ -35,6 +36,8 @@ DATASET_AUC_PAPER = {
 def main():
     parser = LogParser()
     parser.parse_logs()
+
+    save_dir = RESULTS_DIR / "graph" / "dev"
 
     datasets = set(r["dataset"] for r in parser.results)
 
@@ -63,6 +66,8 @@ def main():
             aucs = [epoch_auc[e] for e in EPOCHS]
             plt.plot(EPOCHS, aucs, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
 
+        save_path = os.path.join(save_dir, f"{dataset}_auc_plot.png")
+
         plt.title(f'AUC-ROC vs Epochs ({dataset})')
         plt.xlabel('Epochs')
         plt.ylabel('AUC-ROC')
@@ -74,6 +79,7 @@ def main():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
+        plt.savefig(save_path, dpi=300)
         plt.show()
 
 if __name__ == "__main__":
