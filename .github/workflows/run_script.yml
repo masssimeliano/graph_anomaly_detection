@@ -56,7 +56,7 @@ jobs:
 
       - name: Run training script
         run: |
-            PYTHONPATH=. python src/scripts/read_and_show_metrics.py
+            PYTHONPATH=. python src/scripts/read_and_show_metrics_github.py
 
       - name: Notify success via Telegram
         if: success()
