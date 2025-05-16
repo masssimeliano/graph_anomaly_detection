@@ -60,6 +60,10 @@ jobs:
 
       - name: Run training script
         run: |
+            PYTHONPATH=. python src/scripts/send_txt_to_tg.py
+
+      - name: Run training script
+        run: |
             PYTHONPATH=. python src/scripts/read_and_show_metrics_github.py
 
       - name: Notify success via Telegram
@@ -77,13 +81,6 @@ jobs:
           
             echo "Checking datasets/small:"
             ls -lh datasets/small || echo "Not found"
-          
-            for file in results/anomalydae/*; do
-              [ -e "$file" ] || continue
-              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendPhoto" \
-                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-                -F photo=@"$file"
-            done
 
       - name: Notify failure via Telegram
         if: failure()
