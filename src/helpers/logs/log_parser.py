@@ -20,6 +20,8 @@ class LogParser:
 
                 if "Attr + Str2" in name:
                     features = "Attr + Str2"
+                elif "Attr + Str3" in name:
+                    features = "Attr + Str3"
                 elif "Attr + Alpha" in name:
                     features = "Attr + Alpha"
                 elif "Attr + Emd" in name:

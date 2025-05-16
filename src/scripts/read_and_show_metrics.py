@@ -7,17 +7,20 @@ from src.helpers.logs.log_parser import LogParser
 
 FEATURE_TYPES = [
     "Attr + Str",
-    "Attr + Str2"]
+    "Attr + Str2",
+    "Attr + Str3"]
 FEATURE_COLORS = {
     # "Attr": "blue",
     "Attr + Str": "green",
     "Attr + Str2": "orange",
+    "Attr + Str3": "red"
     # "Attr + Emd": "red",
 }
 FEATURE_LABELS = {
     # "Attr": "Attribute (alpha = 0.5)",
     "Attr + Str": "Attribute + Structure",
     "Attr + Str2": "Attribute + Structure 2",
+    "Attr + Str3": "3",
     # "Attr + Emd": "Attribute + Embedding"
 }
 DATASET_AUC_PAPER = {
