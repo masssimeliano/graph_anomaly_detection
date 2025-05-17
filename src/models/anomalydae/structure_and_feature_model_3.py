@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import torch
 import networkx as nx
@@ -29,6 +31,9 @@ def train(
     )
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
+    print("Extracting node features with NetworkX 1...")
+    start_time = time.time()
+
     features = []
 
     avg_neighbor_degree = nx.average_neighbor_degree(graph)
@@ -115,10 +120,12 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         features.append(node_features)
 
     features_tensor = torch.tensor(features, dtype=torch.float32)
+
+    print(f"Execution time: {(time.time() - start_time):.4f} sec")
+
     return features_tensor
 
 def add_structure_features(graph: nx.Graph):
-    print("Adding structural graphlet features to graph nodes...")
     additional_feats = extract_node_features_tensor(graph)
 
     for i, node in enumerate(graph.nodes()):

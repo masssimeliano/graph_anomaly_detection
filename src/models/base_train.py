@@ -7,6 +7,7 @@ from sklearn.metrics import roc_auc_score
 from pygod.detector import AnomalyDAE
 
 from src.helpers.config import RESULTS_DIR, EPOCHS
+from src.models.encoder.custom_anomalydae import CustomAnomalyDAE
 
 
 def base_train(
@@ -26,7 +27,7 @@ def base_train(
     for current_epoch in EPOCHS:
         start_time = time.time()
 
-        model = AnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True, gpu=0)
+        model = CustomAnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True, gpu=0)
 
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:
@@ -38,11 +39,14 @@ def base_train(
 
             model.fit(di_graph)
             auc = roc_auc_score(labels, model.decision_score_)
+            loss = model.loss_last / di_graph.num_nodes
 
             write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
             write(f"Execution time: {(time.time() - start_time):.4f} sec")
+            write(f"Loss ({title_prefix}): {loss:.4f}")
             print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
             print(f"Execution time: {(time.time() - start_time):.4f} sec")
+            print(f"Loss ({title_prefix}): {loss:.4f}")
 
         if save_emb:
             emd_file = RESULTS_DIR / f"emd_{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.pt"

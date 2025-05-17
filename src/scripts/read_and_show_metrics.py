@@ -7,6 +7,7 @@ from src.helpers.config import EPOCHS, RESULTS_DIR
 from src.helpers.logs.log_parser import LogParser
 
 FEATURE_TYPES = [
+    "Attr",
     "Attr + Str",
     "Attr + Str2",
     "Attr + Str3"]
@@ -33,7 +34,7 @@ DATASET_AUC_PAPER = {
     "Reddit": 0.557
 }
 
-def main():
+def main_auc_roc():
     parser = LogParser()
     parser.parse_logs()
 
@@ -82,5 +83,52 @@ def main():
         plt.savefig(save_path, dpi=300)
         plt.show()
 
+def main_loss():
+    parser = LogParser()
+    parser.parse_logs()
+
+    save_dir = RESULTS_DIR / "graph" / "dev"
+
+    datasets = set(r["dataset"] for r in parser.results)
+
+    for dataset in datasets:
+        plt.figure(figsize=(10, 6))
+
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_loss = defaultdict(float)
+            for r in filtered:
+                epoch = r["epoch"]
+                loss = r["loss"]
+                if loss > epoch_loss[epoch]:
+                    epoch_loss[epoch] = loss
+
+            if not epoch_loss:
+                continue
+
+            losses = [epoch_loss[e] for e in EPOCHS]
+            losses = [loss / (1.5 * max(losses)) for loss in losses]
+            plt.plot(EPOCHS, losses, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+
+        save_path = os.path.join(save_dir, f"{dataset}_loss_plot.png")
+
+        plt.title(f'Loss vs Epochs ({dataset})')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.ylim(0.0, 1.0)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300)
+        plt.show()
+
 if __name__ == "__main__":
-    main()
+    main_loss()
+    main_auc_roc()

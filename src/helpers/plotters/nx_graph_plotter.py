@@ -1,3 +1,5 @@
+import time
+
 import networkx as nx
 import torch
 import matplotlib.pyplot as plt
@@ -33,6 +35,10 @@ def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title):
     plt.show()
 
 def to_networkx_graph(graph: Graph, visualize: bool = False, title: str = "Graph Visualization") -> nx.Graph:
+    print("Forming a NetworkX graph...")
+
+    start_time = time.time()
+
     nx_graph = nx.Graph()
     node_color = []
 
@@ -52,5 +58,7 @@ def to_networkx_graph(graph: Graph, visualize: bool = False, title: str = "Graph
 
     if visualize:
         visualize_graph(nx_graph, node_color, title)
+
+    print(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     return nx_graph

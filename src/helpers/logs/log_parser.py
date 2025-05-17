@@ -38,10 +38,13 @@ class LogParser:
 
                 with open(file, "r") as f:
                     lines = f.readlines()
-                    if len(lines) < 2:
+                    if len(lines) < 3:
                         continue
+
                     auc_line = lines[1].strip()
+                    loss_line = lines[3].strip() if "Loss" in lines[3] else lines[-1].strip()
                     auc_roc = float(auc_line.split("AUC-ROC")[1].split(":")[1].strip())
+                    loss_value = float(loss_line.split("Loss")[1].split(":")[1].strip())
 
                 self.results.append({
                     "filename": file.name,
@@ -50,7 +53,8 @@ class LogParser:
                     "lr": lr,
                     "epoch": epoch,
                     "hid_dim": hid_dim,
-                    "auc_roc": auc_roc
+                    "auc_roc": auc_roc,
+                    "loss": loss_value
                 })
 
             except Exception as e:
@@ -66,14 +70,15 @@ class LogParser:
             min(self.results, key=lambda x: x["auc_roc"])
         )
 
-    def get_result_by_params(self, dataset=None, features=None, lr=None, hid_dim=None, epoch=None):
+    def get_result_by_params(self, dataset=None, features=None, lr=None, hid_dim=None, epoch=None, loss_value=None):
         for result in self.results:
             if (
                 (dataset is None or result["dataset"] == dataset) and
                 (features is None or result["features"] == features) and
                 (lr is None or result["lr"] == lr) and
                 (hid_dim is None or result["hid_dim"] == hid_dim) and
-                (epoch is None or result["epoch"] == epoch)
+                (epoch is None or result["epoch"] == epoch) and
+                (loss_value is None or result["loss"] == loss_value)
             ):
                 return result
         return None
