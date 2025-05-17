@@ -26,6 +26,7 @@ jobs:
 
       - name: Load notebook on Kaggle
         run: |
+          cp kernel-metadata.json ./kernel-metadata.json
           cp src/notebook/train_check.ipynb train_check.ipynb
           kaggle kernels push -p .
 
