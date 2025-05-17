@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "Waiting for notebook: $NOTEBOOK_ID"
           for i in {1..60}; do
-            STATUS=$(kaggle kernels status $NOTEBOOK_ID | grep 'status' | awk '{print $2}')
+            STATUS=$(kaggle kernels status $NOTEBOOK_ID | grep 'status')
             echo "Current status: $STATUS"
             if [ "$STATUS" = "complete" ]; then
               break
