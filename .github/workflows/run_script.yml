@@ -30,7 +30,7 @@ jobs:
         id: getid
         run: |
           NOTEBOOK_ID=$(kaggle kernels list --user ${{ secrets.KAGGLE_USERNAME }} --sort-by dateCreated | grep train_check | head -n 1 | awk '{print $2}')
-          echo "NOTEBOOK_ID=$NOTEBOOK_ID" >> $GITHUB_ENV
+          echo "Parsed Notebook ID: $NOTEBOOK_ID"
 
       - name: Wait for notebook to complete
         run: |
