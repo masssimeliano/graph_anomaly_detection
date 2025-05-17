@@ -21,6 +21,9 @@ jobs:
           echo "{\"username\":\"${{ secrets.KAGGLE_USERNAME }}\",\"key\":\"${{ secrets.KAGGLE_KEY }}\"}" > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
+      - name: Check src/notebooks/
+        run: ls -la src/notebooks/
+
       - name: Load notebook on Kaggle
         run: |
           cp src/notebooks/train_check.ipynb train_check.ipynb
