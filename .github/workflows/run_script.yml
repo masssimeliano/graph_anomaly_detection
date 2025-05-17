@@ -1,7 +1,9 @@
 name: Run Kaggle Notebook
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
   run-kaggle:
@@ -21,7 +23,7 @@ jobs:
 
       - name: Load notebook on Kaggle
         run: |
-          cp notebooks/train_check.ipynb train_check.ipynb
+          cp src/notebooks/train_check.ipynb train_check.ipynb
           kaggle kernels push -p .
 
       - name: Start notebook
