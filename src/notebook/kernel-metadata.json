@@ -1,5 +1,6 @@
 {
   "title": "train_check",
+  "slug": "train-check",
   "code_file": "train_check.ipynb",
   "language": "python",
   "kernel_type": "notebook",
