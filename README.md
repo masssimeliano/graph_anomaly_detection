@@ -73,6 +73,18 @@ scripts/
 
 ---
 
+## 🏃 Run 
+
+Run the ```check_train.py``` script to start calculating of all metrics for each datasets.
+Use ```config.py``` to select the specific dataset
+
+```
+scripts/
+├── check_train.py
+```
+
+---
+
 ## 🧠 Goal
 
 The main objective is to detect anomalies in graph data using both traditional machine learning techniques and modern deep learning models.  
