@@ -71,10 +71,6 @@ class CustomAnomalyDAE(AnomalyDAE):
                     else:
                         self.emb[node_idx[:batch_size]] = \
                             self.model.emb[:batch_size].cpu()
-                score = score.detach().cpu()
-                if not torch.isfinite(score).all():
-                    print(f"NaN/Inf in dataset")
-                    score[~torch.isfinite(score)] = 0.0
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -96,35 +92,6 @@ class CustomAnomalyDAE(AnomalyDAE):
 
         self._process_decision_score()
         return self
-
-    def forward_model(self, data):
-        print("Forward")
-        batch_size = data.batch_size
-        node_idx = data.n_id
-
-        x = data.x.to(self.device)
-        s = data.s.to(self.device)
-        edge_index = data.edge_index.to(self.device)
-
-        x_, s_ = self.model(x, edge_index, batch_size)
-
-        # positive weight conversion
-        weight = 1 - self.alpha
-        pos_weight_a = self.eta / (1 + self.eta)
-        pos_weight_s = self.theta / (1 + self.theta)
-
-        score = self.model.loss_func(x[:batch_size],
-                                     x_[:batch_size],
-                                     s[:batch_size, node_idx],
-                                     s_[:batch_size],
-                                     weight,
-                                     pos_weight_a,
-                                     pos_weight_s)
-
-        loss = torch.mean(score)
-
-        return loss, score.detach().cpu()
-
 
     def fit_emd(self, data, label=None):
 

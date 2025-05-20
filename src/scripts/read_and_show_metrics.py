@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
-
+import seaborn as sns
+import pandas as pd
 from matplotlib import pyplot as plt
 
 from src.helpers.config import EPOCHS, RESULTS_DIR
@@ -12,7 +13,8 @@ FEATURE_TYPES = [
     "Attr + Str2",
     "Attr + Str3",
     "Attr + Error",
-    "Attr + Emd"]
+    "Attr + Emd"
+]
 FEATURE_COLORS = {
     "Attr": "blue",
     "Attr + Str": "green",
@@ -133,6 +135,102 @@ def main_loss():
         plt.savefig(save_path, dpi=300)
         plt.show()
 
+def generate_min_loss_table():
+    parser = LogParser()
+    parser.parse_logs()
+
+    datasets = set(r["dataset"] for r in parser.results)
+    loss_table = defaultdict(dict)
+
+    for dataset in datasets:
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_loss = defaultdict(lambda: float("inf"))
+            for r in filtered:
+                epoch = r["epoch"]
+                loss = r["loss"]
+                if loss < epoch_loss[epoch]:
+                    epoch_loss[epoch] = loss
+
+            losses = [epoch_loss[e] for e in EPOCHS]
+
+            if epoch_loss:
+                min_loss = min(epoch_loss.values())
+                loss_table[dataset][feature] = round(min_loss  / (1.5 * max(losses)), 4)
+
+    df = pd.DataFrame(loss_table).T  # Transpose so datasets are rows
+    df.index.name = "Dataset"
+
+    plt.figure(figsize=(14, 6))
+    sns.heatmap(df,
+                annot=True,
+                cmap="YlGnBu",
+                fmt=".2f",
+                cbar_kws={'label': '"Normalized" loss'},
+                vmin=0,
+                vmax=0.67)
+    plt.title("Minimum / 1.5*Maximum Loss per Feature Type across Datasets (AnomalyDAE)")
+    plt.xlabel("Feature Type")
+    plt.ylabel("Dataset")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+def generate_auc_roc_table():
+    parser = LogParser()
+    parser.parse_logs()
+
+    datasets = set(r["dataset"] for r in parser.results)
+    loss_table = defaultdict(dict)
+
+    for dataset in datasets:
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_auc_roc = defaultdict(lambda: -1)
+            for r in filtered:
+                epoch = r["epoch"]
+                auc_roc = r["auc_roc"]
+                if auc_roc > epoch_auc_roc[epoch]:
+                    epoch_auc_roc[epoch] = auc_roc
+
+            if epoch_auc_roc:
+                max_auc_roc = max(epoch_auc_roc.values())
+                loss_table[dataset][feature] = round(max_auc_roc, 4)
+
+    df = pd.DataFrame(loss_table).T  # Transpose so datasets are rows
+    df.index.name = "Dataset"
+
+    plt.figure(figsize=(14, 6))
+    sns.heatmap(df,
+                annot=True,
+                cmap="YlGnBu",
+                fmt=".2f",
+                cbar_kws={'label': 'AUC-ROC'},
+                vmin=0,
+                vmax=1)
+    plt.title("AUC-ROC per Feature Type across Datasets (AnomalyDAE)")
+    plt.xlabel("Feature Type")
+    plt.ylabel("Dataset")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == "__main__":
     # main_loss()
-    main_auc_roc()
+    generate_min_loss_table()
+    generate_auc_roc_table()
+    # main_auc_roc()
