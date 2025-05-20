@@ -14,7 +14,6 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    save_emb: bool,
     data_set: str
 ):
     add_structure_features(graph)
@@ -26,7 +25,6 @@ def train(
         title_prefix="Attr + Str2",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
-        save_emb=save_emb,
         data_set=data_set
     )
 

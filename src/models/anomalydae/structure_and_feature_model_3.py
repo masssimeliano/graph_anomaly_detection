@@ -14,7 +14,6 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    save_emb: bool,
     data_set: str
 ):
     add_structure_features(graph)
@@ -26,12 +25,11 @@ def train(
         title_prefix="Attr + Str3",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
-        save_emb=save_emb,
         data_set=data_set
     )
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
-    print("Extracting node features with NetworkX 1...")
+    print("Extracting node features with NetworkX 2...")
     start_time = time.time()
 
     features = []

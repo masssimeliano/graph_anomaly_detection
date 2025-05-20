@@ -10,12 +10,15 @@ FEATURE_TYPES = [
     "Attr",
     "Attr + Str",
     "Attr + Str2",
-    "Attr + Str3"]
+    "Attr + Str3",
+    "Attr + Error",
+    "Attr + Emd"]
 FEATURE_COLORS = {
     "Attr": "blue",
     "Attr + Str": "green",
     "Attr + Str2": "orange",
     "Attr + Str3": "red",
+    "Attr + Error": "yellow",
     "Attr + Emd": "pink"
 }
 FEATURE_LABELS = {
@@ -23,7 +26,8 @@ FEATURE_LABELS = {
     "Attr + Str": "Attribute + Structure",
     "Attr + Str2": "Attribute + Structure 2",
     "Attr + Str3": "Attribute + Structure 3",
-    "Attr + Emd": "Attribute + Embedding"
+    "Attr + Emd": "Attribute + Embedding",
+    "Attr + Error": "Attribute + Error",
 }
 DATASET_AUC_PAPER = {
     "cora": 0.762,
@@ -130,5 +134,5 @@ def main_loss():
         plt.show()
 
 if __name__ == "__main__":
-    main_loss()
+    # main_loss()
     main_auc_roc()

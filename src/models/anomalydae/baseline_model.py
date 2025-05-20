@@ -8,7 +8,6 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    save_emb: bool,
     data_set: str):
     base_train(
         di_graph,
@@ -16,5 +15,4 @@ def train(
         title_prefix="Attr",
         learning_rate=learning_rate,
         hid_dim=hid_dim,
-        save_emb=save_emb,
         data_set=data_set)

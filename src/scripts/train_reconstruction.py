@@ -1,17 +1,16 @@
 import random
-from tkinter.constants import CURRENT
 
 import numpy as np
 import torch
 
-from src.helpers.config import MEDIUM_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS, \
-    CURRENT_DATASETS_SIZE, labels_dict, graph_dict
+from src.helpers.config import SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS, \
+    CURRENT_DATASETS_SIZE, graph_dict, labels_dict
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.anomalydae import structure_and_feature_model_2
+from src.models.anomalydae import structure_and_feature_model, reconstruction_error_model
 from src.structure.data_set import DataSetSize
 
-FEATURE_TYPE = "Attr + Str2"
+FEATURE_TYPE = "Attr + Error"
 
 def main():
     torch.manual_seed(SEED)
@@ -24,7 +23,7 @@ def main():
         print(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset], visualize=False)
-        structure_and_feature_model_2.train(
+        reconstruction_error_model.train(
             nx_graph,
             labels_dict[dataset],
             learning_rate=LEARNING_RATE,

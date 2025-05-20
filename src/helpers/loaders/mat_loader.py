@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import scipy.io
 from typing import List
@@ -31,6 +33,10 @@ def build_edges(nodes: List[Node], adj_matrix: np.ndarray):
                 nodes[j].neighbours.append(nodes[i])
 
 def load_graph_from_mat(name: str, size: DataSetSize):
+    print("Loading and building a graph...")
+
+    start_time = time.time()
+
     dataset = DataSet(name, size)
     data = scipy.io.loadmat(dataset.location)
 
@@ -42,5 +48,7 @@ def load_graph_from_mat(name: str, size: DataSetSize):
 
     nodes = build_nodes(adj_matrix, attributes, labels, is_str_anomaly, is_attr_anomaly)
     build_edges(nodes, adj_matrix)
+
+    print(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     return labels.tolist(), Graph(nodes)

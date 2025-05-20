@@ -16,7 +16,6 @@ def base_train(
     title_prefix: str,
     learning_rate: float,
     hid_dim: int,
-    save_emb: bool,
     data_set: str,
     alpha: float = 0.5):
     measure_time = time.time()
@@ -24,11 +23,23 @@ def base_train(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device : ", device)
 
-    for current_epoch in EPOCHS:
-        start_time = time.time()
+    data_set_name = f"{data_set.replace('.mat', '')}"
 
-        model = CustomAnomalyDAE(epoch=current_epoch, lr=learning_rate, hid_dim=hid_dim, alpha=alpha, save_emb=True, gpu=0)
+    # epoch doesnt matter here
+    model = CustomAnomalyDAE(epoch=250,
+                             lr=learning_rate,
+                             hid_dim=hid_dim,
+                             alpha=alpha,
+                             gpu=0,
+                             labels=labels,
+                             title_prefix=title_prefix,
+                             data_set=data_set_name)
 
+    model.fit(di_graph)
+    array_loss = model.array_loss
+    array_auc_roc = model.array_auc_roc
+
+    for i, current_epoch in enumerate(EPOCHS, start=0):
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:
             def write(msg):
@@ -37,19 +48,17 @@ def base_train(
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
             print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
 
-            model.fit(di_graph)
-            auc = roc_auc_score(labels, model.decision_score_)
-            loss = model.loss_last / di_graph.num_nodes
-
-            write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
-            write(f"Execution time: {(time.time() - start_time):.4f} sec")
-            write(f"Loss ({title_prefix}): {loss:.4f}")
-            print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
-            print(f"Execution time: {(time.time() - start_time):.4f} sec")
-            print(f"Loss ({title_prefix}): {loss:.4f}")
-
-        if save_emb:
-            emd_file = RESULTS_DIR / f"emd_{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.pt"
-            torch.save(model.emb, emd_file)
+            write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
+            write(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
+            print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
+            print(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
 
     print(f"Time: {(time.time() - measure_time):.4f} sec")
+
+def get_emd_file(
+    title_prefix: str,
+    learning_rate: float,
+    hid_dim: int,
+    data_set: str,
+    current_epoch: int):
+    RESULTS_DIR / f"emd_{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.pt"

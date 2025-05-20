@@ -8,6 +8,5 @@ def train(
     labels: List[int],
     learning_rate: float,
     hid_dim: int,
-    save_emb: bool,
     data_set: str):
-    emd_train(graph, labels, "Attr + Emd", learning_rate, hid_dim, save_emb, data_set)
+    emd_train(graph, labels, "Attr + Emd", learning_rate, hid_dim, data_set)

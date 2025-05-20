@@ -1,14 +1,23 @@
 import train_baseline
 import train_structure_and_feature
 import train_structure_and_feature_2
+import train_reconstruction
 import train_structure_and_feature_3
+import train_and_save_emd_from_baseline_alpha
+import train_from_emd_baseline_with_alpha
 import read_and_show_metrics
+from src.helpers.config import CURRENT_DATASETS, CURRENT_DATASETS_SIZE, labels_dict, graph_dict
+from src.helpers.loaders.mat_loader import load_graph_from_mat
+
 
 def main():
-    train_baseline.main()
-    train_structure_and_feature.main()
-    train_structure_and_feature_2.main()
-    train_structure_and_feature_3.main()
+    for i, dataset in enumerate(CURRENT_DATASETS):
+        print(f"Preparing {dataset}...")
+        labels, graph = load_graph_from_mat(name=dataset, size=CURRENT_DATASETS_SIZE[i])
+        labels_dict[dataset] = labels
+        graph_dict[dataset] = graph
+
+    train_reconstruction.main()
 
     read_and_show_metrics.main_auc_roc()
     read_and_show_metrics.main_loss()

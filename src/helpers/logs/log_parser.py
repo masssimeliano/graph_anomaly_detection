@@ -28,6 +28,8 @@ class LogParser:
                     features = "Attr + Emd"
                 elif "Attr + Str" in name:
                     features = "Attr + Str"
+                elif "Attr + Error" in name:
+                    features = "Attr + Error"
                 else:
                     features = "Attr"
 
@@ -41,8 +43,8 @@ class LogParser:
                     if len(lines) < 3:
                         continue
 
-                    auc_line = lines[1].strip()
-                    loss_line = lines[3].strip() if "Loss" in lines[3] else lines[-1].strip()
+                    auc_line = next((line for line in lines if "AUC-ROC" in line), None)
+                    loss_line = next((line for line in lines if "Loss" in line), None)
                     auc_roc = float(auc_line.split("AUC-ROC")[1].split(":")[1].strip())
                     loss_value = float(loss_line.split("Loss")[1].split(":")[1].strip())
 

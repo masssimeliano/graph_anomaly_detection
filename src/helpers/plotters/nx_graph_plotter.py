@@ -22,7 +22,6 @@ def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title):
         alpha=0.7
     )
 
-    # Используем отдельный вызов над ax
     ax.set_title(
         title,
         fontsize=20,
