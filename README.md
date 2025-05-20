@@ -85,17 +85,19 @@ The performance of various models will be evaluated and compared across datasets
 
 The following literature and resources were used or referenced during the research:
 
-1. The PyGOD Documentation: https://pygod.org/
+1. The PyGOD Documentation:
+   https://pygod.org/
    
-2. NetworkX Documentation: https://networkx.org/
+2. NetworkX Documentation:
+   https://networkx.org/
 
 3. Stanford CS224W Lecture Slides on Structural Features in Graphs (2021).  
    https://snap.stanford.edu/class/cs224w-2021/slides/02-tradition-ml.pdf
 
-4. Dimitriadis, F., et al. (2021). **PyFGLT: Python Library for Frequent Graph Pattern Features**.  
+4. Dimitriadis, F., et al. (2021). PyFGLT: Python Library for Frequent Graph Pattern Features.  
    IEEE Paper: https://ieeexplore.ieee.org/abstract/document/9286205  
    Implementation: https://fcdimitr.github.io/pyfglt/
 
-5. Datasets with labeled anomalies for Graph AD:  
-    https://github.com/mala-lab/Awesome-Deep-Graph-Anomaly-Detection#Datasets
+5. Datasets with labeled anomalies for Graph AD:
+   https://github.com/mala-lab/Awesome-Deep-Graph-Anomaly-Detection#Datasets
 
