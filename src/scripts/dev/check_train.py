@@ -1,10 +1,4 @@
-import train_baseline
-import train_structure_and_feature
-import train_structure_and_feature_2
 import train_reconstruction
-import train_structure_and_feature_3
-import train_and_save_emd_from_baseline_alpha
-import train_from_emd_baseline_with_alpha
 import read_and_show_metrics
 from src.helpers.config import CURRENT_DATASETS, CURRENT_DATASETS_SIZE, labels_dict, graph_dict
 from src.helpers.loaders.mat_loader import load_graph_from_mat

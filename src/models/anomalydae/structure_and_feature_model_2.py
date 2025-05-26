@@ -9,24 +9,21 @@ from torch_geometric.utils import from_networkx
 
 from src.models.base_train import base_train
 
-def train(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str
-):
+
+def train(graph: nx.Graph,
+          labels: List[int],
+          learning_rate: float,
+          hid_dim: int,
+          data_set: str):
     add_structure_features(graph)
     di_graph = from_networkx(graph)
 
-    base_train(
-        di_graph,
-        labels,
-        title_prefix="Attr + Str2",
-        learning_rate=learning_rate,
-        hid_dim=hid_dim,
-        data_set=data_set
-    )
+    base_train(di_graph,
+               labels,
+               title_prefix="Attr + Str2",
+               learning_rate=learning_rate,
+               hid_dim=hid_dim,
+               data_set=data_set)
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     print("Extracting node features with NetworkX 1...")
@@ -48,15 +45,14 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         square_clustering = square_clust[node]
         num_neighbors = len(neighbors)
 
-        node_features = [
-            degree,
-            clustering,
-            triangle_count,
-            avg_neighbor_degree[node],
-            avg_deg_of_neighbors,
-            ego_density,
-            square_clustering,
-            num_neighbors,]
+        node_features = [degree,
+                         clustering,
+                         triangle_count,
+                         avg_neighbor_degree[node],
+                         avg_deg_of_neighbors,
+                         ego_density,
+                         square_clustering,
+                         num_neighbors,]
         features.append(node_features)
 
     features_tensor = torch.tensor(features, dtype=torch.float32)

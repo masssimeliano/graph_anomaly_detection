@@ -3,21 +3,18 @@ from typing import List
 
 import torch
 import torch_geometric
-from sklearn.metrics import roc_auc_score
-from pygod.detector import AnomalyDAE
 
 from src.helpers.config import RESULTS_DIR, EPOCHS
 from src.models.encoder.custom_anomalydae import CustomAnomalyDAE
 
 
-def base_train(
-    di_graph: torch_geometric.data.Data,
-    labels: List[int],
-    title_prefix: str,
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str,
-    alpha: float = 0.5):
+def base_train(di_graph: torch_geometric.data.Data,
+               labels: List[int],
+               title_prefix: str,
+               learning_rate: float,
+               hid_dim: int,
+               data_set: str,
+               alpha: float = 0.5):
     measure_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,7 +22,8 @@ def base_train(
 
     data_set_name = f"{data_set.replace('.mat', '')}"
 
-    # epoch doesnt matter here
+    # epoch does not matter here
+    # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
     model = CustomAnomalyDAE(epoch=250,
                              lr=learning_rate,
                              hid_dim=hid_dim,
@@ -54,11 +52,3 @@ def base_train(
             print(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
 
     print(f"Time: {(time.time() - measure_time):.4f} sec")
-
-def get_emd_file(
-    title_prefix: str,
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str,
-    current_epoch: int):
-    RESULTS_DIR / f"emd_{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.pt"

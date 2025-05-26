@@ -12,15 +12,13 @@ from src.helpers.loaders.emd_loader import load_emd_model
 from src.models.encoder.custom_anomalydae import CustomAnomalyDAE
 
 
-def emd_train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    title_prefix: str,
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str,
-    alpha: float = 0.5):
-
+def emd_train(nx_graph: nx.Graph,
+              labels: List[int],
+              title_prefix: str,
+              learning_rate: float,
+              hid_dim: int,
+              data_set: str,
+              alpha: float = 0.5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device : ", device)
 
@@ -33,6 +31,8 @@ def emd_train(
 
         data_set_name = f"{data_set.replace('.mat', '')}"
 
+        # epoch does not matter here
+        # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
         model = CustomAnomalyDAE(epoch=current_epoch,
                                  lr=learning_rate,
                                  hid_dim=hid_dim,
@@ -47,6 +47,7 @@ def emd_train(
             def write(msg):
                 log.write(msg + "\n")
 
+            # adjusted regular method from AnomalyDAE
             model.fit_emd(di_graph)
             loss = model.loss_last / di_graph.num_nodes
             auc = roc_auc_score(labels, model.decision_score_)
@@ -62,21 +63,19 @@ def emd_train(
 
     print(f"Time: {(time.time() - measure_time):.4f} sec")
     
-def extract_embedding_features(
-    graph: nx.Graph,
-    learning_rate: float,
-    hid_dim: int,
-    epoch: int,
-    data_set: str):
+def extract_embedding_features(graph: nx.Graph,
+                               learning_rate: float,
+                               hid_dim: int,
+                               epoch: int,
+                               data_set: str):
 
     print("Loading embedding features to graph nodes...")
 
-    emd_model = load_emd_model(
-        data_set=data_set,
-        feature="Attr + Alpha",
-        lr=learning_rate,
-        hid_dim=hid_dim,
-        epoch=epoch)
+    emd_model = load_emd_model(data_set=data_set,
+                               feature="Attr + Alpha",
+                               lr=learning_rate,
+                               hid_dim=hid_dim,
+                               epoch=epoch)
 
     for i, node in enumerate(graph.nodes()):
         original_feat = graph.nodes[node]['x']

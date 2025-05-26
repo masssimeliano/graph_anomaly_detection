@@ -9,24 +9,22 @@ from torch_geometric.utils import from_networkx
 
 from src.models.base_train import base_train
 
-def train(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str
-):
+
+def train(graph: nx.Graph,
+          labels: List[int],
+          learning_rate: float,
+          hid_dim: int,
+          data_set: str):
     add_structure_features(graph)
     di_graph = from_networkx(graph)
 
-    base_train(
-        di_graph,
-        labels,
-        title_prefix="Attr + Str",
-        learning_rate=learning_rate,
-        hid_dim=hid_dim,
-        data_set=data_set
-    )
+    base_train(di_graph,
+               labels,
+               title_prefix="Attr + Str",
+               learning_rate=learning_rate,
+               hid_dim=hid_dim,
+               data_set=data_set)
+
 def add_structure_features(graph: nx.Graph):
     print("Adding structural graphlet features to graph nodes...")
     start_time = time.time()

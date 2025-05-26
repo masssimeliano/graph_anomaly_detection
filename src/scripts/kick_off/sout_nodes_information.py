@@ -48,11 +48,9 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> tuple[torch.Tensor, list
 
     return features_tensor
 
-def summarize_structural_features(
-    nx_graph: nx.Graph,
-    node_types: dict[int, Literal["normal", "attr_anomaly", "struct_anomaly"]],
-    dataset: str
-):
+def summarize_structural_features(nx_graph: nx.Graph,
+                                  node_types: dict[int, Literal["normal", "attr_anomaly", "struct_anomaly"]],
+                                  dataset: str):
     tensor, feature_names, node_ids = extract_node_features_tensor(nx_graph)
     node_id_to_idx = {nid: i for i, nid in enumerate(node_ids)}
 

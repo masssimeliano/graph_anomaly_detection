@@ -1,5 +1,3 @@
-import time
-
 import torch
 from pygod.detector.anomalydae import AnomalyDAE
 from sklearn.metrics import roc_auc_score
@@ -26,7 +24,6 @@ class CustomAnomalyDAE(AnomalyDAE):
         self.save_emb = True
 
     def fit(self, data, label=None):
-
         self.process_graph(data)
         self.num_nodes, self.in_dim = data.x.shape
         if self.batch_size == 0:
@@ -77,15 +74,18 @@ class CustomAnomalyDAE(AnomalyDAE):
                 loss.backward()
                 optimizer.step()
 
+            # saving the loss value on the last epoch
             loss_value = epoch_loss / data.x.shape[0]
             if self.gan:
                 loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
             self.loss_last = loss_value
 
+            # calculating AUC-ROC through all epochs
             if (epoch in EPOCHS):
                 self.array_loss.append(loss_value)
                 auc_roc = roc_auc_score(self.labels, self.decision_score_)
                 self.array_auc_roc.append(auc_roc)
+                # saving embedding if its needed
                 if (self.save_emb):
                     emd_file = self.get_emd_file(epoch)
                     torch.save(self.emb, emd_file)
@@ -145,11 +145,13 @@ class CustomAnomalyDAE(AnomalyDAE):
                 loss.backward()
                 optimizer.step()
 
+            # saving the loss value on the last epoch
             loss_value = epoch_loss / data.x.shape[0]
             if self.gan:
                 loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
             self.loss_last = loss_value
 
+            # saving embedding if its needed
             if (epoch in EPOCHS):
                 if (self.save_emb):
                     emd_file = self.get_emd_file(epoch)

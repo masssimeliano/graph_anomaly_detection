@@ -5,10 +5,9 @@ import torch
 
 from src.helpers.config import SMALL_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS, \
     CURRENT_DATASETS_SIZE, graph_dict, labels_dict
-from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.anomalydae import structure_and_feature_model
-from src.structure.data_set import DataSetSize
+
 
 FEATURE_TYPE = "Attr + Str"
 

@@ -3,6 +3,7 @@ from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.structure.data_set import DataSetSize
 
+
 def main():
     for dataset in MEDIUM_DATASETS:
         labels, graph = load_graph_from_mat(name=dataset, size=DataSetSize.MEDIUM)

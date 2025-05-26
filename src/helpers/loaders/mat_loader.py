@@ -2,11 +2,12 @@ import time
 
 import numpy as np
 import scipy.io
-from typing import List
+from typing import List, Tuple
 
 from src.structure.graph import Graph
 from src.structure.node import Node
 from src.structure.data_set import DataSet, DataSetSize
+
 
 def build_nodes(adj_matrix: np.ndarray,
                 attributes: np.ndarray,
@@ -25,14 +26,17 @@ def build_nodes(adj_matrix: np.ndarray,
         for i in range(len(adj_matrix))
     ]
 
-def build_edges(nodes: List[Node], adj_matrix: np.ndarray):
+def build_edges(nodes: List[Node],
+                adj_matrix:
+                np.ndarray):
     for i in range(len(adj_matrix)):
         for j in range(i, len(adj_matrix)):
             if adj_matrix[i][j] != 0:
                 nodes[i].neighbours.append(nodes[j])
                 nodes[j].neighbours.append(nodes[i])
 
-def load_graph_from_mat(name: str, size: DataSetSize):
+def load_graph_from_mat(name: str,
+                        size: DataSetSize) -> Tuple[List[int], Graph]:
     print("Loading and building a graph...")
 
     start_time = time.time()

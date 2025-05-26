@@ -1,12 +1,15 @@
 import logging
 from pathlib import Path
+from typing import Optional, Dict, Any, Tuple
 
 from src.helpers.config import RESULTS_DIR
 
 logging.basicConfig(level=logging.INFO)
 
+
 class LogParser:
-    def __init__(self, log_dir: Path = RESULTS_DIR):
+    def __init__(self,
+                 log_dir: Path = RESULTS_DIR):
         self.log_dir = log_dir
         self.results = []
 
@@ -48,39 +51,41 @@ class LogParser:
                     auc_roc = float(auc_line.split("AUC-ROC")[1].split(":")[1].strip())
                     loss_value = float(loss_line.split("Loss")[1].split(":")[1].strip())
 
-                self.results.append({
-                    "filename": file.name,
-                    "dataset": dataset,
-                    "features": features,
-                    "lr": lr,
-                    "epoch": epoch,
-                    "hid_dim": hid_dim,
-                    "auc_roc": auc_roc,
-                    "loss": loss_value
-                })
+                self.results.append({"filename": file.name,
+                                     "dataset": dataset,
+                                     "features": features,
+                                     "lr": lr,
+                                     "epoch": epoch,
+                                     "hid_dim": hid_dim,
+                                     "auc_roc": auc_roc,
+                                     "loss": loss_value})
 
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
 
-    def get_best_by_key(self, key: str, value: float):
+    def get_best_by_key(self,
+                        key: str,
+                        value: float) -> Optional[Dict[str, Any]]:
         filtered = [r for r in self.results if r[key] == value]
         return max(filtered, key=lambda x: x["auc_roc"], default=None)
 
-    def get_best_and_worst(self):
-        return (
-            max(self.results, key=lambda x: x["auc_roc"]),
-            min(self.results, key=lambda x: x["auc_roc"])
-        )
+    def get_best_and_worst(self) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+        return (max(self.results, key=lambda x: x["auc_roc"]),
+                min(self.results, key=lambda x: x["auc_roc"]))
 
-    def get_result_by_params(self, dataset=None, features=None, lr=None, hid_dim=None, epoch=None, loss_value=None):
+    def get_result_by_params(self,
+                             dataset=None,
+                             features=None,
+                             lr=None,
+                             hid_dim=None,
+                             epoch=None,
+                             loss_value=None) -> Optional[Dict[str, Any]]:
         for result in self.results:
-            if (
-                (dataset is None or result["dataset"] == dataset) and
+            if ((dataset is None or result["dataset"] == dataset) and
                 (features is None or result["features"] == features) and
                 (lr is None or result["lr"] == lr) and
                 (hid_dim is None or result["hid_dim"] == hid_dim) and
                 (epoch is None or result["epoch"] == epoch) and
-                (loss_value is None or result["loss"] == loss_value)
-            ):
+                (loss_value is None or result["loss"] == loss_value)):
                 return result
         return None

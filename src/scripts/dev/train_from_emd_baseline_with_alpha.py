@@ -2,15 +2,14 @@ import random
 
 import numpy as np
 import torch
-from torch_geometric.utils import from_networkx
 
-from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS_SIZE, graph_dict, \
-    labels_dict
-from src.helpers.loaders.mat_loader import load_graph_from_mat
+from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS_SIZE, labels_dict, \
+    graph_dict
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.anomalydae import baseline_model
+from src.models.anomalydae import embedding_and_feature_model
 
-FEATURE_TYPE = "Attr"
+
+FEATURE_TYPE = "Attr + Emd"
 
 def main():
     torch.manual_seed(SEED)
@@ -23,9 +22,8 @@ def main():
         print(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset], visualize=False)
-        di_graph = from_networkx(nx_graph)
-        baseline_model.train(
-            di_graph,
+        embedding_and_feature_model.train(
+            nx_graph,
             labels_dict[dataset],
             learning_rate=LEARNING_RATE,
             hid_dim=HIDDEN_DIMS,

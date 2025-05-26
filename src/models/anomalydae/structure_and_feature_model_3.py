@@ -9,24 +9,19 @@ from torch_geometric.utils import from_networkx
 
 from src.models.base_train import base_train
 
-def train(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str
-):
+
+def train(graph: nx.Graph,
+          labels: List[int],
+          learning_rate: float,
+          hid_dim: int,data_set: str):
     add_structure_features(graph)
     di_graph = from_networkx(graph)
 
-    base_train(
-        di_graph,
-        labels,
-        title_prefix="Attr + Str3",
-        learning_rate=learning_rate,
-        hid_dim=hid_dim,
-        data_set=data_set
-    )
+    base_train(di_graph,
+               labels,
+               title_prefix="Attr + Str3",
+               learning_rate=learning_rate,
+               hid_dim=hid_dim,data_set=data_set)
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     print("Extracting node features with NetworkX 2...")
@@ -97,23 +92,22 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         is_cut_vertex = 1.0 if node in articulation_points else 0.0
         degree_ratio = degree / max_degree if max_degree > 0 else 0.0
 
-        node_features = [
-            degree,
-            clustering,
-            triangle_count,
-            avg_neighbor_degree.get(node, 0.0),
-            avg_deg_of_neighbors,
-            ego_density,
-            square_clustering,
-            num_neighbors,
-            betw,
-            close,
-            eig,
-            pr,
-            core,
-            ecc,
-            is_cut_vertex,
-            degree_ratio]
+        node_features = [degree,
+                         clustering,
+                         triangle_count,
+                         avg_neighbor_degree.get(node, 0.0),
+                         avg_deg_of_neighbors,
+                         ego_density,
+                         square_clustering,
+                         num_neighbors,
+                         betw,
+                         close,
+                         eig,
+                         pr,
+                         core,
+                         ecc,
+                         is_cut_vertex,
+                         degree_ratio]
 
         features.append(node_features)
 

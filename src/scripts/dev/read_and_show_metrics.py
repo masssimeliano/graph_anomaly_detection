@@ -230,7 +230,7 @@ def generate_auc_roc_table():
     plt.show()
 
 if __name__ == "__main__":
-    # main_loss()
+    main_loss()
     generate_min_loss_table()
     generate_auc_roc_table()
-    # main_auc_roc()
+    main_auc_roc()

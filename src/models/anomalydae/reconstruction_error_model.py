@@ -10,30 +10,25 @@ from torch_geometric.utils import from_networkx
 
 from src.helpers.config import labels_dict
 from src.models.base_train import base_train
-from src.models.emd_train import emd_train
 from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
 
 
-def train(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    data_set: str
-):
+def train(graph: nx.Graph,
+          labels: List[int],
+          learning_rate: float,
+          hid_dim: int,
+          data_set: str):
     normalize_node_features_minmax(graph)
     compare_anomaly_reconstruction_error(graph, labels_dict[data_set])
     add_structure_features(graph)
     di_graph = from_networkx(graph)
 
-    base_train(
-        di_graph,
-        labels,
-        title_prefix="Attr + Error",
-        learning_rate=learning_rate,
-        hid_dim=hid_dim,
-        data_set=data_set
-    )
+    base_train(di_graph,
+               labels,
+               title_prefix="Attr + Error",
+               learning_rate=learning_rate,
+               hid_dim=hid_dim,
+               data_set=data_set)
 
 def normalize_node_features_minmax(graph: nx.Graph):
     features = [graph.nodes[n]['x'] for n in graph.nodes()]
@@ -66,6 +61,7 @@ def add_structure_features(graph: nx.Graph):
         error_feat = torch.tensor([errors[i].item()], dtype=torch.float32)
         graph.nodes[node]['x'] = torch.cat([original_feat, error_feat])
 
+# method for checking mean and median reconstruction errors of nodes
 def compare_anomaly_reconstruction_error(graph: nx.Graph, labels: List[int]):
     print("Comparing reconstruction error between normal and anomalous nodes...")
 
