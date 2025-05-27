@@ -2,6 +2,7 @@ import train_reconstruction
 import read_and_show_metrics
 from src.helpers.config import CURRENT_DATASETS, CURRENT_DATASETS_SIZE, labels_dict, graph_dict
 from src.helpers.loaders.mat_loader import load_graph_from_mat
+import train_baseline
 
 
 def main():
@@ -11,10 +12,10 @@ def main():
         labels_dict[dataset] = labels
         graph_dict[dataset] = graph
 
-    train_reconstruction.main()
+    train_baseline.main()
 
-    read_and_show_metrics.main_auc_roc()
-    read_and_show_metrics.main_loss()
+    # read_and_show_metrics.main_auc_roc()
+    # read_and_show_metrics.main_loss()
 
 if __name__ == "__main__":
     main()

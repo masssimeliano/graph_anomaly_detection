@@ -5,11 +5,10 @@ import torch
 from torch_geometric.utils import from_networkx
 import networkx as nx
 from sklearn.metrics import roc_auc_score
-from pygod.detector import AnomalyDAE
 
+from pygod.pygod.detector import AnomalyDAE
 from src.helpers.config import RESULTS_DIR, EPOCHS
 from src.helpers.loaders.emd_loader import load_emd_model
-from src.models.encoder.custom_anomalydae import CustomAnomalyDAE
 
 
 def emd_train(nx_graph: nx.Graph,
@@ -33,7 +32,7 @@ def emd_train(nx_graph: nx.Graph,
 
         # epoch does not matter here
         # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
-        model = CustomAnomalyDAE(epoch=current_epoch,
+        model = AnomalyDAE(epoch=current_epoch,
                                  lr=learning_rate,
                                  hid_dim=hid_dim,
                                  alpha=alpha,

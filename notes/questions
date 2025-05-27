@@ -5,3 +5,5 @@ Fragen (30.05):
  Benchmarking unsupervised outlier node detection on static attributed graphs. In Advances in Neural
  Information Processing Systems, volume 35, 2022?
 - Zu Runtime noch Zeit von Node-Enrichment-Methods?
+- Kontextuelle und strutuelle Anomalien unterscheiden?
+- Mittlerer Wert von Hyperparamters z.B. in [3, 5, 8]?

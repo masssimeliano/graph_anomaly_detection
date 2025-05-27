@@ -24,12 +24,13 @@ ToDo (23.05):
 - Heatmap für AUC-ROC verbessern
 - Auf ca. 100 Epochen begrenzen
 - Daten in Train/Test/Validation-Datasets unterteilen und verwenden
-- Neue Performance-Metriken ansehen (ROC-AUC, recall@k, precision@k)
+- Neue Performance- und Runtime-Metriken ansehen (ROC-AUC, recall@k, precision@k)
 - Neue Modelle trainieren (Gad-NR, Cola, CARD)
 - Komplexen Autoencoder aus Paper ansehen und implementieren
 - PyGOD im Edit-Modus ausführen
 - Ähnliche Arbeiten ansehen
 - LaTeX erstellen und beginnen
+- Normalisierung von Ergebnissen durch 3-mal Lauf
 
 Absprache (30.05):
 -

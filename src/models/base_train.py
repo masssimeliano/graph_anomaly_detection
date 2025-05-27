@@ -4,8 +4,8 @@ from typing import List
 import torch
 import torch_geometric
 
+from pygod.pygod.detector import AnomalyDAE
 from src.helpers.config import RESULTS_DIR, EPOCHS
-from src.models.encoder.custom_anomalydae import CustomAnomalyDAE
 
 
 def base_train(di_graph: torch_geometric.data.Data,
@@ -24,7 +24,7 @@ def base_train(di_graph: torch_geometric.data.Data,
 
     # epoch does not matter here
     # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
-    model = CustomAnomalyDAE(epoch=250,
+    model = AnomalyDAE(epoch=250,
                              lr=learning_rate,
                              hid_dim=hid_dim,
                              alpha=alpha,
