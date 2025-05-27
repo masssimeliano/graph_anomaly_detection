@@ -1,0 +1,35 @@
+Absprache (16.05):
+- Wie ist Rekonstruktion bei Anomalien im Vergleich zu anderen Knoten?
+- 2 gelernte Features (Err, Emb) und 2 gegebene Features (Str, Str2)
+- Kluster-Koeffizient
+- Ziel: Am Ende vestehen, was für was besser ist
+
+ToDo (16.05):
+- Rekonstruktion durch Autoencoder hinzufügen - Simpel Autoencoder
+- Neue Features als Attribute von NetworkX zu Attr + Str2 hinzufügen - Attr + Str3
+- Mit Kluster-Koeffizient experimentieren - In Attr + Str3
+- Loss gebraucht - CustomAnomalyDAE
+
+Absprache (23.05):
+- Kein max. AUC-ROC verwenden
+- 100 Epochen
+- Train/Test/Validation-Datasets
+- Andere Performance-Metriken
+- Komplexer Autoencoder
+- Ähnliche Arbeiten ansehen
+- PyGOD im Edit-Modus
+- LaTeX
+
+ToDo (23.05):
+- Heatmap für AUC-ROC verbessern
+- Auf ca. 100 Epochen begrenzen
+- Daten in Train/Test/Validation-Datasets unterteilen und verwenden
+- Neue Performance-Metriken ansehen (ROC-AUC, recall@k, precision@k)
+- Neue Modelle trainieren (Gad-NR, Cola, CARD)
+- Komplexen Autoencoder aus Paper ansehen und implementieren
+- PyGOD im Edit-Modus ausführen
+- Ähnliche Arbeiten ansehen
+- LaTeX erstellen und beginnen
+
+Absprache (30.05):
+-
