@@ -14,8 +14,8 @@ def main():
 
     train_baseline.main()
 
-    # read_and_show_metrics.main_auc_roc()
-    # read_and_show_metrics.main_loss()
+    read_and_show_metrics.main_recall()
+    read_and_show_metrics.main_precision()
 
 if __name__ == "__main__":
     main()

@@ -158,6 +158,8 @@ class AnomalyDAE(DeepDetector):
         # new variables for quicker learning
         self.array_loss = []
         self.array_auc_roc = []
+        self.array_recall_k = []
+        self.array_precision_k = []
         self.amount_of_epochs = max(EPOCHS)
         self.labels = labels
         self.title_prefix = title_prefix

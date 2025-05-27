@@ -135,6 +135,96 @@ def main_loss():
         plt.savefig(save_path, dpi=300)
         plt.show()
 
+def main_recall():
+    parser = LogParser()
+    parser.parse_logs()
+
+    save_dir = RESULTS_DIR / "graph" / "dev"
+
+    datasets = set(r["dataset"] for r in parser.results)
+
+    for dataset in datasets:
+        plt.figure(figsize=(10, 6))
+
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_recall = defaultdict(float)
+            for r in filtered:
+                epoch = r["epoch"]
+                recall = r["recall"]
+                if recall > epoch_recall[epoch]:
+                    epoch_recall[epoch] = recall
+
+            if not epoch_recall:
+                continue
+
+            recalls = [epoch_recall[e] for e in EPOCHS]
+            plt.plot(EPOCHS, recalls, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+
+        save_path = os.path.join(save_dir, f"{dataset}_recall_plot.png")
+
+        plt.title(f'Recall@k vs Epochs ({dataset})')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.ylim(0.0, 1.0)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300)
+        plt.show()
+
+def main_precision():
+    parser = LogParser()
+    parser.parse_logs()
+
+    save_dir = RESULTS_DIR / "graph" / "dev"
+
+    datasets = set(r["dataset"] for r in parser.results)
+
+    for dataset in datasets:
+        plt.figure(figsize=(10, 6))
+
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_precision = defaultdict(float)
+            for r in filtered:
+                epoch = r["epoch"]
+                precision = r["precision"]
+                if precision > epoch_precision[epoch]:
+                    epoch_precision[epoch] = precision
+
+            if not epoch_precision:
+                continue
+
+            precisions = [epoch_precision[e] for e in EPOCHS]
+            plt.plot(EPOCHS, precisions, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+
+        save_path = os.path.join(save_dir, f"{dataset}_recall_plot.png")
+
+        plt.title(f'Precision@k vs Epochs ({dataset})')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.ylim(0.0, 1.0)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300)
+        plt.show()
+
 def generate_min_loss_table():
     parser = LogParser()
     parser.parse_logs()
@@ -230,7 +320,5 @@ def generate_auc_roc_table():
     plt.show()
 
 if __name__ == "__main__":
-    main_loss()
-    generate_min_loss_table()
-    generate_auc_roc_table()
-    main_auc_roc()
+    main_recall()
+    main_precision()

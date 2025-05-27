@@ -11,7 +11,7 @@ import torch
 import numpy as np
 from scipy.stats import binom
 from scipy.special import erf
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, recall_score, precision_score
 
 from torch_geometric.nn import GIN
 from torch_geometric import compile
@@ -490,7 +490,11 @@ class DeepDetector(Detector, ABC):
                 if (epoch in EPOCHS):
                     self.array_loss.append(loss_value)
                     auc_roc = roc_auc_score(self.labels, self.decision_score_)
+                    recall_k = self.recall_at_k(self.labels, self.decision_score_, self.labels.count(1))
+                    precision_k = self.precision_at_k(self.labels, self.decision_score_, self.labels.count(1))
                     self.array_auc_roc.append(auc_roc)
+                    self.array_recall_k.append(recall_k)
+                    self.array_precision_k.append(precision_k)
                     # saving embedding if its needed
                     if (self.save_emb):
                         emd_file = self.get_emd_file(epoch)
@@ -744,3 +748,26 @@ class DeepDetector(Detector, ABC):
         score : torch.Tensor
             The outlier scores of the current batch.
         """
+
+    def recall_at_k(self, y_true, scores, k):
+        y_true = np.array(y_true)
+        scores = np.array(scores)
+
+        top_k_indices = np.argsort(scores)[-k:]
+
+        true_positives_in_top_k = np.sum(y_true[top_k_indices])
+
+        total_positives = np.sum(y_true)
+
+        if total_positives == 0:
+            return 0.0
+
+        recall_k = true_positives_in_top_k / total_positives
+        return recall_k
+
+    def precision_at_k(self, y_true, scores, k):
+        y_true = np.array(y_true)
+        scores = np.array(scores)
+        top_k_idx = np.argsort(scores)[-k:]
+        true_positives = np.sum(y_true[top_k_idx])
+        return true_positives / k

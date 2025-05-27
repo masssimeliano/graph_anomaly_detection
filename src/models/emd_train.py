@@ -33,13 +33,13 @@ def emd_train(nx_graph: nx.Graph,
         # epoch does not matter here
         # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
         model = AnomalyDAE(epoch=current_epoch,
-                                 lr=learning_rate,
-                                 hid_dim=hid_dim,
-                                 alpha=alpha,
-                                 gpu=0,
-                                 labels=labels,
-                                 title_prefix=title_prefix,
-                                 data_set=data_set_name)
+                           lr=learning_rate,
+                           hid_dim=hid_dim,
+                           alpha=alpha,
+                           gpu=0,
+                           labels=labels,
+                           title_prefix=title_prefix,
+                           data_set=data_set_name)
 
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:

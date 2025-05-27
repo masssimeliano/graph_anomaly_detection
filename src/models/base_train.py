@@ -25,16 +25,18 @@ def base_train(di_graph: torch_geometric.data.Data,
     # epoch does not matter here
     # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
     model = AnomalyDAE(epoch=250,
-                             lr=learning_rate,
-                             hid_dim=hid_dim,
-                             alpha=alpha,
-                             gpu=0,
-                             labels=labels,
-                             title_prefix=title_prefix,
-                             data_set=data_set_name)
+                       lr=learning_rate,
+                       hid_dim=hid_dim,
+                       alpha=alpha,
+                       gpu=0,
+                       labels=labels,
+                       title_prefix=title_prefix,
+                       data_set=data_set_name)
 
     model.fit(di_graph)
     array_loss = model.array_loss
+    array_precision_k = model.array_precision_k
+    array_recall_k = model.array_recall_k
     array_auc_roc = model.array_auc_roc
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
@@ -48,7 +50,11 @@ def base_train(di_graph: torch_geometric.data.Data,
 
             write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
             write(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
+            write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
+            write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
             print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
             print(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
+            print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
+            print(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
 
     print(f"Time: {(time.time() - measure_time):.4f} sec")
