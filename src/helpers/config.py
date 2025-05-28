@@ -24,12 +24,15 @@ MEDIUM_DATASETS = ["Flickr.mat",
 
 TO_EMD_DATASETS = SMALL_DATASETS
 
-DATASETS = ["Disney.mat"]
+DATASETS = ["Disney.mat",
+            "book.mat",
+            "cora.mat"]
 
 CURRENT_DATASETS = DATASETS
 CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(DATASETS)
 
-EPOCHS = [25, 50, 75, 100, 125, 150]
+EPOCH_TO_LEARN = 100
+EPOCHS = list(range(10, 101, 10))
 
 labels_dict = {}
 graph_dict = {}

@@ -11,7 +11,7 @@ def train(di_graph: torch_geometric.data.Data,
           data_set: str):
     base_train(di_graph,
                labels,
-               title_prefix="Attr + Alpha",
+               title_prefix="Attr + Alpha1",
                learning_rate=learning_rate,
                hid_dim=hid_dim,
                data_set=data_set,

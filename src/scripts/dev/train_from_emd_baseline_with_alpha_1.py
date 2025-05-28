@@ -6,10 +6,10 @@ import torch
 from src.helpers.config import CURRENT_DATASETS, LEARNING_RATE, HIDDEN_DIMS, SEED, CURRENT_DATASETS_SIZE, labels_dict, \
     graph_dict
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
-from src.models.anomalydae import embedding_and_feature_model
+from src.models.anomalydae import embedding_and_feature_model_1
 
 
-FEATURE_TYPE = "Attr + Emd"
+FEATURE_TYPE = "Attr + Emd1"
 
 def main():
     torch.manual_seed(SEED)
@@ -22,7 +22,7 @@ def main():
         print(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset], visualize=False)
-        embedding_and_feature_model.train(
+        embedding_and_feature_model_1.train(
             nx_graph,
             labels_dict[dataset],
             learning_rate=LEARNING_RATE,

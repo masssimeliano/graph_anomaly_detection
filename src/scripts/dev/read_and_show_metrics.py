@@ -13,7 +13,8 @@ FEATURE_TYPES = [
     "Attr + Str2",
     "Attr + Str3",
     "Attr + Error",
-    "Attr + Emd"
+    "Attr + Emd1",
+    "Attr + Emd2",
 ]
 FEATURE_COLORS = {
     "Attr": "blue",
@@ -21,14 +22,16 @@ FEATURE_COLORS = {
     "Attr + Str2": "orange",
     "Attr + Str3": "red",
     "Attr + Error": "yellow",
-    "Attr + Emd": "pink"
+    "Attr + Emd1": "black",
+    "Attr + Emd2": "gray",
 }
 FEATURE_LABELS = {
     "Attr": "Attribute (alpha = 0.5)",
     "Attr + Str": "Attribute + Structure",
     "Attr + Str2": "Attribute + Structure 2",
     "Attr + Str3": "Attribute + Structure 3",
-    "Attr + Emd": "Attribute + Embedding",
+    "Attr + Emd1": "Attribute + Embedding 1",
+    "Attr + Emd2": "Attribute + Embedding 2",
     "Attr + Error": "Attribute + Error",
 }
 DATASET_AUC_PAPER = {
@@ -172,7 +175,7 @@ def main_recall():
 
         plt.title(f'Recall@k vs Epochs ({dataset})')
         plt.xlabel('Epochs')
-        plt.ylabel('Loss')
+        plt.ylabel('Recall@k')
         plt.ylim(0.0, 1.0)
         plt.grid(True)
         plt.legend()
@@ -217,7 +220,7 @@ def main_precision():
 
         plt.title(f'Precision@k vs Epochs ({dataset})')
         plt.xlabel('Epochs')
-        plt.ylabel('Loss')
+        plt.ylabel('Precision@k')
         plt.ylim(0.0, 1.0)
         plt.grid(True)
         plt.legend()

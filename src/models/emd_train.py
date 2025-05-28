@@ -50,12 +50,24 @@ def emd_train(nx_graph: nx.Graph,
             def write(msg):
                 log.write(msg + "\n")
 
-            # adjusted regular method from AnomalyDAE
-            model.fit_emd(di_graph)
-            loss = model.loss_last / di_graph.num_nodes
-            auc = roc_auc_score(labels, model.decision_score_)
-            recall = recall_at_k(labels, model.decision_score_, labels.count(1))
-            precision = precision_at_k(labels, model.decision_score_, labels.count(1))
+            loss = 0
+            auc = 0
+            recall = 0
+            precision = 0
+            for i in range(3):
+                print(f"Fitting x{i + 1}...")
+                # adjusted regular method from AnomalyDAE
+                model.fit_emd(di_graph)
+
+                loss += model.loss_last / di_graph.num_nodes
+                auc += roc_auc_score(labels, model.decision_score_)
+                recall += recall_at_k(labels, model.decision_score_, labels.count(1))
+                precision += precision_at_k(labels, model.decision_score_, labels.count(1))
+
+            loss = loss / 3
+            auc = auc / 3
+            recall = recall / 3
+            precision = precision / 3
 
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
             print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
@@ -83,7 +95,7 @@ def extract_embedding_features(graph: nx.Graph,
 
     emd_model = load_emd_model(data_set=data_set.replace(".mat", ""),
                                labels=labels,
-                               feature="Attr + Alpha",
+                               feature="Attr",
                                lr=learning_rate,
                                hid_dim=hid_dim,
                                epoch=epoch)

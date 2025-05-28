@@ -1,11 +1,12 @@
 import time
 from typing import List
 
+import numpy as np
 import torch
 import torch_geometric
 
 from pygod.pygod.detector import AnomalyDAE
-from src.helpers.config import RESULTS_DIR, EPOCHS
+from src.helpers.config import RESULTS_DIR, EPOCHS, EPOCH_TO_LEARN
 
 
 def base_train(di_graph: torch_geometric.data.Data,
@@ -22,9 +23,7 @@ def base_train(di_graph: torch_geometric.data.Data,
 
     data_set_name = f"{data_set.replace('.mat', '')}"
 
-    # epoch does not matter here
-    # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
-    model = AnomalyDAE(epoch=100,
+    model = AnomalyDAE(epoch=EPOCH_TO_LEARN,
                        lr=learning_rate,
                        hid_dim=hid_dim,
                        alpha=alpha,
@@ -33,11 +32,30 @@ def base_train(di_graph: torch_geometric.data.Data,
                        title_prefix=title_prefix,
                        data_set=data_set_name)
 
-    model.fit(di_graph)
-    array_loss = model.array_loss
-    array_precision_k = model.array_precision_k
-    array_recall_k = model.array_recall_k
-    array_auc_roc = model.array_auc_roc
+    array_loss = []
+    array_precision_k = []
+    array_recall_k = []
+    array_auc_roc = []
+
+    for i in range(3):
+        print(f"Fitting x{i + 1}...")
+        model.fit(di_graph)
+
+        if i == 0:
+            array_loss = np.array(model.array_loss)
+            array_precision_k = np.array(model.array_precision_k)
+            array_recall_k = np.array(model.array_recall_k)
+            array_auc_roc = np.array(model.array_auc_roc)
+        else:
+            array_loss += np.array(model.array_loss)
+            array_precision_k += np.array(model.array_precision_k)
+            array_recall_k += np.array(model.array_recall_k)
+            array_auc_roc += np.array(model.array_auc_roc)
+
+    array_loss /= 3
+    array_precision_k /= 3
+    array_recall_k /= 3
+    array_auc_roc /= 3
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"

@@ -9,4 +9,9 @@ def train(graph: nx.Graph,
           learning_rate: float,
           hid_dim: int,
           data_set: str):
-    emd_train(graph, labels, "Attr + Emd", learning_rate, hid_dim, data_set)
+    emd_train(graph,
+              labels,
+              "Attr + Emd1",
+              learning_rate,
+              hid_dim,
+              data_set)

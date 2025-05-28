@@ -465,6 +465,11 @@ class DeepDetector(Detector, ABC):
         self.compile_model = compile_model
 
     def fit(self, data, label=None):
+        self.array_loss = []
+        self.array_auc_roc = []
+        self.array_recall_k = []
+        self.array_precision_k = []
+
         self.process_graph(data)
         self.num_nodes, self.in_dim = data.x.shape
         if self.batch_size == 0:
@@ -490,7 +495,7 @@ class DeepDetector(Detector, ABC):
 
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
-        for epoch in range(self.epoch):
+        for epoch in range(self.epoch + 1):
             start_time = time.time()
             epoch_loss = 0
             if self.gan:
@@ -585,7 +590,7 @@ class DeepDetector(Detector, ABC):
 
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
-        for epoch in range(self.epoch):
+        for epoch in range(self.epoch + 1):
             start_time = time.time()
             epoch_loss = 0
             if self.gan:
