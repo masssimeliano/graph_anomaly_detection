@@ -1,3 +1,7 @@
 Fragen (30.05):
 - Was nimmt man als k in Precision @k?
 - Warum ist Recall/Precision = 0 bei mir?
+
+ToDo (30.05):
+- Attr + Alpha Text fixen
+- AnomalyDAE in Attr + Alpha fixen

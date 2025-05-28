@@ -3,6 +3,7 @@ import read_and_show_metrics
 from src.helpers.config import CURRENT_DATASETS, CURRENT_DATASETS_SIZE, labels_dict, graph_dict
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 import train_baseline
+import train_from_emd_baseline_with_alpha
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
         labels_dict[dataset] = labels
         graph_dict[dataset] = graph
 
-    train_baseline.main()
+    train_from_emd_baseline_with_alpha.main()
 
     read_and_show_metrics.main_recall()
     read_and_show_metrics.main_precision()

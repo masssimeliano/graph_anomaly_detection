@@ -154,6 +154,7 @@ class AnomalyDAE(DeepDetector):
         self.alpha = alpha
         self.theta = theta
         self.eta = eta
+        self.title_prefix = title_prefix
 
         # new variables for quicker learning
         self.array_loss = []
@@ -162,7 +163,6 @@ class AnomalyDAE(DeepDetector):
         self.array_precision_k = []
         self.amount_of_epochs = max(EPOCHS)
         self.labels = labels
-        self.title_prefix = title_prefix
         self.data_set = data_set
         self.loss_last = 0
         self.save_emb = True

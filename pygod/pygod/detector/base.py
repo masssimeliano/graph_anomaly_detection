@@ -300,6 +300,42 @@ class Detector(ABC):
         return '%s(%s)' % (class_name, pprint(params, offset=len(class_name)))
 
 
+def recall_at_k(y_true,
+                scores,
+                k):
+    y_true = np.array(y_true)
+    scores = np.array(scores)
+
+    top_k_indices = np.argsort(scores)[-k:]
+
+    true_positives_in_top_k = np.sum(y_true[top_k_indices])
+
+    total_positives = np.sum(y_true)
+
+    if total_positives == 0:
+        return 0.0
+
+    recall_k = true_positives_in_top_k / total_positives
+    return recall_k
+
+
+def precision_at_k(y_true,
+                   scores,
+                   k):
+    y_true = np.array(y_true)
+    scores = np.array(scores)
+    top_k_idx = np.argsort(scores)[-k:]
+    true_positives = np.sum(y_true[top_k_idx])
+    return true_positives / k
+
+def get_emd_file(data_set: str,
+                 title_prefix: str,
+                 lr: float,
+                 hid_dim: int,
+                 current_epoch: int):
+    return RESULTS_DIR / f"emd_{data_set}_{title_prefix}_{str(lr).replace('.', '')}_{hid_dim}_{current_epoch}.pt"
+
+
 class DeepDetector(Detector, ABC):
     """
     Abstract class for deep outlier detection algorithms.
@@ -490,14 +526,26 @@ class DeepDetector(Detector, ABC):
                 if (epoch in EPOCHS):
                     self.array_loss.append(loss_value)
                     auc_roc = roc_auc_score(self.labels, self.decision_score_)
-                    recall_k = self.recall_at_k(self.labels, self.decision_score_, self.labels.count(1))
-                    precision_k = self.precision_at_k(self.labels, self.decision_score_, self.labels.count(1))
+
+                    self_labels = self.labels
+                    self_score = self.decision_score_
+                    self_k = self.labels.count(1)
+                    recall_k = recall_at_k(self_labels, self_score, self_k)
+                    precision_k = precision_at_k(self_labels, self_score, self_k)
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
                     # saving embedding if its needed
                     if (self.save_emb):
-                        emd_file = self.get_emd_file(epoch)
+                        data_set = self.data_set
+                        title_prefix = self.title_prefix
+                        lr = self.lr
+                        hid_dim = self.hid_dim
+                        emd_file = get_emd_file(data_set,
+                                                title_prefix,
+                                                lr,
+                                                hid_dim,
+                                                epoch)
                         torch.save(self.emb, emd_file)
 
             logger(epoch=epoch,
@@ -572,7 +620,15 @@ class DeepDetector(Detector, ABC):
                 # saving embedding if its needed
                 if (epoch in EPOCHS):
                     if (self.save_emb):
-                        emd_file = self.get_emd_file(epoch)
+                        data_set = self.data_set
+                        title_prefix = self.title_prefix
+                        lr = self.lr
+                        hid_dim = self.hid_dim
+                        emd_file = get_emd_file(data_set,
+                                                title_prefix,
+                                                lr,
+                                                hid_dim,
+                                                epoch)
                         torch.save(self.emb, emd_file)
 
             logger(epoch=epoch,
@@ -585,10 +641,6 @@ class DeepDetector(Detector, ABC):
 
         self._process_decision_score()
         return self
-
-    def get_emd_file(self,
-        current_epoch: int):
-        return RESULTS_DIR / f"emd_{self.data_set}_{self.title_prefix}_{str(self.lr).replace('.', '')}_{self.hid_dim}_{current_epoch}.pt"
 
     def decision_function(self, data, label=None):
 
@@ -748,26 +800,3 @@ class DeepDetector(Detector, ABC):
         score : torch.Tensor
             The outlier scores of the current batch.
         """
-
-    def recall_at_k(self, y_true, scores, k):
-        y_true = np.array(y_true)
-        scores = np.array(scores)
-
-        top_k_indices = np.argsort(scores)[-k:]
-
-        true_positives_in_top_k = np.sum(y_true[top_k_indices])
-
-        total_positives = np.sum(y_true)
-
-        if total_positives == 0:
-            return 0.0
-
-        recall_k = true_positives_in_top_k / total_positives
-        return recall_k
-
-    def precision_at_k(self, y_true, scores, k):
-        y_true = np.array(y_true)
-        scores = np.array(scores)
-        top_k_idx = np.argsort(scores)[-k:]
-        true_positives = np.sum(y_true[top_k_idx])
-        return true_positives / k

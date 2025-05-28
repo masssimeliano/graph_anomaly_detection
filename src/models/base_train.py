@@ -24,7 +24,7 @@ def base_train(di_graph: torch_geometric.data.Data,
 
     # epoch does not matter here
     # the maximum epochs amount is set to 250 standard and will be retrained each 25 epochs
-    model = AnomalyDAE(epoch=250,
+    model = AnomalyDAE(epoch=100,
                        lr=learning_rate,
                        hid_dim=hid_dim,
                        alpha=alpha,
