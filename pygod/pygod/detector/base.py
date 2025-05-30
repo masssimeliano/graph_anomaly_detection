@@ -504,7 +504,7 @@ class DeepDetector(Detector, ABC):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                loss, score = self.forward_model(sampled_data)
+                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(sampled_data)
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
@@ -599,7 +599,7 @@ class DeepDetector(Detector, ABC):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                loss, score = self.forward_model(sampled_data)
+                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(sampled_data)
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:

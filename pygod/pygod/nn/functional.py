@@ -79,6 +79,8 @@ def double_recon_loss(x,
                                 diff_attr * (1 - pos_weight_a))
 
     attr_error = torch.sqrt(torch.sum(diff_attr, 1))
+    attr_error_mean = diff_attr.mean(dim=1)
+    attr_error_std = diff_attr.std(dim=1)
 
     # structure reconstruction loss
     if bce_s:
@@ -92,10 +94,12 @@ def double_recon_loss(x,
                                 diff_stru * (1 - pos_weight_s))
 
     stru_error = torch.sqrt(torch.sum(diff_stru, 1))
+    stru_error_mean = diff_stru.mean(dim=1)
+    stru_error_std = diff_stru.std(dim=1)
 
     score = weight * attr_error + (1 - weight) * stru_error
 
-    return score
+    return score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std
 
 def KL_neighbor_loss(predictions, targets, mask_len, device):
     """

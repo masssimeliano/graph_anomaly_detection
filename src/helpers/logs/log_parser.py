@@ -35,8 +35,10 @@ class LogParser:
                     features = "Attr + Emd2"
                 elif "Attr + Str" in name:
                     features = "Attr + Str"
-                elif "Attr + Error" in name:
-                    features = "Attr + Error"
+                elif "Attr + Error1" in name:
+                    features = "Attr + Error1"
+                elif "Attr + Error2" in name:
+                    features = "Attr + Error2"
                 else:
                     features = "Attr"
 

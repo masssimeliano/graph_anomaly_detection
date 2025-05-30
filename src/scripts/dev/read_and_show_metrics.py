@@ -12,7 +12,8 @@ FEATURE_TYPES = [
     "Attr + Str",
     "Attr + Str2",
     "Attr + Str3",
-    "Attr + Error",
+    "Attr + Error1",
+    "Attr + Error2",
     "Attr + Emd1",
     "Attr + Emd2",
 ]
@@ -21,7 +22,8 @@ FEATURE_COLORS = {
     "Attr + Str": "green",
     "Attr + Str2": "orange",
     "Attr + Str3": "red",
-    "Attr + Error": "yellow",
+    "Attr + Error1": "yellow",
+    "Attr + Error2": "pink",
     "Attr + Emd1": "black",
     "Attr + Emd2": "gray",
 }
@@ -32,7 +34,8 @@ FEATURE_LABELS = {
     "Attr + Str3": "Attribute + Structure 3",
     "Attr + Emd1": "Attribute + Embedding 1",
     "Attr + Emd2": "Attribute + Embedding 2",
-    "Attr + Error": "Attribute + Error",
+    "Attr + Error1": "Attribute + Error 1",
+    "Attr + Error2": "Attribute + Error 2",
 }
 DATASET_AUC_PAPER = {
     "cora": 0.762,
@@ -323,5 +326,7 @@ def generate_auc_roc_table():
     plt.show()
 
 if __name__ == "__main__":
+    main_loss()
+    main_auc_roc()
     main_recall()
     main_precision()

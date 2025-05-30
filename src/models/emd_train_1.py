@@ -95,7 +95,7 @@ def extract_embedding_features(graph: nx.Graph,
 
     emd_model = load_emd_model(data_set=data_set.replace(".mat", ""),
                                labels=labels,
-                               feature="Attr",
+                               feature="Attr + Alpha1",
                                lr=learning_rate,
                                hid_dim=hid_dim,
                                epoch=epoch)

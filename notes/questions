@@ -7,3 +7,6 @@ Fragen (30.05):
 - Zu Runtime noch Zeit von Node-Enrichment-Methods?
 - Kontextuelle und strutuelle Anomalien unterscheiden?
 - Mittlerer Wert von Hyperparamters z.B. in [3, 5, 8]?
+
+- Was nimmt man als k in Precision @k?
+- Warum ist Recall/Precision = 0 bei mir?

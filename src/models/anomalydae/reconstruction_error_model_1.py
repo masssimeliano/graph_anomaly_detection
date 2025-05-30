@@ -25,7 +25,7 @@ def train(graph: nx.Graph,
 
     base_train(di_graph,
                labels,
-               title_prefix="Attr + Error",
+               title_prefix="Attr + Error1",
                learning_rate=learning_rate,
                hid_dim=hid_dim,
                data_set=data_set)

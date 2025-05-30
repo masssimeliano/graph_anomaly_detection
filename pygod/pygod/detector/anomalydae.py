@@ -165,6 +165,11 @@ class AnomalyDAE(DeepDetector):
         self.labels = labels
         self.data_set = data_set
         self.loss_last = 0
+        self.stru_error_mean = 0
+        self.stru_error_std = 0
+        self.attr_error_mean = 0
+        self.attr_error_std = 0
+
         self.save_emb = True
 
     def process_graph(self, data):
@@ -198,7 +203,7 @@ class AnomalyDAE(DeepDetector):
         pos_weight_a = self.eta / (1 + self.eta)
         pos_weight_s = self.theta / (1 + self.theta)
 
-        score = self.model.loss_func(x[:batch_size],
+        score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.model.loss_func(x[:batch_size],
                                      x_[:batch_size],
                                      s[:batch_size, node_idx],
                                      s_[:batch_size],
@@ -208,4 +213,4 @@ class AnomalyDAE(DeepDetector):
 
         loss = torch.mean(score)
 
-        return loss, score.detach().cpu()
+        return loss, score.detach().cpu(), stru_error_mean, stru_error_std, attr_error_mean, attr_error_std

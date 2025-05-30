@@ -1,7 +1,7 @@
 import networkx as nx
 from typing import List
 
-from src.models.emd_train import emd_train
+from src.models.emd_train_2 import emd_train
 
 
 def train(graph: nx.Graph,

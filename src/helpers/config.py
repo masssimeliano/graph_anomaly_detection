@@ -28,8 +28,8 @@ DATASETS = ["Disney.mat",
             "book.mat",
             "cora.mat"]
 
-CURRENT_DATASETS = DATASETS
-CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(DATASETS)
+CURRENT_DATASETS = SMALL_DATASETS
+CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(CURRENT_DATASETS)
 
 EPOCH_TO_LEARN = 100
 EPOCHS = list(range(10, 101, 10))
