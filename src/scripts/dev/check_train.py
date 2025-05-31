@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import read_and_show_metrics
 from src.helpers.config import CURRENT_DATASETS, CURRENT_DATASETS_SIZE, labels_dict, graph_dict
@@ -36,10 +37,12 @@ def main():
     read_and_show_metrics.main_precision()
     read_and_show_metrics.main_time()
 
+    time.sleep(2)
     for file_name in os.listdir('.'):
         if file_name.endswith('.png'):
             with open(file_name, 'rb') as f:
                 bot.send_document(CHAT_ID, f)
+                time.sleep(1)
 
 
 
