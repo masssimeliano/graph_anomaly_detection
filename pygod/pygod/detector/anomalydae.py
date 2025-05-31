@@ -165,10 +165,12 @@ class AnomalyDAE(DeepDetector):
         self.labels = labels
         self.data_set = data_set
         self.loss_last = 0
-        self.stru_error_mean = 0
-        self.stru_error_std = 0
-        self.attr_error_mean = 0
-        self.attr_error_std = 0
+        self.last_time = 0
+        self.array_time = []
+        self.stru_error_mean = []
+        self.stru_error_std = []
+        self.attr_error_mean = []
+        self.attr_error_std = []
 
         self.save_emb = True
 

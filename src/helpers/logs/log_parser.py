@@ -56,10 +56,13 @@ class LogParser:
                     loss_line = next((line for line in lines if "Loss" in line), None)
                     recall_line = next((line for line in lines if "Recall" in line), None)
                     precision_line = next((line for line in lines if "Precision" in line), None)
+                    time_line = next((line for line in lines if "Time" in line), None)
+
                     auc_roc = float(auc_line.split("AUC-ROC")[1].split(":")[1].strip())
                     loss_value = float(loss_line.split("Loss")[1].split(":")[1].strip())
                     recall = float(recall_line.split("Recall")[1].split(":")[1].strip())
                     precision = float(precision_line.split("Precision")[1].split(":")[1].strip())
+                    time_value = float(time_line.split(":")[1].strip())
 
                 self.results.append({"filename": file.name,
                                      "dataset": dataset,
@@ -70,7 +73,8 @@ class LogParser:
                                      "auc_roc": auc_roc,
                                      "loss": loss_value,
                                      "recall": recall,
-                                     "precision": precision})
+                                     "precision": precision,
+                                     "time": time_value})
 
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")

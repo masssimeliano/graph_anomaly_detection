@@ -8,7 +8,7 @@ from sklearn.metrics import roc_auc_score
 
 from pygod.pygod.detector import AnomalyDAE
 from pygod.pygod.detector.base import precision_at_k, recall_at_k
-from src.helpers.config import RESULTS_DIR, EPOCHS
+from src.helpers.config import RESULTS_DIR, EPOCHS, ETA, THETA
 from src.helpers.loaders.emd_loader import load_emd_model
 
 
@@ -40,6 +40,8 @@ def emd_train(nx_graph: nx.Graph,
                            labels=labels,
                            title_prefix=title_prefix,
                            data_set=data_set_name,
+                           eta=ETA,
+                           theta=THETA,
                            lr=learning_rate,
                            hid_dim=hid_dim,
                            alpha=alpha,
@@ -54,8 +56,10 @@ def emd_train(nx_graph: nx.Graph,
             auc = 0
             recall = 0
             precision = 0
+            timer = 0
             for i in range(3):
                 print(f"Fitting x{i + 1}...")
+                start_time = time.time()
                 # adjusted regular method from AnomalyDAE
                 model.fit_emd(di_graph)
 
@@ -63,11 +67,13 @@ def emd_train(nx_graph: nx.Graph,
                 auc += roc_auc_score(labels, model.decision_score_)
                 recall += recall_at_k(labels, model.decision_score_, labels.count(1))
                 precision += precision_at_k(labels, model.decision_score_, labels.count(1))
+                timer += model.last_time
 
             loss = loss / 3
             auc = auc / 3
             recall = recall / 3
             precision = precision / 3
+            timer /= 3
 
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
             print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
@@ -76,6 +82,7 @@ def emd_train(nx_graph: nx.Graph,
             write(f"Loss ({title_prefix}): {loss:.4f}")
             write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
             write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
+            write(f"Time: {timer:.4f}")
             print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
             print(f"Loss ({title_prefix}): {loss:.4f}")
             print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")

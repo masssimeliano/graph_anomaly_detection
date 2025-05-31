@@ -4,7 +4,7 @@ import torch
 
 from pygod.pygod.detector import AnomalyDAE
 from pygod.pygod.detector.base import get_emd_file
-from src.helpers.config import RESULTS_DIR
+from src.helpers.config import RESULTS_DIR, THETA, ETA
 
 
 def load_emd_model(data_set: str,
@@ -18,6 +18,8 @@ def load_emd_model(data_set: str,
                        data_set=data_set,
                        lr=lr,
                        hid_dim=hid_dim,
+                       eta=ETA,
+                       theta=THETA,
                        epoch=epoch)
     emd_file = get_emd_file(data_set,
                             feature,

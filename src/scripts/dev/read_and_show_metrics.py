@@ -92,7 +92,7 @@ def main_auc_roc():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(f"{dataset}_loss_auc.png", dpi=300)
         plt.show()
 
 def main_loss():
@@ -138,7 +138,7 @@ def main_loss():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(f"{dataset}_loss_plot.png", dpi=300)
         plt.show()
 
 def main_recall():
@@ -183,7 +183,7 @@ def main_recall():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(f"{dataset}_recall_plot.png", dpi=300)
         plt.show()
 
 def main_precision():
@@ -228,7 +228,55 @@ def main_precision():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(f"{dataset}_precision_plot.png", dpi=300)
+        plt.show()
+
+def main_time():
+    parser = LogParser()
+    parser.parse_logs()
+
+    save_dir = RESULTS_DIR / "graph" / "dev"
+
+    datasets = set(r["dataset"] for r in parser.results)
+
+    max_time = 0
+    for dataset in datasets:
+        plt.figure(figsize=(10, 6))
+
+        for feature in FEATURE_TYPES:
+            filtered = [
+                r for r in parser.results
+                if r["dataset"] == dataset and r["features"] == feature
+            ]
+
+            if not filtered:
+                continue
+
+            epoch_time = defaultdict(float)
+            for r in filtered:
+                epoch = r["epoch"]
+                time = r["time"]
+                if time > epoch_time[epoch]:
+                    epoch_time[epoch] = time
+
+            if not epoch_time:
+                continue
+
+            times = [epoch_time[e] for e in EPOCHS]
+            plt.plot(EPOCHS, times, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            if max(times) > max_time:
+                max_time = max(times)
+
+        save_path = os.path.join(save_dir, f"{dataset}_time_plot.png")
+
+        plt.title(f'Time vs Epochs ({dataset})')
+        plt.xlabel('Epochs')
+        plt.ylabel('Time in s')
+        plt.ylim(0.0, max_time)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"{dataset}_time_plot.png", dpi=300)
         plt.show()
 
 def generate_min_loss_table():

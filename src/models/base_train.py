@@ -6,7 +6,7 @@ import torch
 import torch_geometric
 
 from pygod.pygod.detector import AnomalyDAE
-from src.helpers.config import RESULTS_DIR, EPOCHS, EPOCH_TO_LEARN
+from src.helpers.config import RESULTS_DIR, EPOCHS, EPOCH_TO_LEARN, THETA, ETA
 
 
 def base_train(di_graph: torch_geometric.data.Data,
@@ -27,6 +27,8 @@ def base_train(di_graph: torch_geometric.data.Data,
                        lr=learning_rate,
                        hid_dim=hid_dim,
                        alpha=alpha,
+                       eta=ETA,
+                       theta=THETA,
                        gpu=0,
                        labels=labels,
                        title_prefix=title_prefix,
@@ -36,9 +38,12 @@ def base_train(di_graph: torch_geometric.data.Data,
     array_precision_k = []
     array_recall_k = []
     array_auc_roc = []
+    array_time = []
 
     for i in range(3):
         print(f"Fitting x{i + 1}...")
+        start_time = time.time()
+        # adjusted regular method from AnomalyDAE
         model.fit(di_graph)
 
         if i == 0:
@@ -46,16 +51,19 @@ def base_train(di_graph: torch_geometric.data.Data,
             array_precision_k = np.array(model.array_precision_k)
             array_recall_k = np.array(model.array_recall_k)
             array_auc_roc = np.array(model.array_auc_roc)
+            array_time = np.array(model.array_time)
         else:
             array_loss += np.array(model.array_loss)
             array_precision_k += np.array(model.array_precision_k)
             array_recall_k += np.array(model.array_recall_k)
             array_auc_roc += np.array(model.array_auc_roc)
+            array_time += np.array(model.array_time)
 
     array_loss /= 3
     array_precision_k /= 3
     array_recall_k /= 3
     array_auc_roc /= 3
+    array_time /= 3
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
         log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
@@ -70,6 +78,7 @@ def base_train(di_graph: torch_geometric.data.Data,
             write(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
             write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
             write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
+            write(f"Time: {array_time[i]:.4f}")
             print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
             print(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
             print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")

@@ -465,10 +465,12 @@ class DeepDetector(Detector, ABC):
         self.compile_model = compile_model
 
     def fit(self, data, label=None):
+        start_time = time.time()
         self.array_loss = []
         self.array_auc_roc = []
         self.array_recall_k = []
         self.array_precision_k = []
+        self.array_time = []
 
         self.process_graph(data)
         self.num_nodes, self.in_dim = data.x.shape
@@ -496,7 +498,6 @@ class DeepDetector(Detector, ABC):
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
         for epoch in range(self.epoch + 1):
-            start_time = time.time()
             epoch_loss = 0
             if self.gan:
                 self.epoch_loss_in = 0
@@ -505,6 +506,10 @@ class DeepDetector(Detector, ABC):
                 node_idx = sampled_data.n_id
 
                 loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(sampled_data)
+                self.stru_error_mean = stru_error_std
+                self.stru_error_std = stru_error_std
+                self.attr_error_mean = attr_error_mean
+                self.attr_error_std = attr_error_std
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
@@ -526,9 +531,11 @@ class DeepDetector(Detector, ABC):
                 if self.gan:
                     loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
                 self.loss_last = loss_value
+                self.last_time = time.time() - start_time - start_time
 
                 # calculating AUC-ROC through all epochs
                 if (epoch in EPOCHS):
+                    self.array_time.append(time.time() - start_time)
                     self.array_loss.append(loss_value)
                     auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
@@ -565,6 +572,7 @@ class DeepDetector(Detector, ABC):
         return self
 
     def fit_emd(self, data, label=None):
+        start_time = time.time()
         self.process_graph(data)
         self.num_nodes, self.in_dim = data.x.shape
         if self.batch_size == 0:
@@ -591,7 +599,6 @@ class DeepDetector(Detector, ABC):
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
         for epoch in range(self.epoch + 1):
-            start_time = time.time()
             epoch_loss = 0
             if self.gan:
                 self.epoch_loss_in = 0
@@ -599,7 +606,7 @@ class DeepDetector(Detector, ABC):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(sampled_data)
+                loss, score, _, _, _, _ = self.forward_model(sampled_data)
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
@@ -623,7 +630,8 @@ class DeepDetector(Detector, ABC):
                 self.loss_last = loss_value
 
                 # saving embedding if its needed
-                if (epoch in EPOCHS):
+                if (epoch == self.epoch):
+                    self.last_time = time.time() - start_time
                     if (self.save_emb):
                         data_set = self.data_set
                         title_prefix = self.title_prefix
