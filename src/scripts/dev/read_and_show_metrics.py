@@ -374,7 +374,8 @@ def generate_auc_roc_table():
     plt.show()
 
 if __name__ == "__main__":
-    main_loss()
-    main_auc_roc()
-    main_recall()
-    main_precision()
+    # main_loss()
+    # main_auc_roc()
+    # main_recall()
+    # main_precision()
+    main_time()

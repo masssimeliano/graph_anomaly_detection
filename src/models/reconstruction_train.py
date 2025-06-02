@@ -10,6 +10,7 @@ from pygod.pygod.detector import AnomalyDAE
 from pygod.pygod.detector.base import precision_at_k, recall_at_k
 from src.helpers.config import RESULTS_DIR, EPOCHS, ETA, THETA
 from src.helpers.loaders.emd_loader import load_emd_model
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_minmax
 
 
 def reconstruction_train(nx_graph: nx.Graph,
@@ -99,6 +100,7 @@ def get_reconstruction_errors(graph: nx.Graph,
 
     print("Calculating errors for graph nodes...")
 
+    normalize_node_features_minmax(graph)
     di_graph = from_networkx(graph)
 
     model = AnomalyDAE(epoch=epoch,

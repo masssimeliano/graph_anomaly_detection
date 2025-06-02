@@ -20,15 +20,6 @@ def main():
         labels_dict[dataset] = labels
         graph_dict[dataset] = graph
 
-    train_baseline.main()
-    train_structure_and_feature.main()
-    train_structure_and_feature_2.main()
-    train_structure_and_feature_3.main()
-    train_reconstruction_1.main()
-    train_reconstruction_2.main()
-    train_and_save_emd_from_baseline_alpha_1.main()
-    train_and_save_emd_from_baseline_alpha_2.main()
-    train_from_emd_baseline_with_alpha_1.main()
     train_from_emd_baseline_with_alpha_2.main()
 
     read_and_show_metrics.main_loss()

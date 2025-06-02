@@ -531,7 +531,7 @@ class DeepDetector(Detector, ABC):
                 if self.gan:
                     loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
                 self.loss_last = loss_value
-                self.last_time = time.time() - start_time - start_time
+                self.last_time = time.time() - start_time
 
                 # calculating AUC-ROC through all epochs
                 if (epoch in EPOCHS):
