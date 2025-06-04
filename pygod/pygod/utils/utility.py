@@ -4,14 +4,14 @@
 # Author: Yue Zhao <zhaoy@cmu.edu>
 # License: BSD 2 clause
 
-import os
-import torch
-import shutil
 import numbers
-import requests
-import warnings
-import numpy as np
+import os
+import shutil
 from importlib import import_module
+
+import numpy as np
+import requests
+import torch
 
 from ..metric import *
 
@@ -49,8 +49,8 @@ def validate_device(gpu_id):
                         include_right=False)
         device = 'cuda:{}'.format(gpu_id)
     else:
-        if gpu_id != 'cpu':
-            warnings.warn('The cuda is not available. Set to cpu.')
+        # if gpu_id != 'cpu':
+        # warnings.warn('The cuda is not available. Set to cpu.')
         device = 'cpu'
 
     return device
@@ -166,8 +166,8 @@ def load_data(name, cache_dir=None):
 
     if cache_dir is None:
         cache_dir = os.path.join(os.path.expanduser('~'), '.pygod/data')
-    file_path = os.path.join(cache_dir, name+'.pt')
-    zip_path = os.path.join(cache_dir, name+'.pt.zip')
+    file_path = os.path.join(cache_dir, name + '.pt')
+    zip_path = os.path.join(cache_dir, name + '.pt.zip')
 
     if os.path.exists(file_path):
         data = torch.load(file_path)

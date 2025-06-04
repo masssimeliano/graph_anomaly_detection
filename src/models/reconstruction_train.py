@@ -23,7 +23,10 @@ def reconstruction_train(nx_graph: nx.Graph,
                          learning_rate: float,
                          hid_dim: int,
                          dataset: str,
-                         alpha: float = 0.5):
+                         alpha: float = 0.5,
+                         eta: int = ETA,
+                         theta: int = THETA,
+                         gpu: int = 0 if torch.cuda.is_available() else 1):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device : {device}")
 
@@ -45,9 +48,9 @@ def reconstruction_train(nx_graph: nx.Graph,
                            lr=LEARNING_RATE,
                            hid_dim=HIDDEN_DIMS,
                            alpha=alpha,
-                           eta=ETA,
-                           theta=THETA,
-                           gpu=0)
+                           eta=eta,
+                           theta=theta,
+                           gpu=gpu)
 
         log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         with open(log_file, "w") as log:
@@ -96,7 +99,10 @@ def get_reconstruction_errors(graph: nx.Graph,
                               learning_rate: float,
                               hid_dim: int,
                               epoch: int,
-                              dataset: str):
+                              dataset: str,
+                              eta: int = ETA,
+                              theta: int = THETA,
+                              gpu: int = 0 if torch.cuda.is_available() else 1):
     logging.info("Calculating errors for graph nodes...")
 
     di_graph = from_networkx(graph)
@@ -105,7 +111,9 @@ def get_reconstruction_errors(graph: nx.Graph,
                        lr=learning_rate,
                        hid_dim=hid_dim,
                        alpha=0.5,
-                       gpu=0,
+                       eta=eta,
+                       theta=theta,
+                       gpu=gpu,
                        labels=labels,
                        title_prefix=FEATURE_LABEL_ERROR2,
                        data_set=dataset)

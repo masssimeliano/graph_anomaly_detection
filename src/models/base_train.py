@@ -16,10 +16,13 @@ logging.basicConfig(level=logging.INFO)
 def base_train(di_graph: torch_geometric.data.Data,
                labels: List[int],
                title_prefix: str,
-               learning_rate: float,
-               hid_dim: int,
                dataset: str,
-               alpha: float = 0.5):
+               learning_rate: float = LEARNING_RATE,
+               hid_dim: int = HIDDEN_DIMS,
+               alpha: float = 0.5,
+               eta: int = ETA,
+               theta: int = THETA,
+               gpu: int = 0 if torch.cuda.is_available() else 1):
     measure_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -31,9 +34,9 @@ def base_train(di_graph: torch_geometric.data.Data,
                        lr=learning_rate,
                        hid_dim=hid_dim,
                        alpha=alpha,
-                       eta=ETA,
-                       theta=THETA,
-                       gpu=0,
+                       eta=eta,
+                       theta=theta,
+                       gpu=gpu,
                        labels=labels,
                        title_prefix=title_prefix,
                        data_set=data_set_name)

@@ -329,12 +329,12 @@ def precision_at_k(y_true,
     return true_positives / k
 
 
-def get_emd_file(data_set: str,
+def get_emd_file(dataset: str,
                  title_prefix: str,
-                 lr: float,
+                 learning_rate: float,
                  hid_dim: int,
-                 current_epoch: int):
-    return RESULTS_DIR / f"emd_{data_set}_{title_prefix}_{str(lr).replace('.', '')}_{hid_dim}_{current_epoch}.pt"
+                 epoch: int):
+    return RESULTS_DIR / f"emd_{dataset}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.pt"
 
 
 class DeepDetector(Detector, ABC):
