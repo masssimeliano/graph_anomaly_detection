@@ -33,218 +33,30 @@ FEATURE_COLORS_DICT = {
 }
 FEATURE_LABELS_DICT = {
     FEATURE_LABEL_STANDARD: "Attribute (alpha = 0.5)",
-    FEATURE_LABEL_STR: "Attribute + Structure",
-    FEATURE_LABEL_STR2: "Attribute + Structure 2",
-    FEATURE_LABEL_STR3: "Attribute + Structure 3",
-    FEATURE_LABEL_EMD1: "Attribute + Embedding 1",
-    FEATURE_LABEL_EMD2: "Attribute + Embedding 2",
-    FEATURE_LABEL_ERROR1: "Attribute + Error 1",
-    FEATURE_LABEL_ERROR2: "Attribute + Error 2",
+    FEATURE_LABEL_STR: "Attribute + Structure (pyfglt)",
+    FEATURE_LABEL_STR2: "Attribute + Structure 2 (NetworkX Features v1)",
+    FEATURE_LABEL_STR3: "Attribute + Structure 3 (NetworkX Features v2)",
+    FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0))",
+    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1)",
+    FEATURE_LABEL_ERROR1: "Attribute + Error 1 (Reconstruction error from simple encoder)",
+    FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from AnomalyDAE encoder)",
 }
 
 
-def main_auc_roc():
+def plot_metric(metric_key: str,
+                ylabel: str,
+                baseline_dict=None):
     parser = LogParser()
     parser.parse_logs()
 
     save_dir = RESULTS_DIR / "graph" / "dev"
-
-    datasets = set(r["dataset"] for r in parser.results)
-
-    for dataset in datasets:
-        plt.figure(figsize=(10, 6))
-
-        for feature in FEATURE_LABELS:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_auc = defaultdict(float)
-            for r in filtered:
-                epoch = r["epoch"]
-                auc = r["auc_roc"]
-                if auc > epoch_auc[epoch]:
-                    epoch_auc[epoch] = auc
-
-            if not epoch_auc:
-                continue
-
-            aucs = [epoch_auc[e] for e in EPOCHS]
-            plt.plot(EPOCHS, aucs, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
-
-        save_path = os.path.join(save_dir, f"{dataset}_auc_plot.png")
-
-        plt.title(f'AUC-ROC vs Epochs ({dataset})')
-        plt.xlabel('Epochs')
-        plt.ylabel('AUC-ROC')
-        if dataset in AUC_ROC_PAPER:
-            plt.axhline(y=AUC_ROC_PAPER[dataset], color='purple', linestyle='--',
-                        label=f'Baseline ({AUC_ROC_PAPER[dataset]})')
-        else:
-            plt.axhline(y=0.5, color='purple', linestyle='--', label='Baseline (0.5)')
-        plt.ylim(0.0, 1.0)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(f"{dataset}_loss_auc.png", dpi=300)
-        plt.show()
-
-
-def main_loss():
-    parser = LogParser()
-    parser.parse_logs()
-
-    save_dir = RESULTS_DIR / "graph" / "dev"
-
-    datasets = set(r["dataset"] for r in parser.results)
-
-    for dataset in datasets:
-        plt.figure(figsize=(10, 6))
-
-        for feature in FEATURE_LABELS:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_loss = defaultdict(float)
-            for r in filtered:
-                epoch = r["epoch"]
-                loss = r["loss"]
-                if loss > epoch_loss[epoch]:
-                    epoch_loss[epoch] = loss
-
-            if not epoch_loss:
-                continue
-
-            losses = [epoch_loss[e] for e in EPOCHS]
-            losses = [loss / (1.5 * max(losses)) for loss in losses]
-            plt.plot(EPOCHS, losses, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
-
-        save_path = os.path.join(save_dir, f"{dataset}_loss_plot.png")
-
-        plt.title(f'Loss vs Epochs ({dataset})')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.ylim(0.0, 1.0)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(f"{dataset}_loss_plot.png", dpi=300)
-        plt.show()
-
-
-def main_recall():
-    parser = LogParser()
-    parser.parse_logs()
-
-    save_dir = RESULTS_DIR / "graph" / "dev"
-
-    datasets = set(r["dataset"] for r in parser.results)
-
-    for dataset in datasets:
-        plt.figure(figsize=(10, 6))
-
-        for feature in FEATURE_TYPES:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_recall = defaultdict(float)
-            for r in filtered:
-                epoch = r["epoch"]
-                recall = r["recall"]
-                if recall > epoch_recall[epoch]:
-                    epoch_recall[epoch] = recall
-
-            if not epoch_recall:
-                continue
-
-            recalls = [epoch_recall[e] for e in EPOCHS]
-            plt.plot(EPOCHS, recalls, marker='o', label=FEATURE_LABELS_DICT[feature],
-                     color=FEATURE_COLORS_DICT[feature])
-
-        save_path = os.path.join(save_dir, f"{dataset}_recall_plot.png")
-
-        plt.title(f'Recall@k vs Epochs ({dataset})')
-        plt.xlabel('Epochs')
-        plt.ylabel('Recall@k')
-        plt.ylim(0.0, 1.0)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(f"{dataset}_recall_plot.png", dpi=300)
-        plt.show()
-
-
-def main_precision():
-    parser = LogParser()
-    parser.parse_logs()
-
-    save_dir = RESULTS_DIR / "graph" / "dev"
-
-    datasets = set(r["dataset"] for r in parser.results)
-
-    for dataset in datasets:
-        plt.figure(figsize=(10, 6))
-
-        for feature in FEATURE_LABELS:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_precision = defaultdict(float)
-            for r in filtered:
-                epoch = r["epoch"]
-                precision = r["precision"]
-                if precision > epoch_precision[epoch]:
-                    epoch_precision[epoch] = precision
-
-            if not epoch_precision:
-                continue
-
-            precisions = [epoch_precision[e] for e in EPOCHS]
-            plt.plot(EPOCHS, precisions, marker='o', label=FEATURE_LABELS_DICT[feature],
-                     color=FEATURE_COLORS_DICT[feature])
-
-        save_path = os.path.join(save_dir, f"{dataset}_precision_plot.png")
-
-        plt.title(f'Precision@k vs Epochs ({dataset})')
-        plt.xlabel('Epochs')
-        plt.ylabel('Precision@k')
-        plt.ylim(0.0, 1.0)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(f"{dataset}_precision_plot.png", dpi=300)
-        plt.show()
-
-
-def main_time():
-    parser = LogParser()
-    parser.parse_logs()
-
-    save_dir = RESULTS_DIR / "graph" / "dev"
-
     datasets = set(r[DICT_DATASET] for r in parser.results)
 
-    max_time = 0
     for dataset in datasets:
+        max_value = get_max_value_for_dataset_and_metric(dataset=dataset,
+                                                         parser=parser,
+                                                         metric_key=metric_key)
+
         plt.figure(figsize=(10, 6))
 
         for feature in FEATURE_LABELS:
@@ -252,41 +64,97 @@ def main_time():
                 r for r in parser.results
                 if r[DICT_DATASET] == dataset and r[DICT_FEATURE_LABEL] == feature
             ]
-
             if not filtered:
                 continue
 
-            epoch_time = defaultdict(float)
+            epoch_values = defaultdict(float)
             for r in filtered:
                 epoch = r[DICT_EPOCH]
-                time = r[DICT_TIME]
-                if time > epoch_time[epoch]:
-                    epoch_time[epoch] = time
+                value = r.get(metric_key, 0.0)
+                epoch_values[epoch] = value
 
-            if not epoch_time:
+            if not epoch_values:
                 continue
 
-            times = [epoch_time[e] for e in EPOCHS]
-            plt.plot(EPOCHS, times, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
-            if max(times) > max_time:
-                max_time = max(times)
+            values = [epoch_values[e] for e in EPOCHS]
+            plt.plot(EPOCHS, values, marker='o',
+                     label=FEATURE_LABELS_DICT[feature],
+                     color=FEATURE_COLORS_DICT[feature])
 
-        save_path = os.path.join(save_dir, f"{dataset}_time_plot.png")
-
-        plt.title(f'Time vs Epochs ({dataset})')
+        plt.title(f'{ylabel} vs Epochs ({dataset})')
         plt.xlabel('Epochs')
-        plt.ylabel('Time in s')
-        plt.ylim(0.0, max_time)
+        plt.ylabel(ylabel)
+        plt.ylim(0.0, 1.5 * max_value)
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{dataset}_time_plot.png", dpi=300)
+
+        if baseline_dict is not None and dataset in baseline_dict:
+            plt.axhline(y=baseline_dict[dataset],
+                        color='purple',
+                        linestyle='--',
+                        label=f'Baseline ({baseline_dict[dataset]})')
+        elif baseline_dict:
+            plt.axhline(y=0.5,
+                        color='purple',
+                        linestyle='--',
+                        label='Baseline (0.5)')
+
+        save_path = os.path.join(save_dir, f"{dataset}_{ylabel}.png")
+        plt.savefig(save_path, dpi=300)
         plt.show()
 
 
+def get_max_value_for_dataset_and_metric(dataset: str,
+                                         parser: LogParser,
+                                         metric_key: str) -> float:
+    max_val = 0
+
+    for feature in FEATURE_LABELS:
+        filtered = [
+            r for r in parser.results
+            if r[DICT_DATASET] == dataset and r[DICT_FEATURE_LABEL] == feature
+        ]
+        if not filtered:
+            continue
+
+        for r in filtered:
+            value = r.get(metric_key, 0.0)
+            if value > max_val:
+                max_val = value
+
+    return max_val
+
+
+def plot_loss():
+    plot_metric(metric_key=DICT_LOSS,
+                ylabel=VALUE_LOSS)
+
+
+def plot_auc_roc():
+    plot_metric(metric_key=DICT_AUC_ROC,
+                ylabel=VALUE_AUC_ROC,
+                baseline_dict=AUC_ROC_PAPER)
+
+
+def plot_recall():
+    plot_metric(metric_key=DICT_RECALL,
+                ylabel=VALUE_RECALL)
+
+
+def plot_precision():
+    plot_metric(metric_key=DICT_PRECISION,
+                ylabel=VALUE_PRECISION)
+
+
+def plot_time():
+    plot_metric(metric_key=DICT_TIME,
+                ylabel=VALUE_TIME)
+
+
 if __name__ == "__main__":
-    # main_loss()
-    # main_auc_roc()
-    # main_recall()
-    # main_precision()
-    main_time()
+    plot_loss()
+    plot_auc_roc()
+    plot_recall()
+    plot_precision()
+    plot_time()

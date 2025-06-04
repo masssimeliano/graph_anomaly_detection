@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any, List, AnyStr
+from typing import Optional, Dict, Any, List
 
 from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
@@ -7,11 +7,9 @@ from src.helpers.config.dir_config import *
 logging.basicConfig(level=logging.INFO)
 
 
-def extract_value(label: str, content: AnyStr) -> float:
-    for line in content.splitlines():
-        if label in line:
-            return float(line.split(":")[1].strip())
-    raise ValueError(f"{label} not found")
+def extract_value(line: str) -> float:
+    line_splits: list[str] = line.split(":")
+    return float(line_splits[len(line_splits) - 1].strip())
 
 
 class LogParser:
@@ -31,7 +29,7 @@ class LogParser:
                     continue
 
                 dataset = parts[0]
-                feature_label = next((f for f in self.FEATURE_LABELS if f in file.stem), self.FEATURE_LABEL_STANDARD)
+                feature_label = next((f for f in FEATURE_LABELS if f in file.stem), FEATURE_LABEL_STANDARD)
                 # e.g. string 0001 -> float 0.001
                 lr = int(parts[2]) / (10 ** (len(parts[2]) - 1))
                 hid_dim = int(parts[3])
@@ -47,11 +45,11 @@ class LogParser:
                     DICT_LR: lr,
                     DICT_EPOCH: epoch,
                     DICT_HID_DIM: hid_dim,
-                    DICT_AUC_ROC: extract_value(VALUE_AUC_ROC, content),
-                    DICT_LOSS: extract_value(VALUE_LOSS, content),
-                    DICT_RECALL: extract_value(VALUE_RECALL, content),
-                    DICT_PRECISION: extract_value(VALUE_PRECISION, content),
-                    DICT_TIME: extract_value(VALUE_TIME, content)
+                    DICT_AUC_ROC: extract_value(content.splitlines()[1]),
+                    DICT_LOSS: extract_value(content.splitlines()[2]),
+                    DICT_RECALL: extract_value(content.splitlines()[3]),
+                    DICT_PRECISION: extract_value(content.splitlines()[4]),
+                    DICT_TIME: extract_value(content.splitlines()[5])
                 })
 
             except Exception as e:
