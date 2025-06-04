@@ -10,7 +10,7 @@ import warnings
 import torch
 import torch.nn.functional as F
 
-from src.helpers.config import EPOCHS
+from src.helpers.config.config import EPOCHS
 from . import DeepDetector
 from ..nn import AnomalyDAEBase
 
@@ -206,12 +206,13 @@ class AnomalyDAE(DeepDetector):
         pos_weight_s = self.theta / (1 + self.theta)
 
         score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.model.loss_func(x[:batch_size],
-                                     x_[:batch_size],
-                                     s[:batch_size, node_idx],
-                                     s_[:batch_size],
-                                     weight,
-                                     pos_weight_a,
-                                     pos_weight_s)
+                                                                                                       x_[:batch_size],
+                                                                                                       s[:batch_size,
+                                                                                                       node_idx],
+                                                                                                       s_[:batch_size],
+                                                                                                       weight,
+                                                                                                       pos_weight_a,
+                                                                                                       pos_weight_s)
 
         loss = torch.mean(score)
 

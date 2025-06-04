@@ -1,5 +1,5 @@
-from pathlib import Path
-from src.helpers.config import DATASETS_DIR, DataSetSize
+from src.helpers.config.datasets_config import *
+from src.helpers.config.dir_config import *
 
 
 class DataSet:

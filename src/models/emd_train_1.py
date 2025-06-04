@@ -1,14 +1,15 @@
 import time
 from typing import List
 
-import torch
-from torch_geometric.utils import from_networkx
 import networkx as nx
+import torch
 from sklearn.metrics import roc_auc_score
+from torch_geometric.utils import from_networkx
 
 from pygod.pygod.detector import AnomalyDAE
 from pygod.pygod.detector.base import precision_at_k, recall_at_k
-from src.helpers.config import RESULTS_DIR, EPOCHS, ETA, THETA
+from src.helpers.config.dir_config import *
+from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model
 
 
@@ -90,14 +91,14 @@ def emd_train(nx_graph: nx.Graph,
             print(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     print(f"Time: {(time.time() - measure_time):.4f} sec")
-    
+
+
 def extract_embedding_features(graph: nx.Graph,
                                labels: List[int],
                                learning_rate: float,
                                hid_dim: int,
                                epoch: int,
                                data_set: str):
-
     print("Loading embedding features to graph nodes...")
 
     emd_model = load_emd_model(data_set=data_set.replace(".mat", ""),

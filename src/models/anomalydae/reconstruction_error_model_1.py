@@ -1,14 +1,12 @@
-import time
-
-import numpy as np
-import torch.nn.functional as F
-import torch
-import networkx as nx
 from typing import List
 
+import networkx as nx
+import numpy as np
+import torch
+import torch.nn.functional as F
 from torch_geometric.utils import from_networkx
 
-from src.helpers.config import labels_dict
+from src.helpers.config.training_config import *
 from src.models.base_train import base_train
 from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
 
@@ -30,6 +28,7 @@ def train(graph: nx.Graph,
                hid_dim=hid_dim,
                data_set=data_set)
 
+
 def normalize_node_features_minmax(graph: nx.Graph):
     features = [graph.nodes[n]['x'] for n in graph.nodes()]
     stacked = torch.stack(features)
@@ -40,6 +39,7 @@ def normalize_node_features_minmax(graph: nx.Graph):
 
     for n in graph.nodes():
         graph.nodes[n]['x'] = (graph.nodes[n]['x'] - min_vals) / range_vals
+
 
 def extract_error_features(graph: nx.Graph) -> torch.Tensor:
     print("Extracting node error rates...")
@@ -53,6 +53,7 @@ def extract_error_features(graph: nx.Graph) -> torch.Tensor:
         errors = F.mse_loss(reconstructed, features_tensor, reduction='none').mean(dim=1)
     return errors
 
+
 def add_structure_features(graph: nx.Graph):
     errors = extract_error_features(graph)
 
@@ -60,6 +61,7 @@ def add_structure_features(graph: nx.Graph):
         original_feat = graph.nodes[node]['x']
         error_feat = torch.tensor([errors[i].item()], dtype=torch.float32)
         graph.nodes[node]['x'] = torch.cat([original_feat, error_feat])
+
 
 # method for checking mean and median reconstruction errors of nodes
 def compare_anomaly_reconstruction_error(graph: nx.Graph, labels: List[int]):

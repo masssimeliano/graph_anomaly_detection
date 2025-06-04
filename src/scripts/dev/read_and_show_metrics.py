@@ -1,10 +1,13 @@
 import os
 from collections import defaultdict
-import seaborn as sns
+
 import pandas as pd
+import seaborn as sns
 from matplotlib import pyplot as plt
 
-from src.helpers.config import EPOCHS, RESULTS_DIR
+from src.helpers.config.const import *
+from src.helpers.config.dir_config import *
+from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
 
 FEATURE_TYPES = [
@@ -46,6 +49,7 @@ DATASET_AUC_PAPER = {
     "Reddit": 0.557
 }
 
+
 def main_auc_roc():
     parser = LogParser()
     parser.parse_logs()
@@ -85,7 +89,8 @@ def main_auc_roc():
         plt.xlabel('Epochs')
         plt.ylabel('AUC-ROC')
         if dataset in DATASET_AUC_PAPER:
-            plt.axhline(y=DATASET_AUC_PAPER[dataset], color='purple', linestyle='--', label=f'Baseline ({DATASET_AUC_PAPER[dataset]})')
+            plt.axhline(y=DATASET_AUC_PAPER[dataset], color='purple', linestyle='--',
+                        label=f'Baseline ({DATASET_AUC_PAPER[dataset]})')
         else:
             plt.axhline(y=0.5, color='purple', linestyle='--', label='Baseline (0.5)')
         plt.ylim(0.0, 1.0)
@@ -94,6 +99,7 @@ def main_auc_roc():
         plt.tight_layout()
         plt.savefig(f"{dataset}_loss_auc.png", dpi=300)
         plt.show()
+
 
 def main_loss():
     parser = LogParser()
@@ -141,6 +147,7 @@ def main_loss():
         plt.savefig(f"{dataset}_loss_plot.png", dpi=300)
         plt.show()
 
+
 def main_recall():
     parser = LogParser()
     parser.parse_logs()
@@ -186,6 +193,7 @@ def main_recall():
         plt.savefig(f"{dataset}_recall_plot.png", dpi=300)
         plt.show()
 
+
 def main_precision():
     parser = LogParser()
     parser.parse_logs()
@@ -230,6 +238,7 @@ def main_precision():
         plt.tight_layout()
         plt.savefig(f"{dataset}_precision_plot.png", dpi=300)
         plt.show()
+
 
 def main_time():
     parser = LogParser()
@@ -279,6 +288,7 @@ def main_time():
         plt.savefig(f"{dataset}_time_plot.png", dpi=300)
         plt.show()
 
+
 def generate_min_loss_table():
     parser = LogParser()
     parser.parse_logs()
@@ -307,7 +317,7 @@ def generate_min_loss_table():
 
             if epoch_loss:
                 min_loss = min(epoch_loss.values())
-                loss_table[dataset][feature] = round(min_loss  / (1.5 * max(losses)), 4)
+                loss_table[dataset][feature] = round(min_loss / (1.5 * max(losses)), 4)
 
     df = pd.DataFrame(loss_table).T  # Transpose so datasets are rows
     df.index.name = "Dataset"
@@ -326,6 +336,7 @@ def generate_min_loss_table():
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
 
 def generate_auc_roc_table():
     parser = LogParser()
@@ -372,6 +383,7 @@ def generate_auc_roc_table():
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == "__main__":
     # main_loss()

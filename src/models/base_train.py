@@ -6,7 +6,8 @@ import torch
 import torch_geometric
 
 from pygod.pygod.detector import AnomalyDAE
-from src.helpers.config import RESULTS_DIR, EPOCHS, EPOCH_TO_LEARN, THETA, ETA
+from src.helpers.config.dir_config import *
+from src.helpers.config.training_config import *
 
 
 def base_train(di_graph: torch_geometric.data.Data,

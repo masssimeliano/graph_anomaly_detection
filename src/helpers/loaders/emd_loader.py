@@ -4,7 +4,7 @@ import torch
 
 from pygod.pygod.detector import AnomalyDAE
 from pygod.pygod.detector.base import get_emd_file
-from src.helpers.config import RESULTS_DIR, THETA, ETA
+from src.helpers.config.training_config import *
 
 
 def load_emd_model(data_set: str,

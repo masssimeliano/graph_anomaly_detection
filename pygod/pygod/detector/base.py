@@ -11,13 +11,13 @@ import torch
 import numpy as np
 from scipy.stats import binom
 from scipy.special import erf
-from sklearn.metrics import roc_auc_score, recall_score, precision_score
+from sklearn.metrics import roc_auc_score
 
 from torch_geometric.nn import GIN
 from torch_geometric import compile
 from torch_geometric.loader import NeighborLoader
 
-from src.helpers.config import RESULTS_DIR, EPOCHS
+from src.helpers.config.config import RESULTS_DIR, EPOCHS
 from ..utils import logger, validate_device, pprint, is_fitted
 
 
@@ -328,6 +328,7 @@ def precision_at_k(y_true,
     true_positives = np.sum(y_true[top_k_idx])
     return true_positives / k
 
+
 def get_emd_file(data_set: str,
                  title_prefix: str,
                  lr: float,
@@ -505,7 +506,8 @@ class DeepDetector(Detector, ABC):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(sampled_data)
+                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
+                    sampled_data)
                 self.stru_error_mean = stru_error_std
                 self.stru_error_std = stru_error_std
                 self.attr_error_mean = attr_error_mean

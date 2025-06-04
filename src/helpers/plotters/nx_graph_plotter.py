@@ -1,13 +1,19 @@
-import time
+import logging
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import torch
-import matplotlib.pyplot as plt
 
+from src.helpers.time.timed import timed
 from src.structure.graph import Graph
 
+logging.basicConfig(level=logging.INFO)
 
-def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title):
+
+def visualize_graph(nx_graph: nx.Graph,
+                    node_color: list[str], title):
+    logging.info("Visualizing NX graph...")
+
     fig, ax = plt.subplots(figsize=(12, 10))
     pos = nx.spring_layout(nx_graph, seed=42, k=0.15)
 
@@ -22,20 +28,20 @@ def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title):
             alpha=0.7)
 
     ax.set_title(title,
-            fontsize=20,
-            fontweight='bold',
-            pad=20)
+                 fontsize=20,
+                 fontweight='bold',
+                 pad=20)
 
     ax.set_axis_off()
     plt.tight_layout()
     plt.show()
 
+
+@timed
 def to_networkx_graph(graph: Graph,
                       visualize: bool = False,
                       title: str = "Graph Visualization") -> nx.Graph:
-    print("Forming a NetworkX graph...")
-
-    start_time = time.time()
+    logging.info("Forming a NX graph...")
 
     nx_graph = nx.Graph()
     node_color = []
@@ -56,7 +62,5 @@ def to_networkx_graph(graph: Graph,
 
     if visualize:
         visualize_graph(nx_graph, node_color, title)
-
-    print(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     return nx_graph

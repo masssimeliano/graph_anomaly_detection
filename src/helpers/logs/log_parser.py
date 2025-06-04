@@ -1,107 +1,81 @@
 import logging
-from pathlib import Path
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, List, AnyStr
 
-from src.helpers.config import RESULTS_DIR
+from src.helpers.config.const import *
+from src.helpers.config.dir_config import *
 
 logging.basicConfig(level=logging.INFO)
+
+
+def extract_value(label: str, content: AnyStr) -> float:
+    for line in content.splitlines():
+        if label in line:
+            return float(line.split(":")[1].strip())
+    raise ValueError(f"{label} not found")
 
 
 class LogParser:
     def __init__(self,
                  log_dir: Path = RESULTS_DIR):
         self.log_dir = log_dir
-        self.results = []
+        self.results: List[Dict[str, Any]] = []
 
     def parse_logs(self):
+        logging.info("Parsing logs...")
+
         for file in self.log_dir.glob("*.txt"):
             try:
-                name = file.stem
-                parts = name.split("_")
+                parts = file.stem.split("_")
+                if len(parts) < 5:
+                    logging.warning(f"Invalid filename format: {file.name}")
+                    continue
 
                 dataset = parts[0]
-
-                if "Attr + Str2" in name:
-                    features = "Attr + Str2"
-                elif "Attr + Str3" in name:
-                    features = "Attr + Str3"
-                elif "Attr + Alpha1" in name:
-                    features = "Attr + Alpha1"
-                elif "Attr + Alpha2" in name:
-                    features = "Attr + Alpha2"
-                elif "Attr + Emd1" in name:
-                    features = "Attr + Emd1"
-                elif "Attr + Emd2" in name:
-                    features = "Attr + Emd2"
-                elif "Attr + Str" in name:
-                    features = "Attr + Str"
-                elif "Attr + Error1" in name:
-                    features = "Attr + Error1"
-                elif "Attr + Error2" in name:
-                    features = "Attr + Error2"
-                else:
-                    features = "Attr"
-
-                lr_raw = parts[2]
-                lr = int(lr_raw) / (10 ** (len(lr_raw) - 1))
+                feature_label = next((f for f in self.FEATURE_LABELS if f in file.stem), self.FEATURE_LABEL_STANDARD)
+                # e.g. string 0001 -> float 0.001
+                lr = int(parts[2]) / (10 ** (len(parts[2]) - 1))
                 hid_dim = int(parts[3])
                 epoch = int(parts[4])
 
-                with open(file, "r") as f:
-                    lines = f.readlines()
-                    if len(lines) < 5:
-                        continue
+                with file.open() as f:
+                    content = f.read()
 
-                    auc_line = next((line for line in lines if "AUC-ROC" in line), None)
-                    loss_line = next((line for line in lines if "Loss" in line), None)
-                    recall_line = next((line for line in lines if "Recall" in line), None)
-                    precision_line = next((line for line in lines if "Precision" in line), None)
-                    time_line = next((line for line in lines if "Time" in line), None)
-
-                    auc_roc = float(auc_line.split("AUC-ROC")[1].split(":")[1].strip())
-                    loss_value = float(loss_line.split("Loss")[1].split(":")[1].strip())
-                    recall = float(recall_line.split("Recall")[1].split(":")[1].strip())
-                    precision = float(precision_line.split("Precision")[1].split(":")[1].strip())
-                    time_value = float(time_line.split(":")[1].strip())
-
-                self.results.append({"filename": file.name,
-                                     "dataset": dataset,
-                                     "features": features,
-                                     "lr": lr,
-                                     "epoch": epoch,
-                                     "hid_dim": hid_dim,
-                                     "auc_roc": auc_roc,
-                                     "loss": loss_value,
-                                     "recall": recall,
-                                     "precision": precision,
-                                     "time": time_value})
+                self.results.append({
+                    DICT_FILE_NAME: file.name,
+                    DICT_DATASET: dataset,
+                    DICT_FEATURE_LABEL: feature_label,
+                    DICT_LR: lr,
+                    DICT_EPOCH: epoch,
+                    DICT_HID_DIM: hid_dim,
+                    DICT_AUC_ROC: extract_value(VALUE_AUC_ROC, content),
+                    DICT_LOSS: extract_value(VALUE_LOSS, content),
+                    DICT_RECALL: extract_value(VALUE_RECALL, content),
+                    DICT_PRECISION: extract_value(VALUE_PRECISION, content),
+                    DICT_TIME: extract_value(VALUE_TIME, content)
+                })
 
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
 
-    def get_best_by_key(self,
-                        key: str,
-                        value: float) -> Optional[Dict[str, Any]]:
-        filtered = [r for r in self.results if r[key] == value]
-        return max(filtered, key=lambda x: x["auc_roc"], default=None)
-
-    def get_best_and_worst(self) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
-        return (max(self.results, key=lambda x: x["auc_roc"]),
-                min(self.results, key=lambda x: x["auc_roc"]))
-
     def get_result_by_params(self,
-                             dataset=None,
-                             features=None,
-                             lr=None,
-                             hid_dim=None,
-                             epoch=None,
-                             loss_value=None) -> Optional[Dict[str, Any]]:
+                             file_name: str = None,
+                             dataset: str = None,
+                             feature_label: str = None,
+                             lr: float = None,
+                             epoch: int = None,
+                             hid_dim: int = None) -> Optional[Dict[str, Any]]:
         for result in self.results:
-            if ((dataset is None or result["dataset"] == dataset) and
-                (features is None or result["features"] == features) and
-                (lr is None or result["lr"] == lr) and
-                (hid_dim is None or result["hid_dim"] == hid_dim) and
-                (epoch is None or result["epoch"] == epoch) and
-                (loss_value is None or result["loss"] == loss_value)):
-                return result
+            if file_name is not None and result[DICT_FILE_NAME] != file_name:
+                continue
+            if dataset is not None and result[DICT_DATASET] != dataset:
+                continue
+            if feature_label is not None and result[DICT_FEATURE_LABEL] != feature_label:
+                continue
+            if lr is not None and result[DICT_LR] != lr:
+                continue
+            if epoch is not None and result[DICT_EPOCH] != epoch:
+                continue
+            if hid_dim is not None and result[DICT_HID_DIM] != hid_dim:
+                continue
+            return result
         return None
