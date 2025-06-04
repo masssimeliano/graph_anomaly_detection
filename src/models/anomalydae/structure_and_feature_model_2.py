@@ -7,6 +7,7 @@ import numpy as np
 import torch
 from torch_geometric.utils import from_networkx
 
+from src.helpers.config.const import FEATURE_LABEL_STR2
 from src.helpers.time.timed import timed
 from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.base_train import base_train
@@ -20,12 +21,12 @@ def train(nx_graph: nx.Graph,
           hid_dim: int,
           dataset: str):
     normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
-    add_structure_features(nx_graph)
-    di_graph = from_networkx(nx_graph)
+    add_structure_features(nx_graph=nx_graph)
+    di_graph = from_networkx(G=nx_graph)
 
-    base_train(di_graph,
-               labels,
-               title_prefix="Attr + Str2",
+    base_train(di_graph=di_graph,
+               labels=labels,
+               title_prefix=FEATURE_LABEL_STR2,
                learning_rate=learning_rate,
                hid_dim=hid_dim,
                dataset=dataset)
@@ -67,12 +68,12 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
 
 
 @timed
-def add_structure_features(graph: nx.Graph):
+def add_structure_features(nx_graph: nx.Graph):
     logging.info("Extracting node features with NetworkX 1...")
 
-    additional_feats = extract_node_features_tensor(graph)
+    additional_feats = extract_node_features_tensor(nx_graph)
 
-    for i, node in enumerate(graph.nodes()):
-        original_feat = graph.nodes[node]['x']
+    for i, node in enumerate(nx_graph.nodes()):
+        original_feat = nx_graph.nodes[node]['x']
         stat_feat = additional_feats[i]
-        graph.nodes[node]['x'] = torch.cat([original_feat, stat_feat])
+        nx_graph.nodes[node]['x'] = torch.cat([original_feat, stat_feat])

@@ -12,10 +12,12 @@ from pygod.pygod.detector.base import precision_at_k, recall_at_k
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model
+from src.helpers.time.timed import timed
 
 logging.basicConfig(level=logging.INFO)
 
 
+@timed
 def emd_train(nx_graph: nx.Graph,
               labels: List[int],
               title_prefix: str,
@@ -26,10 +28,7 @@ def emd_train(nx_graph: nx.Graph,
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device : {device}")
 
-    measure_time = time.time()
     for current_epoch in EPOCHS:
-        start_time = time.time()
-
         extract_embedding_features(nx_graph,
                                    labels,
                                    learning_rate,
@@ -91,9 +90,6 @@ def emd_train(nx_graph: nx.Graph,
             logging.info(f"Loss ({title_prefix}): {loss:.4f}")
             logging.info(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
             logging.info(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
-            logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
-
-    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")
 
 
 def extract_embedding_features(graph: nx.Graph,
@@ -106,7 +102,7 @@ def extract_embedding_features(graph: nx.Graph,
 
     emd_model = load_emd_model(data_set=data_set.replace(".mat", ""),
                                labels=labels,
-                               feature="Attr + Alpha1",
+                               feature_label="Attr + Alpha1",
                                lr=learning_rate,
                                hid_dim=hid_dim,
                                epoch=epoch)

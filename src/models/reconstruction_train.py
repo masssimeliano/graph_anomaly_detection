@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import List
 
 import networkx as nx
@@ -12,10 +11,12 @@ from pygod.pygod.detector.base import precision_at_k, recall_at_k
 from src.helpers.config.const import FEATURE_LABEL_ERROR2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
+from src.helpers.time.timed import timed
 
 logging.basicConfig(level=logging.INFO)
 
 
+@timed
 def reconstruction_train(nx_graph: nx.Graph,
                          labels: List[int],
                          title_prefix: str,
@@ -26,7 +27,6 @@ def reconstruction_train(nx_graph: nx.Graph,
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device : {device}")
 
-    measure_time = time.time()
     for epoch in EPOCHS:
         get_reconstruction_errors(graph=nx_graph,
                                   labels=labels,
@@ -61,7 +61,6 @@ def reconstruction_train(nx_graph: nx.Graph,
             timer = 0
             for i in range(3):
                 logging.info(f"Fitting x{i + 1}...")
-                start_time = time.time()
                 # adjusted regular method from AnomalyDAE
                 model.fit(di_graph)
 
@@ -90,9 +89,6 @@ def reconstruction_train(nx_graph: nx.Graph,
             logging.info(f"Loss ({title_prefix}): {loss:.4f}")
             logging.info(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
             logging.info(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
-            logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
-
-    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")
 
 
 def get_reconstruction_errors(graph: nx.Graph,
@@ -112,7 +108,7 @@ def get_reconstruction_errors(graph: nx.Graph,
                        gpu=0,
                        labels=labels,
                        title_prefix=FEATURE_LABEL_ERROR2,
-                       dataset=dataset)
+                       data_set=dataset)
 
     logging.info(f"Training-Fitting...")
     model.fit(di_graph)

@@ -625,26 +625,25 @@ class DeepDetector(Detector, ABC):
                 loss.backward()
                 optimizer.step()
 
-                # saving the loss value on the last epoch
-                loss_value = epoch_loss / data.x.shape[0]
-                if self.gan:
-                    loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
-                self.loss_last = loss_value
+            # saving the loss value on the last epoch
+            loss_value = epoch_loss / data.x.shape[0]
+            if self.gan:
+                loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
+            self.loss_last = loss_value
+            self.last_time = time.time() - start_time
 
-                # saving embedding if its needed
-                if (epoch == self.epoch):
-                    self.last_time = time.time() - start_time
-                    if (self.save_emb):
-                        data_set = self.data_set
-                        title_prefix = self.title_prefix
-                        lr = self.lr
-                        hid_dim = self.hid_dim
-                        emd_file = get_emd_file(data_set,
-                                                title_prefix,
-                                                lr,
-                                                hid_dim,
-                                                epoch)
-                        torch.save(self.emb, emd_file)
+        # saving embedding if its needed
+        if (self.save_emb):
+            data_set = self.data_set
+            title_prefix = self.title_prefix
+            lr = self.lr
+            hid_dim = self.hid_dim
+            emd_file = get_emd_file(data_set,
+                                    title_prefix,
+                                    lr,
+                                    hid_dim,
+                                    epoch)
+            torch.save(self.emb, emd_file)
 
             logger(epoch=epoch,
                    loss=loss_value,

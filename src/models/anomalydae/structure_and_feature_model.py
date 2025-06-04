@@ -6,6 +6,7 @@ import pyfglt.fglt as fg
 import torch
 from torch_geometric.utils import from_networkx
 
+from src.helpers.config.const import FEATURE_LABEL_STR
 from src.helpers.time.timed import timed
 from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.base_train import base_train
@@ -20,11 +21,11 @@ def train(nx_graph: nx.Graph,
           dataset: str):
     normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
     add_structure_features(nx_graph=nx_graph)
-    di_graph = from_networkx(graph)
+    di_graph = from_networkx(G=nx_graph)
 
     base_train(di_graph,
                labels,
-               title_prefix="Attr + Str",
+               title_prefix=FEATURE_LABEL_STR,
                learning_rate=learning_rate,
                hid_dim=hid_dim,
                dataset=dataset)
@@ -38,5 +39,6 @@ def add_structure_features(nx_graph: nx.Graph):
 
     for i, node in enumerate(nx_graph.nodes()):
         original_feat = nx_graph.nodes[node]['x']
-        graphlet_feat = torch.tensor(F.iloc[i].values, dtype=torch.float)
+        graphlet_feat = torch.tensor(F.iloc[i].values,
+                                     dtype=torch.float)
         nx_graph.nodes[node]['x'] = torch.cat([original_feat, graphlet_feat])

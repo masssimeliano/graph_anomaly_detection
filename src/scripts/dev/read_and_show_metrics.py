@@ -2,7 +2,7 @@ import logging
 import os
 from collections import defaultdict
 
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
@@ -56,7 +56,7 @@ def create_metric_plot(metric_name: str,
                                                          parser=parser,
                                                          metric_name=metric_name)
 
-        plt.figure(figsize=(10, 6))
+        plot.figure(figsize=(10, 6))
 
         for feature_label in FEATURE_LABELS:
             filtered_feature_labels = [
@@ -76,19 +76,19 @@ def create_metric_plot(metric_name: str,
                 continue
 
             values = [value_per_epochs[epoch] for epoch in EPOCHS]
-            plt.plot(EPOCHS,
+            plot.plot(EPOCHS,
                      values,
                      marker='o',
                      label=FEATURE_LABELS_DICT[feature_label],
                      color=FEATURE_COLORS_DICT[feature_label])
 
-        plt.title(f'{y_axis_label} vs {VALUE_EPOCH} ({dataset})')
-        plt.xlabel(VALUE_EPOCH)
-        plt.ylabel(y_axis_label)
+        plot.title(f'{y_axis_label} vs {VALUE_EPOCH} ({dataset})')
+        plot.xlabel(VALUE_EPOCH)
+        plot.ylabel(y_axis_label)
         # normalizing
-        plt.ylim(0.0, 1.5 * max_value)
-        plt.grid(True)
-        plt.tight_layout()
+        plot.ylim(0.0, 1.5 * max_value)
+        plot.grid(True)
+        plot.tight_layout()
 
         # if benchmark result is given
         if (metric_name == DICT_AUC_ROC):
@@ -98,15 +98,15 @@ def create_metric_plot(metric_name: str,
             if baseline_dict is not None and dataset in baseline_dict:
                 y = baseline_dict[dataset]
                 label = f'Baseline ({baseline_dict[dataset]})'
-            plt.axhline(y=y,
+            plot.axhline(y=y,
                         color='purple',
                         linestyle='--',
                         label=label)
-        plt.legend()
+        plot.legend()
 
         save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
-        plt.savefig(save_path, dpi=300)
-        plt.show()
+        plot.savefig(save_path, dpi=300)
+        plot.show()
 
 
 def get_max_value_for_dataset_and_metric(dataset: str,

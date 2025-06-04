@@ -21,7 +21,6 @@ def train(nx_graph: nx.Graph,
           hid_dim: int,
           dataset: str,
           compare: bool = False):
-    normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
     if compare:
         compare_anomaly_reconstruction_error(nx_graph=nx_graph,
                                              labels=labels_dict[dataset])
