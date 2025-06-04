@@ -45,17 +45,15 @@ graph_anomaly_detection/
 ### Dependencies
 
 - `torch==2.2.0+cu121`
-- `torch-geometric==2.6.1`
-- `torch_scatter==2.1.2+pt22cpu`
-- `torch_sparse==0.6.18+pt22cpu`
-- `pygod==1.1.0`
 - `numpy==1.26.4`
 - `scikit-learn==1.6.1`
 - `scipy==1.15.2`
 - `networkx==3.4.2`
 - `matplotlib==3.10.1`
-- `pyfglt~=0.3.0`
-- `pandas~=2.2.3`
+- `pyfglt==0.3.0`
+- `pandas==2.2.3`
+- `torch-geometric~=2.6.1`
+- `seaborn~=0.13.2`
 
 ---
 
@@ -76,6 +74,7 @@ scripts/
 ## 🏃 Run 
 
 Run the ```check_train.py``` script to start calculating of all metrics for each datasets.
+Run the ```read_and_show_metrics.py``` script to show and plot metrics for each dataset and
 Use ```config.py``` to select the specific dataset
 
 ```
@@ -97,10 +96,10 @@ The performance of various models will be evaluated and compared across datasets
 
 The following literature and resources were used or referenced during the research:
 
-1. The PyGOD Documentation:
+1. PyGOD Documentation.
    https://pygod.org/
    
-2. NetworkX Documentation:
+2. NetworkX Documentation.
    https://networkx.org/
 
 3. Stanford CS224W Lecture Slides on Structural Features in Graphs (2021).  
@@ -110,6 +109,6 @@ The following literature and resources were used or referenced during the resear
    IEEE Paper: https://ieeexplore.ieee.org/abstract/document/9286205  
    Implementation: https://fcdimitr.github.io/pyfglt/
 
-5. Datasets with labeled anomalies for Graph AD:
+5. Datasets with labeled anomalies for Graph AD.
    https://github.com/mala-lab/Awesome-Deep-Graph-Anomaly-Detection#Datasets
 
