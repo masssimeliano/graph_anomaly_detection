@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Base classes for all outlier detector"""
 # Author: Yue Zhao <zhaoy@cmu.edu>, Kay Liu <zliu234@uic.edu>
 # License: BSD 2 clause
@@ -11,13 +10,9 @@ import numpy as np
 import torch
 from scipy.special import erf
 from scipy.stats import binom
-from sklearn.metrics import roc_auc_score
-from torch_geometric import compile
 from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import GIN
 
-from src.helpers.config.dir_config import *
-from src.helpers.config.training_config import *
 from ..utils import logger, validate_device, pprint, is_fitted
 
 
@@ -305,15 +300,11 @@ def recall_at_k(y_true,
                 k):
     y_true = np.array(y_true)
     scores = np.array(scores)
-
     top_k_indices = np.argsort(scores)[-k:]
-
     true_positives_in_top_k = np.sum(y_true[top_k_indices])
-
     total_positives = np.sum(y_true)
-
     if total_positives == 0:
-        return 0.0
+        return 0
 
     recall_k = true_positives_in_top_k / total_positives
     return recall_k
@@ -326,15 +317,8 @@ def precision_at_k(y_true,
     scores = np.array(scores)
     top_k_idx = np.argsort(scores)[-k:]
     true_positives = np.sum(y_true[top_k_idx])
+
     return true_positives / k
-
-
-def get_emd_file(dataset: str,
-                 title_prefix: str,
-                 learning_rate: float,
-                 hid_dim: int,
-                 epoch: int):
-    return RESULTS_DIR / f"emd_{dataset}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.pt"
 
 
 class DeepDetector(Detector, ABC):
@@ -464,197 +448,6 @@ class DeepDetector(Detector, ABC):
         if save_emb:
             self.emb = None
         self.compile_model = compile_model
-
-    def fit(self, data, label=None):
-        start_time = time.time()
-        self.array_loss = []
-        self.array_auc_roc = []
-        self.array_recall_k = []
-        self.array_precision_k = []
-        self.array_time = []
-
-        self.process_graph(data)
-        self.num_nodes, self.in_dim = data.x.shape
-        if self.batch_size == 0:
-            self.batch_size = data.x.shape[0]
-        loader = NeighborLoader(data,
-                                self.num_neigh,
-                                batch_size=self.batch_size)
-
-        self.model = self.init_model(**self.kwargs)
-        if self.compile_model:
-            self.model = compile(self.model)
-        if not self.gan:
-            optimizer = torch.optim.Adam(self.model.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
-        else:
-            self.opt_in = torch.optim.Adam(self.model.inner.parameters(),
-                                           lr=self.lr,
-                                           weight_decay=self.weight_decay)
-            optimizer = torch.optim.Adam(self.model.outer.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
-
-        self.model.train()
-        self.decision_score_ = torch.zeros(data.x.shape[0])
-        for epoch in range(self.epoch + 1):
-            epoch_loss = 0
-            if self.gan:
-                self.epoch_loss_in = 0
-            for sampled_data in loader:
-                batch_size = sampled_data.batch_size
-                node_idx = sampled_data.n_id
-
-                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
-                    sampled_data)
-                self.stru_error_mean = stru_error_std
-                self.stru_error_std = stru_error_std
-                self.attr_error_mean = attr_error_mean
-                self.attr_error_std = attr_error_std
-                epoch_loss += loss.item() * batch_size
-                if self.save_emb:
-                    if type(self.emb) is tuple:
-                        self.emb[0][node_idx[:batch_size]] = \
-                            self.model.emb[0][:batch_size].cpu()
-                        self.emb[1][node_idx[:batch_size]] = \
-                            self.model.emb[1][:batch_size].cpu()
-                    else:
-                        self.emb[node_idx[:batch_size]] = \
-                            self.model.emb[:batch_size].cpu()
-                self.decision_score_[node_idx[:batch_size]] = score
-
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-                # saving the loss value on the last epoch
-                loss_value = epoch_loss / data.x.shape[0]
-                if self.gan:
-                    loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
-                self.loss_last = loss_value
-                self.last_time = time.time() - start_time
-
-                # calculating AUC-ROC through all epochs
-                if (epoch in EPOCHS):
-                    self.array_time.append(time.time() - start_time)
-                    self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
-
-                    self_labels = self.labels
-                    self_score = self.decision_score_
-                    self_k = self.labels.count(1)
-                    recall_k = recall_at_k(self_labels, self_score, self_k)
-                    precision_k = precision_at_k(self_labels, self_score, self_k)
-                    self.array_auc_roc.append(auc_roc)
-                    self.array_recall_k.append(recall_k)
-                    self.array_precision_k.append(precision_k)
-                    # saving embedding if its needed
-                    if (self.save_emb):
-                        data_set = self.data_set
-                        title_prefix = self.title_prefix
-                        lr = self.lr
-                        hid_dim = self.hid_dim
-                        emd_file = get_emd_file(data_set,
-                                                title_prefix,
-                                                lr,
-                                                hid_dim,
-                                                epoch)
-                        torch.save(self.emb, emd_file)
-
-            logger(epoch=epoch,
-                   loss=loss_value,
-                   score=self.decision_score_,
-                   target=label,
-                   time=time.time() - start_time,
-                   verbose=self.verbose,
-                   train=True)
-
-        self._process_decision_score()
-        return self
-
-    def fit_emd(self, data, label=None):
-        start_time = time.time()
-        self.process_graph(data)
-        self.num_nodes, self.in_dim = data.x.shape
-        if self.batch_size == 0:
-            self.batch_size = data.x.shape[0]
-        loader = NeighborLoader(data,
-                                self.num_neigh,
-                                batch_size=self.batch_size)
-
-        self.model = self.init_model(**self.kwargs)
-        if self.compile_model:
-            self.model = compile(self.model)
-        if not self.gan:
-            optimizer = torch.optim.Adam(self.model.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
-        else:
-            self.opt_in = torch.optim.Adam(self.model.inner.parameters(),
-                                           lr=self.lr,
-                                           weight_decay=self.weight_decay)
-            optimizer = torch.optim.Adam(self.model.outer.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
-
-        self.model.train()
-        self.decision_score_ = torch.zeros(data.x.shape[0])
-        for epoch in range(self.epoch + 1):
-            epoch_loss = 0
-            if self.gan:
-                self.epoch_loss_in = 0
-            for sampled_data in loader:
-                batch_size = sampled_data.batch_size
-                node_idx = sampled_data.n_id
-
-                loss, score, _, _, _, _ = self.forward_model(sampled_data)
-                epoch_loss += loss.item() * batch_size
-                if self.save_emb:
-                    if type(self.emb) is tuple:
-                        self.emb[0][node_idx[:batch_size]] = \
-                            self.model.emb[0][:batch_size].cpu()
-                        self.emb[1][node_idx[:batch_size]] = \
-                            self.model.emb[1][:batch_size].cpu()
-                    else:
-                        self.emb[node_idx[:batch_size]] = \
-                            self.model.emb[:batch_size].cpu()
-                self.decision_score_[node_idx[:batch_size]] = score
-
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-            # saving the loss value on the last epoch
-            loss_value = epoch_loss / data.x.shape[0]
-            if self.gan:
-                loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
-            self.loss_last = loss_value
-            self.last_time = time.time() - start_time
-
-        # saving embedding if its needed
-        if (self.save_emb):
-            data_set = self.data_set
-            title_prefix = self.title_prefix
-            lr = self.lr
-            hid_dim = self.hid_dim
-            emd_file = get_emd_file(data_set,
-                                    title_prefix,
-                                    lr,
-                                    hid_dim,
-                                    epoch)
-            torch.save(self.emb, emd_file)
-
-            logger(epoch=epoch,
-                   loss=loss_value,
-                   score=self.decision_score_,
-                   target=label,
-                   time=time.time() - start_time,
-                   verbose=self.verbose,
-                   train=True)
-
-        self._process_decision_score()
-        return self
 
     def decision_function(self, data, label=None):
 

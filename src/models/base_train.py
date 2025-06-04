@@ -19,14 +19,14 @@ def base_train(di_graph: torch_geometric.data.Data,
                dataset: str,
                learning_rate: float = LEARNING_RATE,
                hid_dim: int = HIDDEN_DIMS,
-               alpha: float = 0.5,
+               alpha: float = ALPHA,
                eta: int = ETA,
                theta: int = THETA,
                gpu: int = 0 if torch.cuda.is_available() else 1):
     measure_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logging.info(f"Device : {device}")
+    logging.info(f"Device: {device}")
 
     data_set_name = f"{dataset.replace('.mat', '')}"
 

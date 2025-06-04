@@ -27,7 +27,7 @@ def main():
         logging.info(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset],
-                                     visualize=False)
+                                     do_visualize=False)
         normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
         structure_and_feature_model_2.train(nx_graph=nx_graph,
                                             labels=labels_dict[dataset],

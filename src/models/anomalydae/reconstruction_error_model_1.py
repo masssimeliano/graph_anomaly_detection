@@ -20,8 +20,8 @@ def train(nx_graph: nx.Graph,
           learning_rate: float,
           hid_dim: int,
           dataset: str,
-          compare: bool = False):
-    if compare:
+          do_compare: bool = False):
+    if do_compare:
         compare_anomaly_reconstruction_error(nx_graph=nx_graph,
                                              labels=labels_dict[dataset])
     add_structure_features(nx_graph=nx_graph)

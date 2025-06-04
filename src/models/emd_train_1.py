@@ -24,12 +24,12 @@ def emd_train(nx_graph: nx.Graph,
               learning_rate: float,
               hid_dim: int,
               dataset: str,
-              alpha: float = 0.5,
+              alpha: float = ALPHA,
               eta: int = ETA,
               theta: int = THETA,
               gpu: int = 0 if torch.cuda.is_available() else 1):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logging.info(f"Device : {device}")
+    logging.info(f"Device: {device}")
 
     for epoch in EPOCHS:
         extract_embedding_features(graph=nx_graph,
@@ -53,7 +53,7 @@ def emd_train(nx_graph: nx.Graph,
                            alpha=alpha,
                            gpu=gpu)
 
-        log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+        log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         with open(log_file, "w") as log:
             def write(msg):
                 log.write(msg + "\n")
@@ -111,6 +111,6 @@ def extract_embedding_features(graph: nx.Graph,
                                epoch=epoch)
 
     for i, node in enumerate(graph.nodes()):
-        original_feat = graph.nodes[node]['x']
-        embedding = emd_model[i]
-        graph.nodes[node]['x'] = torch.cat([original_feat, embedding]).detach().clone()
+        original_node_features = graph.nodes[node]['x']
+        embedding_node_features = emd_model[i]
+        graph.nodes[node]['x'] = torch.cat([original_node_features, embedding_node_features]).detach().clone()

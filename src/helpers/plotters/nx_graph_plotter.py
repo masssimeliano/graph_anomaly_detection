@@ -40,7 +40,7 @@ def visualize_graph(nx_graph: nx.Graph,
 
 @timed
 def to_networkx_graph(graph: Graph,
-                      visualize: bool = False,
+                      do_visualize: bool = False,
                       title: str = "Graph visualization") -> nx.Graph:
     logging.info("Forming a NX graph...")
 
@@ -48,7 +48,9 @@ def to_networkx_graph(graph: Graph,
     node_color = []
 
     for node in graph.nodes:
-        nx_graph.add_node(node.id, x=torch.tensor(node.features, dtype=torch.float))
+        nx_graph.add_node(node.id,
+                          x=torch.tensor(node.features,
+                                         dtype=torch.float))
         if visualize:
             if node.is_attr_anomaly:
                 node_color.append("red")

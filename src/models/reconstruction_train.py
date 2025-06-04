@@ -23,12 +23,12 @@ def reconstruction_train(nx_graph: nx.Graph,
                          learning_rate: float,
                          hid_dim: int,
                          dataset: str,
-                         alpha: float = 0.5,
+                         alpha: float = ALPHA,
                          eta: int = ETA,
                          theta: int = THETA,
                          gpu: int = 0 if torch.cuda.is_available() else 1):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logging.info(f"Device : {device}")
+    logging.info(f"Device: {device}")
 
     for epoch in EPOCHS:
         get_reconstruction_errors(graph=nx_graph,
@@ -100,6 +100,7 @@ def get_reconstruction_errors(graph: nx.Graph,
                               hid_dim: int,
                               epoch: int,
                               dataset: str,
+                              alpha: float = ALPHA,
                               eta: int = ETA,
                               theta: int = THETA,
                               gpu: int = 0 if torch.cuda.is_available() else 1):
@@ -110,7 +111,7 @@ def get_reconstruction_errors(graph: nx.Graph,
     model = AnomalyDAE(epoch=epoch,
                        lr=learning_rate,
                        hid_dim=hid_dim,
-                       alpha=0.5,
+                       alpha=alpha,
                        eta=eta,
                        theta=theta,
                        gpu=gpu,
@@ -120,17 +121,17 @@ def get_reconstruction_errors(graph: nx.Graph,
 
     logging.info(f"Training-Fitting...")
     model.fit(di_graph)
-    stru_error_mean = model.stru_error_mean
-    stru_error_std = model.stru_error_std
-    attr_error_mean = model.attr_error_mean
-    attr_error_std = model.attr_error_std
+    structural_error_mean = model.stru_error_mean
+    structural_error_std = model.stru_error_std
+    attribute_error_mean = model.attr_error_mean
+    attribute_error_std = model.attr_error_std
 
     for i, node in enumerate(graph.nodes()):
-        original_feat = graph.nodes[node]['x']
-        error_feats = torch.tensor([
-            stru_error_mean[i].item(),
-            stru_error_std[i].item(),
-            attr_error_mean[i].item(),
-            attr_error_std[i].item()
+        original_node_features = graph.nodes[node]['x']
+        node_error_features = torch.tensor([
+            structural_error_mean[i].item(),
+            structural_error_std[i].item(),
+            attribute_error_mean[i].item(),
+            attribute_error_std[i].item()
         ], dtype=torch.float32)
-        graph.nodes[node]['x'] = torch.cat([original_feat, error_feats]).detach().clone()
+        graph.nodes[node]['x'] = torch.cat([original_node_features, node_error_features]).detach().clone()

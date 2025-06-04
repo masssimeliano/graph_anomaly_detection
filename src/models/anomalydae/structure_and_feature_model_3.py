@@ -1,9 +1,7 @@
 import logging
-import time
 from typing import List
 
 import networkx as nx
-import numpy as np
 import torch
 from torch_geometric.utils import from_networkx
 
@@ -33,7 +31,6 @@ def train(nx_graph: nx.Graph,
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     logging.info("Extracting node features with NetworkX 2...")
-    start_time = time.time()
 
     features = []
 
@@ -79,24 +76,23 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     max_degree = max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 1
 
     for node in graph.nodes():
-        neighbors = list(graph.neighbors(node))
+        node_neighbours = list(graph.neighbors(node))
         ego = nx.ego_graph(graph, node)
 
         degree = graph.degree(node)
         clustering = nx.clustering(graph, node)
         triangle_count = nx.triangles(graph, node)
-        avg_deg_of_neighbors = np.mean([graph.degree(n) for n in neighbors]) if neighbors else 0
         ego_density = nx.density(ego)
         square_clustering = square_clust[node]
-        num_neighbors = len(neighbors)
+        num_neighbours = len(node_neighbours)
 
         # New features
-        betw = betweenness.get(node, 0.0)
-        close = closeness.get(node, 0.0)
-        eig = eigenvector.get(node, 0.0)
-        pr = pagerank.get(node, 0.0)
+        betweenness = betweenness.get(node, 0.0)
+        closeness = closeness.get(node, 0.0)
+        eigenvector = eigenvector.get(node, 0.0)
+        pagerank = pagerank.get(node, 0.0)
         core = core_number.get(node, 0)
-        ecc = eccentricity.get(node, 0.0)
+        eccentricity = eccentricity.get(node, 0.0)
         is_cut_vertex = 1.0 if node in articulation_points else 0.0
         degree_ratio = degree / max_degree if max_degree > 0 else 0.0
 
@@ -104,30 +100,31 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
                          clustering,
                          triangle_count,
                          avg_neighbor_degree.get(node, 0.0),
-                         avg_deg_of_neighbors,
                          ego_density,
                          square_clustering,
-                         num_neighbors,
-                         betw,
-                         close,
-                         eig,
-                         pr,
+                         num_neighbours,
+                         betweenness,
+                         closeness,
+                         eigenvector,
+                         pagerank,
                          core,
-                         ecc,
+                         eccentricity,
                          is_cut_vertex,
                          degree_ratio]
 
         features.append(node_features)
 
-    features_tensor = torch.tensor(features, dtype=torch.float32)
+    features_tensor = torch.tensor(features,
+                                   dtype=torch.float32)
 
     return features_tensor
 
 
 def add_structure_features(nx_graph: nx.Graph):
-    additional_feats = extract_node_features_tensor(nx_graph)
+    logging.info("Extracting node features with NetworkX 2...")
+
+    structural_features = extract_node_features_tensor(nx_graph)
 
     for i, node in enumerate(nx_graph.nodes()):
-        original_feat = nx_graph.nodes[node]['x']
-        stat_feat = additional_feats[i]
-        nx_graph.nodes[node]['x'] = torch.cat([original_feat, stat_feat])
+        original_node_features = nx_graph.nodes[node]['x']
+        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, structural_features[i]])

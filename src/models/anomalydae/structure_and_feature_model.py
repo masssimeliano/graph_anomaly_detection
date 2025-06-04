@@ -23,8 +23,8 @@ def train(nx_graph: nx.Graph,
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
 
-    base_train(di_graph,
-               labels,
+    base_train(di_graph=di_graph,
+               labels=labels,
                title_prefix=FEATURE_LABEL_STR,
                learning_rate=learning_rate,
                hid_dim=hid_dim,
@@ -35,10 +35,10 @@ def train(nx_graph: nx.Graph,
 def add_structure_features(nx_graph: nx.Graph):
     logging.info("Adding structural graphlet features to graph nodes...")
 
-    F = fg.compute(nx_graph).reindex(list(nx_graph.nodes()))
+    F = fg.compute(A=nx_graph).reindex(list(nx_graph.nodes()))
 
     for i, node in enumerate(nx_graph.nodes()):
-        original_feat = nx_graph.nodes[node]['x']
-        graphlet_feat = torch.tensor(F.iloc[i].values,
-                                     dtype=torch.float)
-        nx_graph.nodes[node]['x'] = torch.cat([original_feat, graphlet_feat])
+        original_node_features = nx_graph.nodes[node]['x']
+        node_graphlet_features = torch.tensor(F.iloc[i].values,
+                                              dtype=torch.float)
+        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, node_graphlet_features])

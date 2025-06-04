@@ -3,8 +3,8 @@ from typing import List
 import torch
 
 from pygod.pygod.detector import AnomalyDAE
-from pygod.pygod.detector.base import get_emd_file
 from src.helpers.config.training_config import *
+from src.helpers.loaders.emd_file_getter import get_emd_file
 
 
 def load_emd_model(dataset: str,
@@ -12,14 +12,18 @@ def load_emd_model(dataset: str,
                    labels: List[int],
                    learning_rate: float,
                    hid_dim: int,
-                   epoch: int):
+                   epoch: int,
+                   alpha: float = ALPHA,
+                   eta: int = ETA,
+                   theta: float = THETA):
     model = AnomalyDAE(labels=labels,
                        title_prefix=feature_label,
                        data_set=dataset,
                        lr=learning_rate,
                        hid_dim=hid_dim,
-                       eta=ETA,
-                       theta=THETA,
+                       alpha=alpha,
+                       eta=eta,
+                       theta=theta,
                        epoch=epoch)
     emd_file = get_emd_file(dataset=dataset,
                             title_prefix=feature_label,
