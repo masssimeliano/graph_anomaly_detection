@@ -87,12 +87,12 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         num_neighbours = len(node_neighbours)
 
         # New features
-        betweenness = betweenness.get(node, 0.0)
-        closeness = closeness.get(node, 0.0)
-        eigenvector = eigenvector.get(node, 0.0)
-        pagerank = pagerank.get(node, 0.0)
+        betweenness_node = betweenness.get(node, 0.0)
+        closeness_node = closeness.get(node, 0.0)
+        eigenvector_node = eigenvector.get(node, 0.0)
+        pagerank_node = pagerank.get(node, 0.0)
         core = core_number.get(node, 0)
-        eccentricity = eccentricity.get(node, 0.0)
+        eccentricity_node = eccentricity.get(node, 0.0)
         is_cut_vertex = 1.0 if node in articulation_points else 0.0
         degree_ratio = degree / max_degree if max_degree > 0 else 0.0
 
@@ -103,12 +103,12 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
                          ego_density,
                          square_clustering,
                          num_neighbours,
-                         betweenness,
-                         closeness,
-                         eigenvector,
-                         pagerank,
+                         betweenness_node,
+                         closeness_node,
+                         eigenvector_node,
+                         pagerank_node,
                          core,
-                         eccentricity,
+                         eccentricity_node,
                          is_cut_vertex,
                          degree_ratio]
 

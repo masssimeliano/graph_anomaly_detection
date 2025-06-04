@@ -69,5 +69,4 @@ def add_structure_features(nx_graph: nx.Graph):
 
     for i, node in enumerate(nx_graph.nodes()):
         original_node_features = nx_graph.nodes[node]['x']
-        structural_features = structural_features[i]
-        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, structural_features])
+        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, structural_features[i]])
