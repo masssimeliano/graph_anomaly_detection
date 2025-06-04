@@ -1,5 +1,5 @@
-from typing import List
 from dataclasses import dataclass, field
+from typing import List
 
 
 @dataclass
@@ -15,8 +15,6 @@ class Node:
         return (
             f"Node(id={self.id}, label={self.label}, "
             f"neighbours={[n.id for n in self.neighbours]}, "
-            f"str_anom={self.is_str_anomaly}, attr_anom={self.is_attr_anomaly})"
+            f"str_anom={self.is_str_anomaly}, "
+            f"attr_anom={self.is_attr_anomaly})"
         )
-
-    def add_neighbour(self, neighbour: 'Node'):
-        self.neighbours.append(neighbour)

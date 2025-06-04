@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 def visualize_graph(nx_graph: nx.Graph,
-                    node_color: list[str], title):
+                    node_color: list[str],
+                    title: str):
     logging.info("Visualizing NX graph...")
 
     fig, ax = plt.subplots(figsize=(12, 10))
@@ -40,7 +41,7 @@ def visualize_graph(nx_graph: nx.Graph,
 @timed
 def to_networkx_graph(graph: Graph,
                       visualize: bool = False,
-                      title: str = "Graph Visualization") -> nx.Graph:
+                      title: str = "Graph visualization") -> nx.Graph:
     logging.info("Forming a NX graph...")
 
     nx_graph = nx.Graph()

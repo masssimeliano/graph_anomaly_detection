@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    for i, dataset in enumerate(CURRENT_DATASETS):
+    for i, dataset in enumerate(iterable=CURRENT_DATASETS):
         logging.info(f"Preparing {dataset}...")
         labels, graph = load_graph_from_mat(name=dataset,
                                             size=CURRENT_DATASETS_SIZE[i])

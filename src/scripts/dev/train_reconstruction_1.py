@@ -19,21 +19,19 @@ def main():
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for i, dataset in enumerate(iterable=CURRENT_DATASETS,
-                                start=0):
+    for i, dataset in enumerate(iterable=CURRENT_DATASETS):
         logging.info(f"-------------------------------")
         logging.info(f"--- Begin training on {dataset} ({FEATURE_LABEL_ERROR1}) ---")
         logging.info(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset],
                                      visualize=False)
-        normalize_node_features_via_minmax_and_remove_nan(nx_graph)
-        reconstruction_error_model_1.train(
-            nx_graph,
-            labels_dict[dataset],
-            learning_rate=LEARNING_RATE,
-            hid_dim=HIDDEN_DIMS,
-            data_set=dataset)
+        normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
+        reconstruction_error_model_1.train(nx_graph=nx_graph,
+                                           labels=labels_dict[dataset],
+                                           learning_rate=LEARNING_RATE,
+                                           hid_dim=HIDDEN_DIMS,
+                                           dataset=dataset)
 
         logging.info(f"-------------------------------")
         logging.info(f"--- End training on {dataset} ({FEATURE_LABEL_ERROR1}) ---")
