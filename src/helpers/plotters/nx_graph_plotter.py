@@ -51,7 +51,7 @@ def to_networkx_graph(graph: Graph,
         nx_graph.add_node(node.id,
                           x=torch.tensor(node.features,
                                          dtype=torch.float))
-        if visualize:
+        if do_visualize:
             if node.is_attr_anomaly:
                 node_color.append("red")
             elif node.is_str_anomaly:
@@ -63,7 +63,7 @@ def to_networkx_graph(graph: Graph,
         for neighbour in node.neighbours:
             nx_graph.add_edge(node.id, neighbour.id)
 
-    if visualize:
+    if do_visualize:
         visualize_graph(nx_graph, node_color, title)
 
     return nx_graph
