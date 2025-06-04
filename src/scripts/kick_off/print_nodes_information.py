@@ -73,9 +73,9 @@ def summarize_structural_features(nx_graph: nx.Graph,
         group_tensor = tensor[indices]
         stats[group_name] = group_tensor.mean(dim=0).tolist()
 
-    print(f"\nMean of structural features ({dataset}):")
+    logging.info(f"\nMean of structural features ({dataset}):")
     df = pd.DataFrame(stats, index=feature_names).round(2)
-    print(df)
+    logging.info(df)
 
     return df
 

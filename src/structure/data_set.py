@@ -9,7 +9,9 @@ class DataSet:
         self.location: Path = DATASETS_DIR / size.value / name
 
     def __repr__(self):
-        return f"DataSet(name={self.name}, size={self.size.value}, location={self.location})"
+        return (f"DataSet(name={self.name}, "
+                f"size={self.size.value}, "
+                f"location={self.location})")
 
     def get_path(self) -> Path:
         return self.location

@@ -4,20 +4,20 @@
 # License: BSD 2 clause
 
 import time
-from inspect import signature
 from abc import ABC, abstractmethod
+from inspect import signature
 
-import torch
 import numpy as np
-from scipy.stats import binom
+import torch
 from scipy.special import erf
+from scipy.stats import binom
 from sklearn.metrics import roc_auc_score
-
-from torch_geometric.nn import GIN
 from torch_geometric import compile
 from torch_geometric.loader import NeighborLoader
+from torch_geometric.nn import GIN
 
-from src.helpers.config.config import RESULTS_DIR, EPOCHS
+from src.helpers.config.dir_config import *
+from src.helpers.config.training_config import *
 from ..utils import logger, validate_device, pprint, is_fitted
 
 

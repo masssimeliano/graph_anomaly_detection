@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import networkx as nx
@@ -9,6 +10,8 @@ from torch_geometric.utils import from_networkx
 from src.helpers.config.training_config import *
 from src.models.base_train import base_train
 from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
+
+logging.basicConfig(level=logging.INFO)
 
 
 def train(graph: nx.Graph,
@@ -42,7 +45,7 @@ def normalize_node_features_minmax(graph: nx.Graph):
 
 
 def extract_error_features(graph: nx.Graph) -> torch.Tensor:
-    print("Extracting node error rates...")
+    logging.info("Extracting node error rates...")
     features = [graph.nodes[node]['x'] for node in graph.nodes()]
     features_tensor = torch.stack(features).float()
 
@@ -65,7 +68,7 @@ def add_structure_features(graph: nx.Graph):
 
 # method for checking mean and median reconstruction errors of nodes
 def compare_anomaly_reconstruction_error(graph: nx.Graph, labels: List[int]):
-    print("Comparing reconstruction error between normal and anomalous nodes...")
+    logging.info("Comparing reconstruction error between normal and anomalous nodes...")
 
     features = [graph.nodes[node]['x'] for node in graph.nodes()]
     features_tensor = torch.stack(features).float()
@@ -83,12 +86,10 @@ def compare_anomaly_reconstruction_error(graph: nx.Graph, labels: List[int]):
     normal_errors = errors[labels == 0]
     anomaly_errors = errors[labels == 1]
 
-    print(f"Normal nodes:")
-    print(f"  Mean error:   {normal_errors.mean():.6f}")
-    print(f"  Median error: {np.median(normal_errors):.6f}")
+    logging.info(f"Normal nodes:")
+    logging.info(f"  Mean error:   {normal_errors.mean():.6f}")
+    logging.info(f"  Median error: {np.median(normal_errors):.6f}")
 
-    print(f"Anomalous nodes:")
-    print(f"  Mean error:   {anomaly_errors.mean():.6f}")
-    print(f"  Median error: {np.median(anomaly_errors):.6f}")
-
-    print("")
+    logging.info(f"Anomalous nodes:")
+    logging.info(f"  Mean error:   {anomaly_errors.mean():.6f}")
+    logging.info(f"  Median error: {np.median(anomaly_errors):.6f}\n")

@@ -1,8 +1,18 @@
-# order is important here because in parse_logs() it must search for all feature labels through contains()
-FEATURE_LABELS = ["Attr + Str2", "Attr + Str3", "Attr + Str", "Attr + Alpha1", "Attr + Alpha2",
-                  "Attr + Emd1", "Attr + Emd2", "Attr + Error1", "Attr + Error2"]
-
+FEATURE_LABEL_STR2 = "Attr + Str2"
+FEATURE_LABEL_STR3 = "Attr + Str3"
+FEATURE_LABEL_STR = "Attr + Str"
+FEATURE_LABEL_ALPHA1 = "Attr + Alpha1"
+FEATURE_LABEL_ALPHA2 = "Attr + Alpha2"
+FEATURE_LABEL_EMD1 = "Attr + Emd1"
+FEATURE_LABEL_EMD2 = "Attr + Emd2"
+FEATURE_LABEL_ERROR1 = "Attr + Error1"
+FEATURE_LABEL_ERROR2 = "Attr + Error2"
 FEATURE_LABEL_STANDARD = "Attr"
+
+# order is important here because in parse_logs() it must search for all feature labels through contains()
+FEATURE_LABELS = [FEATURE_LABEL_STR2, FEATURE_LABEL_STR3, FEATURE_LABEL_STR, FEATURE_LABEL_ALPHA1, FEATURE_LABEL_ALPHA2,
+                  FEATURE_LABEL_EMD1, FEATURE_LABEL_EMD2, FEATURE_LABEL_ERROR1, FEATURE_LABEL_ERROR2,
+                  FEATURE_LABEL_STANDARD]
 
 DICT_FILE_NAME = "file_name"
 DICT_DATASET = "dataset"

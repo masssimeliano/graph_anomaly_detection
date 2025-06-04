@@ -1,8 +1,7 @@
+import logging
 import os
 from collections import defaultdict
 
-import pandas as pd
-import seaborn as sns
 from matplotlib import pyplot as plt
 
 from src.helpers.config.const import *
@@ -10,43 +9,37 @@ from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
 
-FEATURE_TYPES = [
-    "Attr",
-    "Attr + Str",
-    "Attr + Str2",
-    "Attr + Str3",
-    "Attr + Error1",
-    "Attr + Error2",
-    "Attr + Emd1",
-    "Attr + Emd2",
+logging.basicConfig(level=logging.INFO)
+
+FEATURE_LABELS = [
+    FEATURE_LABEL_STANDARD,
+    FEATURE_LABEL_STR,
+    FEATURE_LABEL_STR2,
+    FEATURE_LABEL_STR3,
+    FEATURE_LABEL_ERROR1,
+    FEATURE_LABEL_ERROR2,
+    FEATURE_LABEL_EMD1,
+    FEATURE_LABEL_EMD2,
 ]
-FEATURE_COLORS = {
-    "Attr": "blue",
-    "Attr + Str": "green",
-    "Attr + Str2": "orange",
-    "Attr + Str3": "red",
-    "Attr + Error1": "yellow",
-    "Attr + Error2": "pink",
-    "Attr + Emd1": "black",
-    "Attr + Emd2": "gray",
+FEATURE_COLORS_DICT = {
+    FEATURE_LABEL_STANDARD: "blue",
+    FEATURE_LABEL_STR: "green",
+    FEATURE_LABEL_STR2: "orange",
+    FEATURE_LABEL_STR3: "red",
+    FEATURE_LABEL_ERROR1: "yellow",
+    FEATURE_LABEL_ERROR2: "pink",
+    FEATURE_LABEL_EMD1: "black",
+    FEATURE_LABEL_EMD2: "gray",
 }
-FEATURE_LABELS = {
-    "Attr": "Attribute (alpha = 0.5)",
-    "Attr + Str": "Attribute + Structure",
-    "Attr + Str2": "Attribute + Structure 2",
-    "Attr + Str3": "Attribute + Structure 3",
-    "Attr + Emd1": "Attribute + Embedding 1",
-    "Attr + Emd2": "Attribute + Embedding 2",
-    "Attr + Error1": "Attribute + Error 1",
-    "Attr + Error2": "Attribute + Error 2",
-}
-DATASET_AUC_PAPER = {
-    "cora": 0.762,
-    "citeseer": 0.727,
-    "BlogCatalog": 0.783,
-    "weibo": 0.915,
-    "Flickr": 0.751,
-    "Reddit": 0.557
+FEATURE_LABELS_DICT = {
+    FEATURE_LABEL_STANDARD: "Attribute (alpha = 0.5)",
+    FEATURE_LABEL_STR: "Attribute + Structure",
+    FEATURE_LABEL_STR2: "Attribute + Structure 2",
+    FEATURE_LABEL_STR3: "Attribute + Structure 3",
+    FEATURE_LABEL_EMD1: "Attribute + Embedding 1",
+    FEATURE_LABEL_EMD2: "Attribute + Embedding 2",
+    FEATURE_LABEL_ERROR1: "Attribute + Error 1",
+    FEATURE_LABEL_ERROR2: "Attribute + Error 2",
 }
 
 
@@ -61,7 +54,7 @@ def main_auc_roc():
     for dataset in datasets:
         plt.figure(figsize=(10, 6))
 
-        for feature in FEATURE_TYPES:
+        for feature in FEATURE_LABELS:
             filtered = [
                 r for r in parser.results
                 if r["dataset"] == dataset and r["features"] == feature
@@ -81,16 +74,16 @@ def main_auc_roc():
                 continue
 
             aucs = [epoch_auc[e] for e in EPOCHS]
-            plt.plot(EPOCHS, aucs, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            plt.plot(EPOCHS, aucs, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
 
         save_path = os.path.join(save_dir, f"{dataset}_auc_plot.png")
 
         plt.title(f'AUC-ROC vs Epochs ({dataset})')
         plt.xlabel('Epochs')
         plt.ylabel('AUC-ROC')
-        if dataset in DATASET_AUC_PAPER:
-            plt.axhline(y=DATASET_AUC_PAPER[dataset], color='purple', linestyle='--',
-                        label=f'Baseline ({DATASET_AUC_PAPER[dataset]})')
+        if dataset in AUC_ROC_PAPER:
+            plt.axhline(y=AUC_ROC_PAPER[dataset], color='purple', linestyle='--',
+                        label=f'Baseline ({AUC_ROC_PAPER[dataset]})')
         else:
             plt.axhline(y=0.5, color='purple', linestyle='--', label='Baseline (0.5)')
         plt.ylim(0.0, 1.0)
@@ -112,7 +105,7 @@ def main_loss():
     for dataset in datasets:
         plt.figure(figsize=(10, 6))
 
-        for feature in FEATURE_TYPES:
+        for feature in FEATURE_LABELS:
             filtered = [
                 r for r in parser.results
                 if r["dataset"] == dataset and r["features"] == feature
@@ -133,7 +126,7 @@ def main_loss():
 
             losses = [epoch_loss[e] for e in EPOCHS]
             losses = [loss / (1.5 * max(losses)) for loss in losses]
-            plt.plot(EPOCHS, losses, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            plt.plot(EPOCHS, losses, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
 
         save_path = os.path.join(save_dir, f"{dataset}_loss_plot.png")
 
@@ -179,7 +172,8 @@ def main_recall():
                 continue
 
             recalls = [epoch_recall[e] for e in EPOCHS]
-            plt.plot(EPOCHS, recalls, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            plt.plot(EPOCHS, recalls, marker='o', label=FEATURE_LABELS_DICT[feature],
+                     color=FEATURE_COLORS_DICT[feature])
 
         save_path = os.path.join(save_dir, f"{dataset}_recall_plot.png")
 
@@ -205,7 +199,7 @@ def main_precision():
     for dataset in datasets:
         plt.figure(figsize=(10, 6))
 
-        for feature in FEATURE_TYPES:
+        for feature in FEATURE_LABELS:
             filtered = [
                 r for r in parser.results
                 if r["dataset"] == dataset and r["features"] == feature
@@ -225,9 +219,10 @@ def main_precision():
                 continue
 
             precisions = [epoch_precision[e] for e in EPOCHS]
-            plt.plot(EPOCHS, precisions, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            plt.plot(EPOCHS, precisions, marker='o', label=FEATURE_LABELS_DICT[feature],
+                     color=FEATURE_COLORS_DICT[feature])
 
-        save_path = os.path.join(save_dir, f"{dataset}_recall_plot.png")
+        save_path = os.path.join(save_dir, f"{dataset}_precision_plot.png")
 
         plt.title(f'Precision@k vs Epochs ({dataset})')
         plt.xlabel('Epochs')
@@ -246,16 +241,16 @@ def main_time():
 
     save_dir = RESULTS_DIR / "graph" / "dev"
 
-    datasets = set(r["dataset"] for r in parser.results)
+    datasets = set(r[DICT_DATASET] for r in parser.results)
 
     max_time = 0
     for dataset in datasets:
         plt.figure(figsize=(10, 6))
 
-        for feature in FEATURE_TYPES:
+        for feature in FEATURE_LABELS:
             filtered = [
                 r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
+                if r[DICT_DATASET] == dataset and r[DICT_FEATURE_LABEL] == feature
             ]
 
             if not filtered:
@@ -263,8 +258,8 @@ def main_time():
 
             epoch_time = defaultdict(float)
             for r in filtered:
-                epoch = r["epoch"]
-                time = r["time"]
+                epoch = r[DICT_EPOCH]
+                time = r[DICT_TIME]
                 if time > epoch_time[epoch]:
                     epoch_time[epoch] = time
 
@@ -272,7 +267,7 @@ def main_time():
                 continue
 
             times = [epoch_time[e] for e in EPOCHS]
-            plt.plot(EPOCHS, times, marker='o', label=FEATURE_LABELS[feature], color=FEATURE_COLORS[feature])
+            plt.plot(EPOCHS, times, marker='o', label=FEATURE_LABELS_DICT[feature], color=FEATURE_COLORS_DICT[feature])
             if max(times) > max_time:
                 max_time = max(times)
 
@@ -287,102 +282,6 @@ def main_time():
         plt.tight_layout()
         plt.savefig(f"{dataset}_time_plot.png", dpi=300)
         plt.show()
-
-
-def generate_min_loss_table():
-    parser = LogParser()
-    parser.parse_logs()
-
-    datasets = set(r["dataset"] for r in parser.results)
-    loss_table = defaultdict(dict)
-
-    for dataset in datasets:
-        for feature in FEATURE_TYPES:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_loss = defaultdict(lambda: float("inf"))
-            for r in filtered:
-                epoch = r["epoch"]
-                loss = r["loss"]
-                if loss < epoch_loss[epoch]:
-                    epoch_loss[epoch] = loss
-
-            losses = [epoch_loss[e] for e in EPOCHS]
-
-            if epoch_loss:
-                min_loss = min(epoch_loss.values())
-                loss_table[dataset][feature] = round(min_loss / (1.5 * max(losses)), 4)
-
-    df = pd.DataFrame(loss_table).T  # Transpose so datasets are rows
-    df.index.name = "Dataset"
-
-    plt.figure(figsize=(14, 6))
-    sns.heatmap(df,
-                annot=True,
-                cmap="YlGnBu",
-                fmt=".2f",
-                cbar_kws={'label': '"Normalized" loss'},
-                vmin=0,
-                vmax=0.67)
-    plt.title("Minimum / 1.5*Maximum Loss per Feature Type across Datasets (AnomalyDAE)")
-    plt.xlabel("Feature Type")
-    plt.ylabel("Dataset")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
-
-
-def generate_auc_roc_table():
-    parser = LogParser()
-    parser.parse_logs()
-
-    datasets = set(r["dataset"] for r in parser.results)
-    loss_table = defaultdict(dict)
-
-    for dataset in datasets:
-        for feature in FEATURE_TYPES:
-            filtered = [
-                r for r in parser.results
-                if r["dataset"] == dataset and r["features"] == feature
-            ]
-
-            if not filtered:
-                continue
-
-            epoch_auc_roc = defaultdict(lambda: -1)
-            for r in filtered:
-                epoch = r["epoch"]
-                auc_roc = r["auc_roc"]
-                if auc_roc > epoch_auc_roc[epoch]:
-                    epoch_auc_roc[epoch] = auc_roc
-
-            if epoch_auc_roc:
-                max_auc_roc = max(epoch_auc_roc.values())
-                loss_table[dataset][feature] = round(max_auc_roc, 4)
-
-    df = pd.DataFrame(loss_table).T  # Transpose so datasets are rows
-    df.index.name = "Dataset"
-
-    plt.figure(figsize=(14, 6))
-    sns.heatmap(df,
-                annot=True,
-                cmap="YlGnBu",
-                fmt=".2f",
-                cbar_kws={'label': 'AUC-ROC'},
-                vmin=0,
-                vmax=1)
-    plt.title("AUC-ROC per Feature Type across Datasets (AnomalyDAE)")
-    plt.xlabel("Feature Type")
-    plt.ylabel("Dataset")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List
 
@@ -8,6 +9,8 @@ import torch_geometric
 from pygod.pygod.detector import AnomalyDAE
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
+
+logging.basicConfig(level=logging.INFO)
 
 
 def base_train(di_graph: torch_geometric.data.Data,
@@ -20,7 +23,7 @@ def base_train(di_graph: torch_geometric.data.Data,
     measure_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Device : ", device)
+    logging.info(f"Device : {device}")
 
     data_set_name = f"{data_set.replace('.mat', '')}"
 
@@ -42,7 +45,7 @@ def base_train(di_graph: torch_geometric.data.Data,
     array_time = []
 
     for i in range(3):
-        print(f"Fitting x{i + 1}...")
+        logging.info(f"Fitting x{i + 1}...")
         start_time = time.time()
         # adjusted regular method from AnomalyDAE
         model.fit(di_graph)
@@ -73,16 +76,16 @@ def base_train(di_graph: torch_geometric.data.Data,
                 log.write(msg + "\n")
 
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
-            print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
+            logging.info(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
 
             write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
             write(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
             write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
             write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
             write(f"Time: {array_time[i]:.4f}")
-            print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
-            print(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
-            print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
-            print(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
+            logging.info(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}")
+            logging.info(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
+            logging.info(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}")
+            logging.info(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}")
 
-    print(f"Time: {(time.time() - measure_time):.4f} sec")
+    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")

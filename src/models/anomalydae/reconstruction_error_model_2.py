@@ -1,9 +1,12 @@
-import networkx as nx
+import logging
 from typing import List
 
+import networkx as nx
 import torch
 
 from src.models.reconstruction_train import reconstruction_train
+
+logging.basicConfig(level=logging.INFO)
 
 
 def train(graph: nx.Graph,
@@ -13,11 +16,12 @@ def train(graph: nx.Graph,
           data_set: str):
     normalize_node_features_minmax(graph)
     reconstruction_train(graph,
-              labels,
-              "Attr + Error2",
-              learning_rate,
-              hid_dim,
-              data_set)
+                         labels,
+                         "Attr + Error2",
+                         learning_rate,
+                         hid_dim,
+                         data_set)
+
 
 def normalize_node_features_minmax(graph: nx.Graph):
     features = [graph.nodes[n]['x'] for n in graph.nodes()]

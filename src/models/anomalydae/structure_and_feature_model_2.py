@@ -1,13 +1,15 @@
+import logging
 import time
-
-import numpy as np
-import torch
-import networkx as nx
 from typing import List
 
+import networkx as nx
+import numpy as np
+import torch
 from torch_geometric.utils import from_networkx
 
 from src.models.base_train import base_train
+
+logging.basicConfig(level=logging.INFO)
 
 
 def train(graph: nx.Graph,
@@ -25,8 +27,9 @@ def train(graph: nx.Graph,
                hid_dim=hid_dim,
                data_set=data_set)
 
+
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
-    print("Extracting node features with NetworkX 1...")
+    logging.info("Extracting node features with NetworkX 1...")
     start_time = time.time()
 
     features = []
@@ -52,14 +55,15 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
                          avg_deg_of_neighbors,
                          ego_density,
                          square_clustering,
-                         num_neighbors,]
+                         num_neighbors, ]
         features.append(node_features)
 
     features_tensor = torch.tensor(features, dtype=torch.float32)
 
-    print(f"Execution time: {(time.time() - start_time):.4f} sec")
+    logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     return features_tensor
+
 
 def add_structure_features(graph: nx.Graph):
     additional_feats = extract_node_features_tensor(graph)

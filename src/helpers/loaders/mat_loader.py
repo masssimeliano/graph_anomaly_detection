@@ -1,13 +1,16 @@
-import time
+import logging
 from typing import List, Tuple
 
 import numpy as np
 import scipy.io
 
 from src.helpers.config.datasets_config import *
+from src.helpers.time.timed import timed
 from src.structure.data_set import DataSet
 from src.structure.graph import Graph
 from src.structure.node import Node
+
+logging.basicConfig(level=logging.INFO)
 
 
 def build_nodes(adj_matrix: np.ndarray,
@@ -22,10 +25,9 @@ def build_nodes(adj_matrix: np.ndarray,
             neighbours=[],
             features=attributes[i].tolist(),
             is_str_anomaly=bool(is_str_anomaly[i]),
-            is_attr_anomaly=bool(is_attr_anomaly[i])
-        )
-        for i in range(len(adj_matrix))
-    ]
+            is_attr_anomaly=bool(is_attr_anomaly[i]))
+
+        for i in range(len(adj_matrix))]
 
 
 def build_edges(nodes: List[Node],
@@ -38,11 +40,10 @@ def build_edges(nodes: List[Node],
                 nodes[j].neighbours.append(nodes[i])
 
 
+@timed
 def load_graph_from_mat(name: str,
                         size: DataSetSize) -> Tuple[List[int], Graph]:
-    print("Loading and building a graph...")
-
-    start_time = time.time()
+    logging.info("Loading and building a graph...")
 
     dataset = DataSet(name, size)
     data = scipy.io.loadmat(dataset.location)
@@ -55,7 +56,5 @@ def load_graph_from_mat(name: str,
 
     nodes = build_nodes(adj_matrix, attributes, labels, is_str_anomaly, is_attr_anomaly)
     build_edges(nodes, adj_matrix)
-
-    print(f"Execution time: {(time.time() - start_time):.4f} sec")
 
     return labels.tolist(), Graph(nodes)

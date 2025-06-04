@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List
 
@@ -12,6 +13,8 @@ from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_minmax
 
+logging.basicConfig(level=logging.INFO)
+
 
 def reconstruction_train(nx_graph: nx.Graph,
                          labels: List[int],
@@ -21,7 +24,7 @@ def reconstruction_train(nx_graph: nx.Graph,
                          data_set: str,
                          alpha: float = 0.5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Device : ", device)
+    logging.info(f"Device : {device}")
 
     measure_time = time.time()
     for current_epoch in EPOCHS:
@@ -57,7 +60,7 @@ def reconstruction_train(nx_graph: nx.Graph,
             precision = 0
             timer = 0
             for i in range(3):
-                print(f"Fitting x{i + 1}...")
+                logging.info(f"Fitting x{i + 1}...")
                 start_time = time.time()
                 # adjusted regular method from AnomalyDAE
                 model.fit(di_graph)
@@ -76,20 +79,20 @@ def reconstruction_train(nx_graph: nx.Graph,
             timer = timer / 3
 
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
-            print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
+            logging.info(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
 
             write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
             write(f"Loss ({title_prefix}): {loss:.4f}")
             write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
             write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
             write(f"Time: {timer:.4f}")
-            print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
-            print(f"Loss ({title_prefix}): {loss:.4f}")
-            print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
-            print(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
-            print(f"Execution time: {(time.time() - start_time):.4f} sec")
+            logging.info(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
+            logging.info(f"Loss ({title_prefix}): {loss:.4f}")
+            logging.info(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
+            logging.info(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
+            logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
 
-    print(f"Time: {(time.time() - measure_time):.4f} sec")
+    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")
 
 
 def get_reconstruction_errors(graph: nx.Graph,
@@ -98,7 +101,7 @@ def get_reconstruction_errors(graph: nx.Graph,
                               hid_dim: int,
                               epoch: int,
                               data_set: str):
-    print("Calculating errors for graph nodes...")
+    logging.info("Calculating errors for graph nodes...")
 
     normalize_node_features_minmax(graph)
     di_graph = from_networkx(graph)
@@ -112,7 +115,7 @@ def get_reconstruction_errors(graph: nx.Graph,
                        title_prefix="Attr + Error2",
                        data_set=data_set)
 
-    print(f"Training-Fitting...")
+    logging.info(f"Training-Fitting...")
     model.fit(di_graph)
     stru_error_mean = model.stru_error_mean
     stru_error_std = model.stru_error_std

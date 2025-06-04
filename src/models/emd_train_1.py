@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List
 
@@ -12,6 +13,8 @@ from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model
 
+logging.basicConfig(level=logging.INFO)
+
 
 def emd_train(nx_graph: nx.Graph,
               labels: List[int],
@@ -21,7 +24,7 @@ def emd_train(nx_graph: nx.Graph,
               data_set: str,
               alpha: float = 0.5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Device : ", device)
+    logging.info(f"Device : {device}")
 
     measure_time = time.time()
     for current_epoch in EPOCHS:
@@ -59,7 +62,7 @@ def emd_train(nx_graph: nx.Graph,
             precision = 0
             timer = 0
             for i in range(3):
-                print(f"Fitting x{i + 1}...")
+                logging.info(f"Fitting x{i + 1}...")
                 start_time = time.time()
                 # adjusted regular method from AnomalyDAE
                 model.fit_emd(di_graph)
@@ -77,20 +80,20 @@ def emd_train(nx_graph: nx.Graph,
             timer /= 3
 
             write(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
-            print(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
+            logging.info(f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})")
 
             write(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
             write(f"Loss ({title_prefix}): {loss:.4f}")
             write(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
             write(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
             write(f"Time: {timer:.4f}")
-            print(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
-            print(f"Loss ({title_prefix}): {loss:.4f}")
-            print(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
-            print(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
-            print(f"Execution time: {(time.time() - start_time):.4f} sec")
+            logging.info(f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {auc:.4f}")
+            logging.info(f"Loss ({title_prefix}): {loss:.4f}")
+            logging.info(f"Recall@k ({title_prefix}) for k={labels.count(1)}: {recall:.4f}")
+            logging.info(f"Precision@k ({title_prefix}) for k={labels.count(1)}: {precision:.4f}")
+            logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
 
-    print(f"Time: {(time.time() - measure_time):.4f} sec")
+    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")
 
 
 def extract_embedding_features(graph: nx.Graph,
@@ -99,7 +102,7 @@ def extract_embedding_features(graph: nx.Graph,
                                hid_dim: int,
                                epoch: int,
                                data_set: str):
-    print("Loading embedding features to graph nodes...")
+    logging.info("Loading embedding features to graph nodes...")
 
     emd_model = load_emd_model(data_set=data_set.replace(".mat", ""),
                                labels=labels,

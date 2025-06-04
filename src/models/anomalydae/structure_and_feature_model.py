@@ -1,13 +1,15 @@
+import logging
 import time
-
-import torch
-import networkx as nx
-import pyfglt.fglt as fg
 from typing import List
 
+import networkx as nx
+import pyfglt.fglt as fg
+import torch
 from torch_geometric.utils import from_networkx
 
 from src.models.base_train import base_train
+
+logging.basicConfig(level=logging.INFO)
 
 
 def train(graph: nx.Graph,
@@ -25,8 +27,9 @@ def train(graph: nx.Graph,
                hid_dim=hid_dim,
                data_set=data_set)
 
+
 def add_structure_features(graph: nx.Graph):
-    print("Adding structural graphlet features to graph nodes...")
+    logging.info("Adding structural graphlet features to graph nodes...")
     start_time = time.time()
 
     F = fg.compute(graph).reindex(list(graph.nodes()))
@@ -36,4 +39,4 @@ def add_structure_features(graph: nx.Graph):
         graphlet_feat = torch.tensor(F.iloc[i].values, dtype=torch.float)
         graph.nodes[node]['x'] = torch.cat([original_feat, graphlet_feat])
 
-    print(f"Execution time: {(time.time() - start_time):.4f} sec")
+    logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")

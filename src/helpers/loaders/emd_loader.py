@@ -8,13 +8,13 @@ from src.helpers.config.training_config import *
 
 
 def load_emd_model(data_set: str,
-                   feature: str,
+                   feature_label: str,
                    labels: List[int],
                    lr: float,
                    hid_dim: int,
                    epoch: int):
     model = AnomalyDAE(labels=labels,
-                       title_prefix=feature,
+                       title_prefix=feature_label,
                        data_set=data_set,
                        lr=lr,
                        hid_dim=hid_dim,
@@ -22,7 +22,7 @@ def load_emd_model(data_set: str,
                        theta=THETA,
                        epoch=epoch)
     emd_file = get_emd_file(data_set,
-                            feature,
+                            feature_label,
                             lr,
                             hid_dim,
                             epoch)

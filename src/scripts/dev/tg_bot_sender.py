@@ -1,10 +1,16 @@
+import os
 import sys
-import telebot
 
-BOT_TOKEN = '7603189034:AAGCeQDK3Oqzn0o7qeQzJLgrZiDGm-KHkqA'
-CHAT_ID = '340101376'
+import telebot
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="./tg.env")
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 bot = telebot.TeleBot(BOT_TOKEN)
+
 
 class TelegramLogger(object):
     def __init__(self):

@@ -3,14 +3,10 @@
 on attributed networks"""
 import warnings
 
-# Author: Xueying Ding <xding2@andrew.cmu.edu>,
-#         Kay Liu <zliu234@uic.edu>
-# License: BSD 2 clause
-
 import torch
 import torch.nn.functional as F
 
-from src.helpers.config.config import EPOCHS
+from src.helpers.config.training_config import *
 from . import DeepDetector
 from ..nn import AnomalyDAEBase
 

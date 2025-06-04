@@ -8,5 +8,14 @@ THETA = 40
 
 SEED = 42
 
+AUC_ROC_PAPER = {
+    "cora": 0.762,
+    "citeseer": 0.727,
+    "BlogCatalog": 0.783,
+    "weibo": 0.915,
+    "Flickr": 0.751,
+    "Reddit": 0.557
+}
+
 labels_dict = {}
 graph_dict = {}
