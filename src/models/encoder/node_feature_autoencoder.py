@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# simple autoencoder
 class NodeFeatureAutoencoder(nn.Module):
     def __init__(self, in_dim, hid_dim):
         super().__init__()

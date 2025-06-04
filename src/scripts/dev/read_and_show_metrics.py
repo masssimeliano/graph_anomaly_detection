@@ -77,10 +77,10 @@ def create_metric_plot(metric_name: str,
 
             values = [value_per_epochs[epoch] for epoch in EPOCHS]
             plot.plot(EPOCHS,
-                     values,
-                     marker='o',
-                     label=FEATURE_LABELS_DICT[feature_label],
-                     color=FEATURE_COLORS_DICT[feature_label])
+                      values,
+                      marker='o',
+                      label=FEATURE_LABELS_DICT[feature_label],
+                      color=FEATURE_COLORS_DICT[feature_label])
 
         plot.title(f'{y_axis_label} vs {VALUE_EPOCH} ({dataset})')
         plot.xlabel(VALUE_EPOCH)
@@ -99,9 +99,9 @@ def create_metric_plot(metric_name: str,
                 y = baseline_dict[dataset]
                 label = f'Baseline ({baseline_dict[dataset]})'
             plot.axhline(y=y,
-                        color='purple',
-                        linestyle='--',
-                        label=label)
+                         color='purple',
+                         linestyle='--',
+                         label=label)
         plot.legend()
 
         save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
@@ -127,7 +127,7 @@ def get_max_value_for_dataset_and_metric(dataset: str,
             if value > max_value:
                 max_value = value
 
-    return max_value
+    return max(max_value, 1)
 
 
 def plot_loss():
@@ -157,8 +157,8 @@ def plot_time():
 
 
 if __name__ == "__main__":
-    # plot_loss()
-    # plot_auc_roc()
-    # plot_recall()
-    # plot_precision()
+    plot_loss()
+    plot_auc_roc()
+    plot_recall()
+    plot_precision()
     plot_time()

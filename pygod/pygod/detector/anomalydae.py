@@ -67,7 +67,6 @@ class AnomalyDAE(DeepDetector):
         self.theta = theta
         self.eta = eta
         self.title_prefix = title_prefix
-
         # new variables for quicker learning
         self.array_loss = []
         self.array_auc_roc = []
@@ -75,7 +74,7 @@ class AnomalyDAE(DeepDetector):
         self.array_precision_k = []
         self.amount_of_epochs = max(EPOCHS)
         self.labels = labels
-        self.data_set = data_set
+        self.dataset = data_set
         self.loss_last = 0
         self.last_time = 0
         self.array_time = []
@@ -134,6 +133,9 @@ class AnomalyDAE(DeepDetector):
 
         return loss, score.detach().cpu(), structural_error_mean, structural_error_std, attribute_error_mean, attribute_error_std
 
+    # custom fit() method that works with same epochs value
+    # and saves resulting metrics inside for-cycle
+    # (used for base training)
     def fit(self, data, label=None):
         start_time = time.time()
         self.array_loss = []
@@ -175,12 +177,14 @@ class AnomalyDAE(DeepDetector):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
+                # getting structural and attribute reconstruction errors
                 loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
                     sampled_data)
                 self.stru_error_mean = stru_error_std
                 self.stru_error_std = stru_error_std
                 self.attr_error_mean = attr_error_mean
                 self.attr_error_std = attr_error_std
+
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
@@ -208,33 +212,43 @@ class AnomalyDAE(DeepDetector):
                 if (epoch in EPOCHS):
                     self.array_time.append(time.time() - start_time)
                     self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
+                    auc_roc = roc_auc_score(self.labels,
+                                            self.decision_score_)
 
                     self_labels = self.labels
                     self_score = self.decision_score_
                     self_k = self.labels.count(1)
-                    recall_k = recall_at_k(self_labels, self_score, self_k)
-                    precision_k = precision_at_k(self_labels, self_score, self_k)
+                    recall_k = recall_at_k(y_true=self_labels,
+                                           scores=self_score,
+                                           k=self_k)
+                    precision_k = precision_at_k(y_true=self_labels,
+                                                 scores=self_score,
+                                                 k=self_k)
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
+
                     # saving embedding if its needed
                     if self.save_emb:
-                        data_set = self.data_set
+                        dataset = self.dataset
                         title_prefix = self.title_prefix
-                        lr = self.lr
+                        learning_rate = self.lr
                         hid_dim = self.hid_dim
-                        emd_file = get_emd_file(data_set,
-                                                title_prefix,
-                                                lr,
-                                                hid_dim,
-                                                epoch)
-                        torch.save(self.emb, emd_file)
+                        emd_file = get_emd_file(dataset=dataset,
+                                                title_prefix=title_prefix,
+                                                learning_rate=learning_rate,
+                                                hid_dim=hid_dim,
+                                                epoch=epoch, )
+                        torch.save(obj=self.emb,
+                                   f=emd_file)
 
         self._process_decision_score()
         return self
 
-    def fit_emd(self, data, label=None):
+    # custom fit() method that works with same epochs value,
+    # but calculates every resulting metric only once
+    # (used for training with embedding)
+    def fit_emd(self, data):
         start_time = time.time()
         self.process_graph(data)
         self.num_nodes, self.in_dim = data.x.shape
@@ -269,6 +283,7 @@ class AnomalyDAE(DeepDetector):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
+                # structural and attribute reconstruction errors are not used here
                 loss, score, _, _, _, _ = self.forward_model(sampled_data)
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
@@ -295,16 +310,18 @@ class AnomalyDAE(DeepDetector):
 
         # saving embedding if its needed
         if (self.save_emb):
-            data_set = self.data_set
+            dataset = self.dataset
             title_prefix = self.title_prefix
-            lr = self.lr
+            learning_rate = self.lr
             hid_dim = self.hid_dim
-            emd_file = get_emd_file(data_set,
-                                    title_prefix,
-                                    lr,
-                                    hid_dim,
-                                    epoch)
-            torch.save(self.emb, emd_file)
+            epoch = self.epoch
+            emd_file = get_emd_file(dataset=dataset,
+                                    title_prefix=title_prefix,
+                                    learning_rate=learning_rate,
+                                    hid_dim=hid_dim,
+                                    epoch=epoch)
+            torch.save(obj=self.emb,
+                       f=emd_file)
 
         self._process_decision_score()
         return self

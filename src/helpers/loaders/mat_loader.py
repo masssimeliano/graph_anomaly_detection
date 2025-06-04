@@ -54,7 +54,12 @@ def load_graph_from_mat(name: str,
     is_str_anomaly = data["str_anomaly_label"].flatten()
     is_attr_anomaly = data["attr_anomaly_label"].flatten()
 
-    nodes = build_nodes(adj_matrix, attributes, labels, is_str_anomaly, is_attr_anomaly)
-    build_edges(nodes, adj_matrix)
+    nodes = build_nodes(adj_matrix=adj_matrix,
+                        attributes=attributes,
+                        labels=labels,
+                        is_str_anomaly=is_str_anomaly,
+                        is_attr_anomaly=is_attr_anomaly)
+    build_edges(nodes=nodes,
+                adj_matrix=adj_matrix)
 
     return labels.tolist(), Graph(nodes)

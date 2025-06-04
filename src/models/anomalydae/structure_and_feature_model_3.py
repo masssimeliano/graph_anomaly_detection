@@ -6,7 +6,6 @@ import torch
 from torch_geometric.utils import from_networkx
 
 from src.helpers.config.const import FEATURE_LABEL_STR3
-from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.base_train import base_train
 
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +16,6 @@ def train(nx_graph: nx.Graph,
           learning_rate: float,
           hid_dim: int,
           dataset: str):
-    normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
 

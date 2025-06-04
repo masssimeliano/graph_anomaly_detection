@@ -1,14 +1,17 @@
 EPOCH_TO_LEARN = 100
 EPOCHS = list(range(10, 101, 10))
 
+# hyper parameters from benchmark
 LEARNING_RATE = 0.005
 HIDDEN_DIMS = 16
 ETA = 5
 THETA = 40
 ALPHA = 0.5
 
+# custom seed
 SEED = 42
 
+# AUC-ROC from benchmark
 AUC_ROC_PAPER = {
     "cora": 0.762,
     "citeseer": 0.727,
