@@ -157,8 +157,8 @@ def plot_time():
 
 
 if __name__ == "__main__":
-    plot_loss()
-    plot_auc_roc()
-    plot_recall()
-    plot_precision()
+    # plot_loss()
+    # plot_auc_roc()
+    # plot_recall()
+    # plot_precision()
     plot_time()

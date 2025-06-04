@@ -38,7 +38,7 @@ def emd_train(nx_graph: nx.Graph,
                                    dataset)
         di_graph = from_networkx(nx_graph)
 
-        data_set_name = f"{dataset.replace('.mat', '')}"
+        dataset_name = f"{dataset.replace('.mat', '')}"
 
         model = AnomalyDAE(epoch=current_epoch,
                            labels=labels,
