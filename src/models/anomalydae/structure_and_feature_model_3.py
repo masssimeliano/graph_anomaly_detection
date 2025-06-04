@@ -32,7 +32,7 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
 
     features = []
 
-    avg_neighbor_degree = nx.average_neighbor_degree(graph)
+    average_neighbour_degree = nx.average_neighbor_degree(graph)
     square_clust = nx.square_clustering(graph)
 
     try:
@@ -97,7 +97,7 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         node_features = [degree,
                          clustering,
                          triangle_count,
-                         avg_neighbor_degree.get(node, 0.0),
+                         average_neighbour_degree.get(node, 0.0),
                          ego_density,
                          square_clustering,
                          num_neighbours,

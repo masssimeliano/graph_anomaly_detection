@@ -31,4 +31,5 @@ def load_emd_model(dataset: str,
                             hid_dim=hid_dim,
                             epoch=epoch)
     model.emb = torch.load(f=emd_file)
+
     return model.emb

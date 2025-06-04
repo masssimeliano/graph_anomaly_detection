@@ -6,15 +6,14 @@ from typing import List
 class Node:
     id: int
     label: int
+    is_str_anomaly: bool
+    is_attr_anomaly: bool
     neighbours: List['Node'] = field(default_factory=list)
     features: List[float] = field(default_factory=list)
-    is_str_anomaly: bool = False
-    is_attr_anomaly: bool = False
 
     def __repr__(self):
-        return (
-            f"Node(id={self.id}, label={self.label}, "
-            f"neighbours={[n.id for n in self.neighbours]}, "
-            f"str_anom={self.is_str_anomaly}, "
-            f"attr_anom={self.is_attr_anomaly})"
-        )
+        return (f"Node(id={self.id}, "
+                f"label={self.label}, "
+                f"neighbours={[node_neighbour.id for node_neighbour in self.neighbours]}, "
+                f"str_anom={self.is_str_anomaly}, "
+                f"attr_anom={self.is_attr_anomaly})")

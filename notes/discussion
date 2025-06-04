@@ -21,7 +21,6 @@ Absprache (23.05):
 - LaTeX
 
 ToDo (23.05):
-- Heatmap für Loss verbessern - Erledigt
 - Auf ca. 100 Epochen begrenzen - Erledigt
 - Loss im Bezug auf Epochen beobachten - Erledigt
 - Daten in Train/Test/Validation-Datasets unterteilen und verwenden
@@ -39,9 +38,9 @@ Absprache (30.05):
 
 ToDo (30.05):
 - Zeit messen - Erledigt
-- Fehler aus AnomalyDAE verwenden - Erledigt
+- Fehler aus AnomalyDAE verwenden - Erledigt in Attr + Error2
 - LaTeX-Inhalt machen
-- Ähnliche Arbeiten einsehen
-- Versuchen den Fehlerart zu parsen
+- Ähnliche Arbeiten einsehen - Average Controllability, ID_Features
+- Versuchen den Fehlerart zu parsen - Bei manchen beides, bei anderen - getrennt
 
 
