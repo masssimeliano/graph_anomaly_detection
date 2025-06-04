@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import List
 
 import networkx as nx
@@ -7,17 +6,20 @@ import pyfglt.fglt as fg
 import torch
 from torch_geometric.utils import from_networkx
 
+from src.helpers.time.timed import timed
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.base_train import base_train
 
 logging.basicConfig(level=logging.INFO)
 
 
-def train(graph: nx.Graph,
+def train(nx_graph: nx.Graph,
           labels: List[int],
           learning_rate: float,
           hid_dim: int,
-          data_set: str):
-    add_structure_features(graph)
+          dataset: str):
+    normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
+    add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(graph)
 
     base_train(di_graph,
@@ -25,18 +27,16 @@ def train(graph: nx.Graph,
                title_prefix="Attr + Str",
                learning_rate=learning_rate,
                hid_dim=hid_dim,
-               data_set=data_set)
+               dataset=dataset)
 
 
-def add_structure_features(graph: nx.Graph):
+@timed
+def add_structure_features(nx_graph: nx.Graph):
     logging.info("Adding structural graphlet features to graph nodes...")
-    start_time = time.time()
 
-    F = fg.compute(graph).reindex(list(graph.nodes()))
+    F = fg.compute(nx_graph).reindex(list(nx_graph.nodes()))
 
-    for i, node in enumerate(graph.nodes()):
-        original_feat = graph.nodes[node]['x']
+    for i, node in enumerate(nx_graph.nodes()):
+        original_feat = nx_graph.nodes[node]['x']
         graphlet_feat = torch.tensor(F.iloc[i].values, dtype=torch.float)
-        graph.nodes[node]['x'] = torch.cat([original_feat, graphlet_feat])
-
-    logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
+        nx_graph.nodes[node]['x'] = torch.cat([original_feat, graphlet_feat])

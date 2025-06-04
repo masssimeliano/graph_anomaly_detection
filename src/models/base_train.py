@@ -18,14 +18,14 @@ def base_train(di_graph: torch_geometric.data.Data,
                title_prefix: str,
                learning_rate: float,
                hid_dim: int,
-               data_set: str,
+               dataset: str,
                alpha: float = 0.5):
     measure_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device : {device}")
 
-    data_set_name = f"{data_set.replace('.mat', '')}"
+    data_set_name = f"{dataset.replace('.mat', '')}"
 
     model = AnomalyDAE(epoch=EPOCH_TO_LEARN,
                        lr=learning_rate,
@@ -70,7 +70,7 @@ def base_train(di_graph: torch_geometric.data.Data,
     array_time /= 3
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
-        log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+        log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:
             def write(msg):
                 log.write(msg + "\n")

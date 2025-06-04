@@ -1,7 +1,10 @@
+from dataclasses import dataclass
+
 from src.helpers.config.datasets_config import *
 from src.helpers.config.dir_config import *
 
 
+@dataclass
 class DataSet:
     def __init__(self, name: str, size: DataSetSize):
         self.name = name

@@ -19,7 +19,8 @@ def main():
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for i, dataset in enumerate(CURRENT_DATASETS, start=0):
+    for i, dataset in enumerate(iterable=CURRENT_DATASETS,
+                                start=0):
         logging.info(f"-------------------------------")
         logging.info(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         logging.info(f"-------------------------------")

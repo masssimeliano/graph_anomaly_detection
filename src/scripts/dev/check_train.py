@@ -19,7 +19,7 @@ def main():
 
     train_baseline.main()
 
-    read_and_show_metrics.main_time()
+    read_and_show_metrics.plot_time()
 
 
 if __name__ == "__main__":

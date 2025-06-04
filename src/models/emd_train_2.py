@@ -21,7 +21,7 @@ def emd_train(nx_graph: nx.Graph,
               title_prefix: str,
               learning_rate: float,
               hid_dim: int,
-              data_set: str,
+              dataset: str,
               alpha: float = 0.5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device : {device}")
@@ -35,15 +35,15 @@ def emd_train(nx_graph: nx.Graph,
                                    learning_rate,
                                    hid_dim,
                                    current_epoch,
-                                   data_set)
+                                   dataset)
         di_graph = from_networkx(nx_graph)
 
-        data_set_name = f"{data_set.replace('.mat', '')}"
+        data_set_name = f"{dataset.replace('.mat', '')}"
 
         model = AnomalyDAE(epoch=current_epoch,
                            labels=labels,
                            title_prefix=title_prefix,
-                           data_set=data_set_name,
+                           dataset=dataset_name,
                            lr=learning_rate,
                            hid_dim=hid_dim,
                            alpha=alpha,
@@ -51,7 +51,7 @@ def emd_train(nx_graph: nx.Graph,
                            theta=THETA,
                            gpu=0)
 
-        log_file = RESULTS_DIR / f"{data_set.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+        log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         with open(log_file, "w") as log:
             def write(msg):
                 log.write(msg + "\n")

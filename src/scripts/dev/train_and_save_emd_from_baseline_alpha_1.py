@@ -9,6 +9,7 @@ from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.anomalydae import baseline_alpha_model_1
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,12 +21,14 @@ def main():
     np.random.seed(SEED)
     random.seed(SEED)
 
-    for i, dataset in enumerate(CURRENT_DATASETS, start=0):
+    for i, dataset in enumerate(iterable=CURRENT_DATASETS,
+                                start=0):
         logging.info(f"-------------------------------")
         logging.info(f"--- Begin training on {dataset} ({FEATURE_TYPE}) ---")
         logging.info(f"-------------------------------")
 
         nx_graph = to_networkx_graph(graph=graph_dict[dataset], visualize=False)
+        normalize_node_features_via_minmax_and_remove_nan(nx_graph)
         di_graph = from_networkx(nx_graph)
         baseline_alpha_model_1.train(
             di_graph,

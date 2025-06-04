@@ -36,120 +36,124 @@ FEATURE_LABELS_DICT = {
     FEATURE_LABEL_STR: "Attribute + Structure (pyfglt)",
     FEATURE_LABEL_STR2: "Attribute + Structure 2 (NetworkX Features v1)",
     FEATURE_LABEL_STR3: "Attribute + Structure 3 (NetworkX Features v2)",
-    FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0))",
-    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1)",
     FEATURE_LABEL_ERROR1: "Attribute + Error 1 (Reconstruction error from simple encoder)",
     FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from AnomalyDAE encoder)",
+    FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0 (node features)))",
+    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1 (adjacent matrix))",
 }
 
 
-def plot_metric(metric_key: str,
-                ylabel: str,
-                baseline_dict=None):
+def create_metric_plot(metric_name: str,
+                       y_axis_label: str,
+                       baseline_dict: dict[str, float] = None):
     parser = LogParser()
     parser.parse_logs()
 
-    save_dir = RESULTS_DIR / "graph" / "dev"
-    datasets = set(r[DICT_DATASET] for r in parser.results)
+    datasets = set(result[DICT_DATASET] for result in parser.results)
 
     for dataset in datasets:
         max_value = get_max_value_for_dataset_and_metric(dataset=dataset,
                                                          parser=parser,
-                                                         metric_key=metric_key)
+                                                         metric_name=metric_name)
 
         plt.figure(figsize=(10, 6))
 
-        for feature in FEATURE_LABELS:
-            filtered = [
-                r for r in parser.results
-                if r[DICT_DATASET] == dataset and r[DICT_FEATURE_LABEL] == feature
+        for feature_label in FEATURE_LABELS:
+            filtered_feature_labels = [
+                result for result in parser.results
+                if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
             ]
-            if not filtered:
+            if not filtered_feature_labels:
                 continue
 
-            epoch_values = defaultdict(float)
-            for r in filtered:
-                epoch = r[DICT_EPOCH]
-                value = r.get(metric_key, 0.0)
-                epoch_values[epoch] = value
+            value_per_epochs = defaultdict(float)
+            for result in filtered_feature_labels:
+                epoch = result[DICT_EPOCH]
+                value = result.get(metric_name, 0)
+                value_per_epochs[epoch] = value
 
-            if not epoch_values:
+            if not value_per_epochs:
                 continue
 
-            values = [epoch_values[e] for e in EPOCHS]
-            plt.plot(EPOCHS, values, marker='o',
-                     label=FEATURE_LABELS_DICT[feature],
-                     color=FEATURE_COLORS_DICT[feature])
+            values = [value_per_epochs[epoch] for epoch in EPOCHS]
+            plt.plot(EPOCHS,
+                     values,
+                     marker='o',
+                     label=FEATURE_LABELS_DICT[feature_label],
+                     color=FEATURE_COLORS_DICT[feature_label])
 
-        plt.title(f'{ylabel} vs Epochs ({dataset})')
-        plt.xlabel('Epochs')
-        plt.ylabel(ylabel)
+        plt.title(f'{y_axis_label} vs {VALUE_EPOCH} ({dataset})')
+        plt.xlabel(VALUE_EPOCH)
+        plt.ylabel(y_axis_label)
+        # normalizing
         plt.ylim(0.0, 1.5 * max_value)
         plt.grid(True)
-        plt.legend()
         plt.tight_layout()
 
-        if baseline_dict is not None and dataset in baseline_dict:
-            plt.axhline(y=baseline_dict[dataset],
+        # if benchmark result is given
+        if (metric_name == DICT_AUC_ROC):
+            y = 0.5
+            label = 'Baseline (0.5)'
+            # if benchmark result is given
+            if baseline_dict is not None and dataset in baseline_dict:
+                y = baseline_dict[dataset]
+                label = f'Baseline ({baseline_dict[dataset]})'
+            plt.axhline(y=y,
                         color='purple',
                         linestyle='--',
-                        label=f'Baseline ({baseline_dict[dataset]})')
-        elif baseline_dict:
-            plt.axhline(y=0.5,
-                        color='purple',
-                        linestyle='--',
-                        label='Baseline (0.5)')
+                        label=label)
+        plt.legend()
 
-        save_path = os.path.join(save_dir, f"{dataset}_{ylabel}.png")
+        save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
         plt.savefig(save_path, dpi=300)
         plt.show()
 
 
 def get_max_value_for_dataset_and_metric(dataset: str,
                                          parser: LogParser,
-                                         metric_key: str) -> float:
-    max_val = 0
+                                         metric_name: str) -> float:
+    max_value = 0
 
-    for feature in FEATURE_LABELS:
-        filtered = [
-            r for r in parser.results
-            if r[DICT_DATASET] == dataset and r[DICT_FEATURE_LABEL] == feature
+    for feature_label in FEATURE_LABELS:
+        filtered_parser_result = [
+            result for result in parser.results
+            if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
         ]
-        if not filtered:
+        if not filtered_parser_result:
             continue
 
-        for r in filtered:
-            value = r.get(metric_key, 0.0)
-            if value > max_val:
-                max_val = value
+        for result in filtered_parser_result:
+            value = result.get(metric_name, 0)
+            if value > max_value:
+                max_value = value
 
-    return max_val
+    return max_value
 
 
 def plot_loss():
-    plot_metric(metric_key=DICT_LOSS,
-                ylabel=VALUE_LOSS)
+    create_metric_plot(metric_name=DICT_LOSS,
+                       y_axis_label=VALUE_LOSS)
 
 
 def plot_auc_roc():
-    plot_metric(metric_key=DICT_AUC_ROC,
-                ylabel=VALUE_AUC_ROC,
-                baseline_dict=AUC_ROC_PAPER)
+    create_metric_plot(metric_name=DICT_AUC_ROC,
+                       y_axis_label=VALUE_AUC_ROC,
+                       baseline_dict=AUC_ROC_PAPER)
 
 
 def plot_recall():
-    plot_metric(metric_key=DICT_RECALL,
-                ylabel=VALUE_RECALL)
+    create_metric_plot(metric_name=DICT_RECALL,
+                       y_axis_label=VALUE_RECALL)
 
 
 def plot_precision():
-    plot_metric(metric_key=DICT_PRECISION,
-                ylabel=VALUE_PRECISION)
+    create_metric_plot(metric_name=DICT_PRECISION,
+                       y_axis_label=VALUE_PRECISION)
 
 
 def plot_time():
-    plot_metric(metric_key=DICT_TIME,
-                ylabel=VALUE_TIME)
+    create_metric_plot(metric_name=DICT_TIME,
+                       y_axis_label=VALUE_TIME)
 
 
 if __name__ == "__main__":

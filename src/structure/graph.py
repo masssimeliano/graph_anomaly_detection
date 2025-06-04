@@ -1,7 +1,10 @@
+from dataclasses import dataclass
 from typing import List, Optional
+
 from src.structure.node import Node
 
 
+@dataclass
 class Graph:
     def __init__(self, nodes: List[Node]):
         self.nodes = nodes

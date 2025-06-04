@@ -2,34 +2,23 @@ import logging
 from typing import List
 
 import networkx as nx
-import torch
 
+from src.helpers.config.const import FEATURE_LABEL_ERROR2
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.reconstruction_train import reconstruction_train
 
 logging.basicConfig(level=logging.INFO)
 
 
-def train(graph: nx.Graph,
+def train(nx_graph: nx.Graph,
           labels: List[int],
           learning_rate: float,
           hid_dim: int,
-          data_set: str):
-    normalize_node_features_minmax(graph)
-    reconstruction_train(graph,
-                         labels,
-                         "Attr + Error2",
-                         learning_rate,
-                         hid_dim,
-                         data_set)
-
-
-def normalize_node_features_minmax(graph: nx.Graph):
-    features = [graph.nodes[n]['x'] for n in graph.nodes()]
-    stacked = torch.stack(features)
-    min_vals = stacked.min(dim=0)[0]
-    max_vals = stacked.max(dim=0)[0]
-    range_vals = max_vals - min_vals
-    range_vals[range_vals == 0] = 1
-
-    for n in graph.nodes():
-        graph.nodes[n]['x'] = (graph.nodes[n]['x'] - min_vals) / range_vals
+          dataset: str):
+    normalize_node_features_via_minmax_and_remove_nan(nx_graph)
+    reconstruction_train(nx_graph=nx_graph,
+                         labels=labels,
+                         title_prefix=FEATURE_LABEL_ERROR2,
+                         learning_rate=learning_rate,
+                         hid_dim=hid_dim,
+                         dataset=dataset)

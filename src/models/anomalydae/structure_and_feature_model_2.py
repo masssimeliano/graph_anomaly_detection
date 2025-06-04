@@ -7,43 +7,46 @@ import numpy as np
 import torch
 from torch_geometric.utils import from_networkx
 
+from src.helpers.time.timed import timed
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 from src.models.base_train import base_train
 
 logging.basicConfig(level=logging.INFO)
 
 
-def train(graph: nx.Graph,
+def train(nx_graph: nx.Graph,
           labels: List[int],
           learning_rate: float,
           hid_dim: int,
-          data_set: str):
-    add_structure_features(graph)
-    di_graph = from_networkx(graph)
+          dataset: str):
+    normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
+    add_structure_features(nx_graph)
+    di_graph = from_networkx(nx_graph)
 
     base_train(di_graph,
                labels,
                title_prefix="Attr + Str2",
                learning_rate=learning_rate,
                hid_dim=hid_dim,
-               data_set=data_set)
+               dataset=dataset)
 
 
-def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
+def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
     logging.info("Extracting node features with NetworkX 1...")
     start_time = time.time()
 
     features = []
-    avg_neighbor_degree = nx.average_neighbor_degree(graph)
-    square_clust = nx.square_clustering(graph)
+    avg_neighbor_degree = nx.average_neighbor_degree(nx_graph)
+    square_clust = nx.square_clustering(nx_graph)
 
-    for node in graph.nodes():
-        neighbors = list(graph.neighbors(node))
-        ego = nx.ego_graph(graph, node)
+    for node in nx_graph.nodes():
+        neighbors = list(nx_graph.neighbors(node))
+        ego = nx.ego_graph(nx_graph, node)
 
-        degree = graph.degree(node)
-        clustering = nx.clustering(graph, node)
-        triangle_count = nx.triangles(graph, node)
-        avg_deg_of_neighbors = np.mean([graph.degree(n) for n in neighbors]) if neighbors else 0
+        degree = nx_graph.degree(node)
+        clustering = nx.clustering(nx_graph, node)
+        triangle_count = nx.triangles(nx_graph, node)
+        avg_deg_of_neighbors = np.mean([nx_graph.degree(n) for n in neighbors]) if neighbors else 0
         ego_density = nx.density(ego)
         square_clustering = square_clust[node]
         num_neighbors = len(neighbors)
@@ -60,12 +63,13 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
 
     features_tensor = torch.tensor(features, dtype=torch.float32)
 
-    logging.info(f"Execution time: {(time.time() - start_time):.4f} sec")
-
     return features_tensor
 
 
+@timed
 def add_structure_features(graph: nx.Graph):
+    logging.info("Extracting node features with NetworkX 1...")
+
     additional_feats = extract_node_features_tensor(graph)
 
     for i, node in enumerate(graph.nodes()):

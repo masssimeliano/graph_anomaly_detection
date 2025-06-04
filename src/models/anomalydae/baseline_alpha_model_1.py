@@ -1,6 +1,8 @@
 from typing import List
+
 import torch_geometric
 
+from src.helpers.config.const import FEATURE_LABEL_ALPHA1
 from src.models.base_train import base_train
 
 
@@ -8,11 +10,11 @@ def train(di_graph: torch_geometric.data.Data,
           labels: List[int],
           learning_rate: float,
           hid_dim: int,
-          data_set: str):
-    base_train(di_graph,
-               labels,
-               title_prefix="Attr + Alpha1",
+          dataset: str):
+    base_train(di_graph=di_graph,
+               labels=labels,
+               title_prefix=FEATURE_LABEL_ALPHA1,
                learning_rate=learning_rate,
                hid_dim=hid_dim,
-               data_set=data_set,
+               dataset=dataset,
                alpha=0)
