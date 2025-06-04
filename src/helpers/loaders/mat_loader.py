@@ -59,6 +59,13 @@ def load_graph_from_mat(name: str,
                         labels=labels,
                         is_str_anomaly=is_str_anomaly,
                         is_attr_anomaly=is_attr_anomaly)
+
+    only_str = np.sum((is_str_anomaly == 1) & (is_attr_anomaly == 0))
+    only_attr = np.sum((is_str_anomaly == 0) & (is_attr_anomaly == 1))
+    both = np.sum((is_str_anomaly == 1) & (is_attr_anomaly == 1))
+
+    logging.info(f"Anomalies: Str = {only_str}, Attr = {only_attr}, Str&Attr = {both}")
+
     build_edges(nodes=nodes,
                 adj_matrix=adj_matrix)
 

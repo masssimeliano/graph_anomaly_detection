@@ -21,17 +21,27 @@ Absprache (23.05):
 - LaTeX
 
 ToDo (23.05):
-- Heatmap für Loss verbessern
+- Heatmap für Loss verbessern - Erledigt
 - Auf ca. 100 Epochen begrenzen - Erledigt
-- Loss im Bezug auf Epochen beobachten
+- Loss im Bezug auf Epochen beobachten - Erledigt
 - Daten in Train/Test/Validation-Datasets unterteilen und verwenden
 - Neue Performance- und Runtime-Metriken ansehen (ROC-AUC, recall@k, precision@k) - Erledigt
-- Neue Modelle trainieren (Gad-NR, Cola, CARD)
-- Komplexen Autoencoder aus Paper ansehen und implementieren
+- Neue Modelle trainieren (Gad-NR, Cola, CARD) - Verweigert
 - PyGOD im Edit-Modus ausführen - Erledigt
 - Ähnliche Arbeiten ansehen
-- LaTeX erstellen und beginnen
+- LaTeX erstellen und beginnen - Erledigt
 - Normalisierung von Ergebnissen durch 3-mal Lauf - Erledigt
 
 Absprache (30.05):
--
+- Zeit messen
+- Fehler aus AnomalyDAE verwenden
+- Versuchen den Fehlerart zu parsen
+
+ToDo (30.05):
+- Zeit messen - Erledigt
+- Fehler aus AnomalyDAE verwenden - Erledigt
+- LaTeX-Inhalt machen
+- Ähnliche Arbeiten einsehen
+- Versuchen den Fehlerart zu parsen
+
+
