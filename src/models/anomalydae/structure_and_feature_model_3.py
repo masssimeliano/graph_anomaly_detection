@@ -28,8 +28,6 @@ def train(nx_graph: nx.Graph,
 
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
-    logging.info("Extracting node features with NetworkX 2...")
-
     features = []
 
     average_neighbour_degree = nx.average_neighbor_degree(graph)

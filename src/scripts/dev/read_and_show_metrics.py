@@ -39,7 +39,7 @@ FEATURE_LABELS_DICT = {
     FEATURE_LABEL_ERROR1: "Attribute + Error 1 (Reconstruction error from simple encoder)",
     FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from AnomalyDAE encoder)",
     FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0 (node features)))",
-    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1 (adjacent matrix))",
+    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1 (adjacent matrix)))",
 }
 
 
@@ -86,7 +86,10 @@ def create_metric_plot(metric_name: str,
         plot.xlabel(VALUE_EPOCH)
         plot.ylabel(y_axis_label)
         # normalizing
-        plot.ylim(0.0, 1.5 * max_value)
+        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
+            plot.ylim(0.0, 1.5 * max_value)
+        else:
+            plot.ylim(0.0, max_value)
         plot.grid(True)
         plot.tight_layout()
 
@@ -112,22 +115,25 @@ def create_metric_plot(metric_name: str,
 def get_max_value_for_dataset_and_metric(dataset: str,
                                          parser: LogParser,
                                          metric_name: str) -> float:
-    max_value = 0
+    if metric_name == DICT_RECALL or metric_name == DICT_PRECISION:
+        return 1
+    else:
+        max_value = 0
 
-    for feature_label in FEATURE_LABELS:
-        filtered_parser_result = [
-            result for result in parser.results
-            if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
-        ]
-        if not filtered_parser_result:
-            continue
+        for feature_label in FEATURE_LABELS:
+            filtered_parser_result = [
+                result for result in parser.results
+                if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
+            ]
+            if not filtered_parser_result:
+                continue
 
-        for result in filtered_parser_result:
-            value = result.get(metric_name, 0)
-            if value > max_value:
-                max_value = value
+            for result in filtered_parser_result:
+                value = result.get(metric_name, 0)
+                if value > max_value:
+                    max_value = value
 
-    return max(max_value, 1)
+        return max(max_value, 1)
 
 
 def plot_loss():
@@ -153,7 +159,7 @@ def plot_precision():
 
 def plot_time():
     create_metric_plot(metric_name=DICT_TIME,
-                       y_axis_label=VALUE_TIME)
+                       y_axis_label=VALUE_TIME + " in s")
 
 
 if __name__ == "__main__":
