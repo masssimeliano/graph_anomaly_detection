@@ -42,7 +42,7 @@ def normalize_node_features_via_minmax_and_remove_nan(nx_graph: nx.Graph):
                                                          nan=0.0)
     node_features_stacked_without_nan_min = node_features_stacked_without_nan.min(dim=0)[0]
     node_features_stacked_without_nan_max = node_features_stacked_without_nan.max(dim=0)[0]
-    node_features_stacked_diff = node_features_stacked_without_nan_min - node_features_stacked_without_nan_max
+    node_features_stacked_diff = node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
     node_features_stacked_diff[node_features_stacked_diff == 0] = 1
 
     for n in nx_graph.nodes():

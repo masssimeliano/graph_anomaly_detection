@@ -9,7 +9,7 @@ def timed(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
-        logging.info(f"Execution time ({func.__name__}): {(time.time() - start_time):.4f} sус")
+        logging.info(f"Execution time ({func.__name__}): {(time.time() - start_time):.4f} seс")
         return result
 
     return wrapper

@@ -83,7 +83,7 @@ class AnomalyDAE(DeepDetector):
         self.attr_error_mean = []
         self.attr_error_std = []
 
-        self.save_emb = True
+        self.save_emb = save_emb
 
     def process_graph(self, data):
         AnomalyDAEBase.process_graph(data)
@@ -129,7 +129,24 @@ class AnomalyDAE(DeepDetector):
                                                      pos_weight_a,
                                                      pos_weight_s)
 
+        if not torch.isfinite(score).all():
+            print("❌ NaN or Inf in score detected. Replacing with zeros.")
+            # score = torch.nan_to_num(score, nan=0.0, posinf=1e6, neginf=-1e6)
+
+            # Проверка на вырожденность (все значения нули)
+        if torch.all(score == 0):
+            print("⚠️ Warning: all score values are zero — potential degenerate output")
+
+            # Проверка на взрыв
+        if torch.max(score) > 1e6:
+            print("⚠️ Warning: unusually large score values detected")
+
         loss = torch.mean(score)
+
+        # Проверка самого loss
+        if not torch.isfinite(loss):
+            print("❌ Loss is NaN or Inf — replacing with default fallback value")
+            # loss = torch.tensor(1e6, device=self.device)
 
         return loss, score.detach().cpu(), structural_error_mean, structural_error_std, attribute_error_mean, attribute_error_std
 
@@ -180,7 +197,7 @@ class AnomalyDAE(DeepDetector):
                 # getting structural and attribute reconstruction errors
                 loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
                     sampled_data)
-                self.stru_error_mean = stru_error_std
+                self.stru_error_mean = stru_error_mean
                 self.stru_error_std = stru_error_std
                 self.attr_error_mean = attr_error_mean
                 self.attr_error_std = attr_error_std
@@ -284,7 +301,13 @@ class AnomalyDAE(DeepDetector):
                 node_idx = sampled_data.n_id
 
                 # structural and attribute reconstruction errors are not used here
-                loss, score, _, _, _, _ = self.forward_model(sampled_data)
+                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
+                    sampled_data)
+                self.stru_error_mean = stru_error_mean
+                self.stru_error_std = stru_error_std
+                self.attr_error_mean = attr_error_mean
+                self.attr_error_std = attr_error_std
+
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:

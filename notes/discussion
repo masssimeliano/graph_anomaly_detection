@@ -40,7 +40,5 @@ ToDo (30.05):
 - Zeit messen - Erledigt
 - Fehler aus AnomalyDAE verwenden - Erledigt in Attr + Error2
 - LaTeX-Inhalt machen
-- Ähnliche Arbeiten einsehen - Average Controllability, ID_Features
+- Ähnliche Arbeiten einsehen - Average Controllability, ID_Features (Count of cycles of length k = 1-6)
 - Versuchen den Fehlerart zu parsen - Bei manchen beides, bei anderen - getrennt
-
-

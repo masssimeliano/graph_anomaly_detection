@@ -71,6 +71,11 @@ def double_recon_loss(x,
     assert 0 <= pos_weight_a <= 1 and 0 <= pos_weight_s <= 1, \
         "positive weight must be a float between 0 and 1."
 
+    # print(f"x = {torch.isfinite(x).all().item()}")
+    # print(f"x_ = {torch.isfinite(x_).all().item()}")
+    #  print(f"s = {torch.isfinite(s).all().item()}")
+    # print(f"s_ = {torch.isfinite(s_).all().item()}")
+
     # attribute reconstruction loss
     diff_attr = torch.pow(x - x_, 2)
 
@@ -78,6 +83,8 @@ def double_recon_loss(x,
         diff_attr = torch.where(x > 0,
                                 diff_attr * pos_weight_a,
                                 diff_attr * (1 - pos_weight_a))
+
+    # print(f"x = {torch.isfinite(diff_attr).all().item()}")
 
     # calculating mean and std of attribute errors
     attr_error = torch.sqrt(torch.sum(diff_attr, 1))

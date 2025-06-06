@@ -12,6 +12,7 @@ from src.helpers.config.const import FEATURE_LABEL_ERROR2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.time.timed import timed
+from src.models.anomalydae.reconstruction_error_model_1 import normalize_node_features_via_minmax_and_remove_nan
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,12 +46,13 @@ def reconstruction_train(nx_graph: nx.Graph,
                            labels=labels,
                            title_prefix=title_prefix,
                            data_set=dataset_name,
-                           lr=LEARNING_RATE,
-                           hid_dim=HIDDEN_DIMS,
+                           lr=learning_rate,
+                           hid_dim=hid_dim,
                            alpha=alpha,
                            eta=eta,
                            theta=theta,
-                           gpu=gpu)
+                           gpu=gpu,
+                           save_emb=True)
 
         log_file = RESULTS_DIR / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         with open(log_file, "w") as log:
@@ -64,13 +66,11 @@ def reconstruction_train(nx_graph: nx.Graph,
             timer = 0
             for i in range(3):
                 logging.info(f"Fitting x{i + 1}...")
-                # adjusted regular method from AnomalyDAE
-                model.fit(di_graph)
+                model.fit_emd(di_graph)
 
                 loss += model.loss_last / di_graph.num_nodes
                 auc += roc_auc_score(labels, model.decision_score_)
                 recall += recall_at_k(labels, model.decision_score_, labels.count(1))
-                precision += precision_at_k(labels, model.decision_score_, labels.count(1))
                 precision += precision_at_k(labels, model.decision_score_, labels.count(1))
                 timer += model.last_time
 
@@ -97,9 +97,9 @@ def reconstruction_train(nx_graph: nx.Graph,
 def get_reconstruction_errors(graph: nx.Graph,
                               labels: List[int],
                               learning_rate: float,
-                              hid_dim: int,
                               epoch: int,
                               dataset: str,
+                              hid_dim: int = HIDDEN_DIMS,
                               alpha: float = ALPHA,
                               eta: int = ETA,
                               theta: int = THETA,
@@ -120,11 +120,13 @@ def get_reconstruction_errors(graph: nx.Graph,
                        data_set=dataset)
 
     logging.info(f"Training-Fitting...")
-    model.fit(di_graph)
+    model.fit_emd(di_graph)
     structural_error_mean = model.stru_error_mean
     structural_error_std = model.stru_error_std
     attribute_error_mean = model.attr_error_mean
     attribute_error_std = model.attr_error_std
+
+    print(len(structural_error_mean))
 
     for i, node in enumerate(graph.nodes()):
         original_node_features = graph.nodes[node]['x']
@@ -135,3 +137,5 @@ def get_reconstruction_errors(graph: nx.Graph,
             attribute_error_std[i].item()
         ], dtype=torch.float32)
         graph.nodes[node]['x'] = torch.cat([original_node_features, node_error_features]).detach().clone()
+
+    normalize_node_features_via_minmax_and_remove_nan(graph)

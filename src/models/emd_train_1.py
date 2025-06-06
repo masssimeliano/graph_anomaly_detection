@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import List
 
 import networkx as nx
@@ -65,8 +64,6 @@ def emd_train(nx_graph: nx.Graph,
             timer = 0
             for i in range(3):
                 logging.info(f"Fitting x{i + 1}...")
-                start_time = time.time()
-                # adjusted regular method from AnomalyDAE
                 model.fit_emd(di_graph)
 
                 loss += model.loss_last / di_graph.num_nodes
