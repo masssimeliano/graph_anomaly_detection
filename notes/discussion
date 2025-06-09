@@ -42,3 +42,16 @@ ToDo (30.05):
 - LaTeX-Inhalt machen
 - Ähnliche Arbeiten einsehen - Average Controllability, ID_Features (Count of cycles of length k = 1-6)
 - Versuchen den Fehlerart zu parsen - Bei manchen beides, bei anderen - getrennt
+
+Absprache (06.06):
+- Neue Modelle trainieren (Gad-NR, Cola, CARD)
+- In related works schauen
+
+ToDo (06.06):
+- Neue Modelle trainieren (Gad-NR, Cola, CARD)
+- Neue Feature berechnen (Average Controllability, ID_Features)
+- In related works schauen
+- Last refactoring
+- Kommentare
+- GitHub-Seite
+- LaTeX-Inhalt bearbeiten
