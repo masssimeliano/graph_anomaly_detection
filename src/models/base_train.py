@@ -4,7 +4,6 @@ This file contains training method realization for feature model "Attr".
 """
 
 import logging
-import time
 from typing import List
 
 import numpy as np
@@ -14,8 +13,11 @@ import torch_geometric
 from pygod.pygod.detector import AnomalyDAE
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
+from src.helpers.time.timed import timed
+from src.models.emd_train_1 import get_message_for_write_and_log
 
 
+@timed
 def base_train(
     di_graph: torch_geometric.data.Data,
     labels: List[int],
@@ -28,8 +30,6 @@ def base_train(
     theta: int = THETA,
     gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
-    measure_time = time.time()
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
 
@@ -83,40 +83,20 @@ def base_train(
             RESULTS_DIR
             / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         )
+
         with open(log_file, "w") as log:
-
-            def write(msg):
-                log.write(msg + "\n")
-
-            write(
-                f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})"
-            )
-            logging.info(
-                f"AnomalyDAE(epoch={current_epoch}, lr={learning_rate}, hid_dim={hid_dim})"
-            )
-
-            write(
-                f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}"
-            )
-            write(f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}")
-            write(
-                f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}"
-            )
-            write(
-                f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}"
-            )
-            write(f"Time: {array_time[i]:.4f}")
-            logging.info(
-                f"Epoch: {current_epoch} - AUC-ROC ({title_prefix}): {array_auc_roc[i]:.4f}"
-            )
-            logging.info(
-                f"Loss ({title_prefix}): {(array_loss[i] / di_graph.num_nodes):.4f}"
-            )
-            logging.info(
-                f"Recall@k ({title_prefix}) for k={labels.count(1)}: {array_recall_k[i]:.4f}"
-            )
-            logging.info(
-                f"Precision@k ({title_prefix}) for k={labels.count(1)}: {array_precision_k[i]:.4f}"
+            message = get_message_for_write_and_log(
+                epoch=current_epoch,
+                learning_rate=learning_rate,
+                hid_dim=hid_dim,
+                title_prefix=title_prefix,
+                loss=array_loss[i],
+                auc_roc=array_auc_roc[i],
+                recall_at_k=array_recall_k[i],
+                precision_at_k=array_precision_k[i],
+                k=labels.count(1),
+                time=array_time[i],
             )
 
-    logging.info(f"Time: {(time.time() - measure_time):.4f} sec")
+            log.write(message)
+            logging.info(message)

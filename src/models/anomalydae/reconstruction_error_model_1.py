@@ -70,7 +70,7 @@ def normalize_node_features_via_minmax_and_remove_nan(nx_graph: nx.Graph):
 
 @timed
 def extract_error_features(nx_graph: nx.Graph) -> torch.Tensor:
-    logging.info("Extracting node error rates...")
+    logging.info("Extracting node error rates 1...")
     node_features = [nx_graph.nodes[node]["x"] for node in nx_graph.nodes()]
     node_features_tensor = torch.stack(node_features).float()
 
@@ -100,7 +100,7 @@ def add_error_features(nx_graph: nx.Graph):
 
 
 def compare_anomaly_reconstruction_error(nx_graph: nx.Graph, labels: List[int]):
-    logging.info("Comparing reconstruction error between normal and anomaly nodes...")
+    logging.info("Comparing reconstruction error between normal and anomaly nodes 1...")
 
     features = [nx_graph.nodes[node]["x"] for node in nx_graph.nodes()]
     node_features_tensor = torch.stack(features).float()

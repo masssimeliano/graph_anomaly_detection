@@ -120,7 +120,6 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
             is_cut_vertex,
             degree_ratio,
         ]
-
         features.append(node_features)
 
     features_tensor = torch.tensor(features, dtype=torch.float32)

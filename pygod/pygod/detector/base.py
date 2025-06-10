@@ -1,4 +1,5 @@
 """Base classes for all outlier detector"""
+
 # Author: Yue Zhao <zhaoy@cmu.edu>, Kay Liu <zliu234@uic.edu>
 # License: BSD 2 clause
 
@@ -48,13 +49,12 @@ class Detector(ABC):
         ``threshold_`` on ``decision_score_``.
     """
 
-    def __init__(self,
-                 contamination=0.1,
-                 verbose=0):
+    def __init__(self, contamination=0.1, verbose=0):
 
-        if not (0. < contamination <= 0.5):
-            raise ValueError("contamination must be in (0, 0.5], "
-                             "got: %f" % contamination)
+        if not (0.0 < contamination <= 0.5):
+            raise ValueError(
+                "contamination must be in (0, 0.5], " "got: %f" % contamination
+            )
 
         self.contamination = contamination
         self.verbose = verbose
@@ -109,14 +109,16 @@ class Detector(ABC):
             The outlier scores of shape :math:`N`.
         """
 
-    def predict(self,
-                data=None,
-                label=None,
-                return_pred=True,
-                return_score=False,
-                return_prob=False,
-                prob_method='linear',
-                return_conf=False):
+    def predict(
+        self,
+        data=None,
+        label=None,
+        return_pred=True,
+        return_score=False,
+        return_prob=False,
+        prob_method="linear",
+        return_conf=False,
+    ):
         """Prediction for testing data using the fitted detector.
         Return predicted labels by default.
 
@@ -172,15 +174,17 @@ class Detector(ABC):
             Only available when ``return_conf=True``.
         """
 
-        is_fitted(self, ['decision_score_', 'threshold_', 'label_'])
+        is_fitted(self, ["decision_score_", "threshold_", "label_"])
 
         output = ()
         if data is None:
             score = self.decision_score_
-            logger(score=self.decision_score_,
-                   target=label,
-                   verbose=self.verbose,
-                   train=False)
+            logger(
+                score=self.decision_score_,
+                target=label,
+                verbose=self.verbose,
+                train=False,
+            )
         else:
             score = self.decision_function(data, label)
         if return_pred:
@@ -200,7 +204,7 @@ class Detector(ABC):
         else:
             return output
 
-    def _predict_prob(self, score, method='linear'):
+    def _predict_prob(self, score, method="linear"):
         """Predict the probabilities of being outliers. Two approaches
         are possible:
 
@@ -226,20 +230,19 @@ class Detector(ABC):
             The outlier probabilities of shape :math:`N`.
         """
 
-        if method == 'linear':
+        if method == "linear":
             train_score = self.decision_score_
             prob = score - train_score.min()
             prob /= train_score.max() - train_score.min()
             prob = prob.clamp(0, 1)
-        elif method == 'unify':
+        elif method == "unify":
             mu = torch.mean(self.decision_score_)
             sigma = torch.std(self.decision_score_)
             pre_erf_score = (score - mu) / (sigma * np.sqrt(2))
             erf_score = erf(pre_erf_score)
             prob = erf_score.clamp(0, 1)
         else:
-            raise ValueError(method,
-                             'is not a valid probability conversion method')
+            raise ValueError(method, "is not a valid probability conversion method")
         return prob
 
     def _predict_conf(self, score):
@@ -279,46 +282,24 @@ class Detector(ABC):
         - label_: binary labels of training data
         """
 
-        self.threshold_ = np.percentile(self.decision_score_,
-                                        100 * (1 - self.contamination))
+        self.threshold_ = np.percentile(
+            self.decision_score_, 100 * (1 - self.contamination)
+        )
         self.label_ = (self.decision_score_ > self.threshold_).long()
 
     def __repr__(self):
 
         class_name = self.__class__.__name__
         init_signature = signature(self.__init__)
-        parameters = [p for p in init_signature.parameters.values()
-                      if p.name != 'self' and p.kind != p.VAR_KEYWORD]
+        parameters = [
+            p
+            for p in init_signature.parameters.values()
+            if p.name != "self" and p.kind != p.VAR_KEYWORD
+        ]
         params = {}
         for key in sorted([p.name for p in parameters]):
             params[key] = getattr(self, key, None)
-        return '%s(%s)' % (class_name, pprint(params, offset=len(class_name)))
-
-
-def recall_at_k(y_true,
-                scores,
-                k):
-    y_true = np.array(y_true)
-    scores = np.array(scores)
-    top_k_indices = np.argsort(scores)[-k:]
-    true_positives_in_top_k = np.sum(y_true[top_k_indices])
-    total_positives = np.sum(y_true)
-    if total_positives == 0:
-        return 0
-
-    recall_k = true_positives_in_top_k / total_positives
-    return recall_k
-
-
-def precision_at_k(y_true,
-                   scores,
-                   k):
-    y_true = np.array(y_true)
-    scores = np.array(scores)
-    top_k_idx = np.argsort(scores)[-k:]
-    true_positives = np.sum(y_true[top_k_idx])
-
-    return true_positives / k
+        return "%s(%s)" % (class_name, pprint(params, offset=len(class_name)))
 
 
 class DeepDetector(Detector, ABC):
@@ -392,27 +373,28 @@ class DeepDetector(Detector, ABC):
         ``emb`` is a tuple of torch.Tensor.
     """
 
-    def __init__(self,
-                 hid_dim=64,
-                 num_layers=2,
-                 dropout=0.,
-                 weight_decay=0.,
-                 act=torch.nn.functional.relu,
-                 backbone=GIN,
-                 contamination=0.1,
-                 lr=4e-3,
-                 epoch=100,
-                 gpu=-1,
-                 batch_size=0,
-                 num_neigh=-1,
-                 verbose=0,
-                 gan=False,
-                 save_emb=False,
-                 compile_model=False,
-                 **kwargs):
+    def __init__(
+        self,
+        hid_dim=64,
+        num_layers=2,
+        dropout=0.0,
+        weight_decay=0.0,
+        act=torch.nn.functional.relu,
+        backbone=GIN,
+        contamination=0.1,
+        lr=4e-3,
+        epoch=100,
+        gpu=-1,
+        batch_size=0,
+        num_neigh=-1,
+        verbose=0,
+        gan=False,
+        save_emb=False,
+        compile_model=False,
+        **kwargs
+    ):
 
-        super(DeepDetector, self).__init__(contamination=contamination,
-                                           verbose=verbose)
+        super(DeepDetector, self).__init__(contamination=contamination, verbose=verbose)
 
         # model param
         self.in_dim = None
@@ -435,12 +417,14 @@ class DeepDetector(Detector, ABC):
             self.num_neigh = [num_neigh] * self.num_layers
         elif type(num_neigh) is list:
             if len(num_neigh) != self.num_layers:
-                raise ValueError('Number of neighbors should have the '
-                                 'same length as hidden layers dimension or'
-                                 'the number of layers.')
+                raise ValueError(
+                    "Number of neighbors should have the "
+                    "same length as hidden layers dimension or"
+                    "the number of layers."
+                )
             self.num_neigh = num_neigh
         else:
-            raise ValueError('Number of neighbors must be int or list of int')
+            raise ValueError("Number of neighbors must be int or list of int")
 
         # other param
         self.model = None
@@ -452,16 +436,16 @@ class DeepDetector(Detector, ABC):
     def decision_function(self, data, label=None):
 
         self.process_graph(data)
-        loader = NeighborLoader(data,
-                                self.num_neigh,
-                                batch_size=self.batch_size)
+        loader = NeighborLoader(data, self.num_neigh, batch_size=self.batch_size)
 
         self.model.eval()
         outlier_score = torch.zeros(data.x.shape[0])
         if self.save_emb:
             if type(self.hid_dim) is tuple:
-                self.emb = (torch.zeros(data.x.shape[0], self.hid_dim[0]),
-                            torch.zeros(data.x.shape[0], self.hid_dim[1]))
+                self.emb = (
+                    torch.zeros(data.x.shape[0], self.hid_dim[0]),
+                    torch.zeros(data.x.shape[0], self.hid_dim[1]),
+                )
             else:
                 self.emb = torch.zeros(data.x.shape[0], self.hid_dim)
         start_time = time.time()
@@ -472,13 +456,14 @@ class DeepDetector(Detector, ABC):
             node_idx = sampled_data.n_id
             if self.save_emb:
                 if type(self.hid_dim) is tuple:
-                    self.emb[0][node_idx[:batch_size]] = \
-                        self.model.emb[0][:batch_size].cpu()
-                    self.emb[1][node_idx[:batch_size]] = \
-                        self.model.emb[1][:batch_size].cpu()
+                    self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
+                        :batch_size
+                    ].cpu()
+                    self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
+                        :batch_size
+                    ].cpu()
                 else:
-                    self.emb[node_idx[:batch_size]] = \
-                        self.model.emb[:batch_size].cpu()
+                    self.emb[node_idx[:batch_size]] = self.model.emb[:batch_size].cpu()
 
             test_loss = loss.item() * batch_size
             outlier_score[node_idx[:batch_size]] = score
@@ -487,23 +472,27 @@ class DeepDetector(Detector, ABC):
         if self.gan:
             loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
 
-        logger(loss=loss_value,
-               score=outlier_score,
-               target=label,
-               time=time.time() - start_time,
-               verbose=self.verbose,
-               train=False)
+        logger(
+            loss=loss_value,
+            score=outlier_score,
+            target=label,
+            time=time.time() - start_time,
+            verbose=self.verbose,
+            train=False,
+        )
         return outlier_score
 
-    def predict(self,
-                data=None,
-                label=None,
-                return_pred=True,
-                return_score=False,
-                return_prob=False,
-                prob_method='linear',
-                return_conf=False,
-                return_emb=False):
+    def predict(
+        self,
+        data=None,
+        label=None,
+        return_pred=True,
+        return_score=False,
+        return_prob=False,
+        prob_method="linear",
+        return_conf=False,
+        return_emb=False,
+    ):
         """Prediction for testing data using the fitted detector.
         Return predicted labels by default.
 
@@ -564,13 +553,15 @@ class DeepDetector(Detector, ABC):
         if return_emb:
             self.save_emb = True
 
-        output = super(DeepDetector, self).predict(data,
-                                                   label,
-                                                   return_pred,
-                                                   return_score,
-                                                   return_prob,
-                                                   prob_method,
-                                                   return_conf)
+        output = super(DeepDetector, self).predict(
+            data,
+            label,
+            return_pred,
+            return_score,
+            return_prob,
+            prob_method,
+            return_conf,
+        )
         if return_emb:
             if type(output) is tuple:
                 output += (self.emb,)

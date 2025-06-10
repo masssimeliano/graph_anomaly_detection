@@ -19,6 +19,13 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
+    read_all()
+    train_all()
+
+    read_and_show_metrics.plot_time()
+
+
+def read_all():
     for i, dataset in enumerate(iterable=CURRENT_DATASETS):
         logging.info(f"Preparing {dataset}...")
         labels, graph = load_graph_from_mat(name=dataset, size=CURRENT_DATASETS_SIZE[i])
@@ -29,6 +36,8 @@ def main():
         )
         graph_dict[dataset] = nx_graph
 
+
+def train_all():
     train_reconstruction_2.main()
 
     read_and_show_metrics.plot_time()

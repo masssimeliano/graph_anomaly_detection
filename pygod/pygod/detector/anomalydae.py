@@ -12,7 +12,7 @@ from torch_geometric.loader import NeighborLoader
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_file_getter import get_emd_file
 from . import DeepDetector
-from .base import recall_at_k, precision_at_k
+from ..metric import eval_precision_at_k, eval_recall_at_k
 from ..nn import AnomalyDAEBase
 
 
@@ -72,12 +72,12 @@ class AnomalyDAE(DeepDetector):
         self.theta = theta
         self.eta = eta
         self.title_prefix = title_prefix
+
         # new variables for quicker learning
         self.array_loss = []
         self.array_auc_roc = []
         self.array_recall_k = []
         self.array_precision_k = []
-        self.amount_of_epochs = max(EPOCHS)
         self.labels = labels
         self.dataset = data_set
         self.loss_last = 0
@@ -122,6 +122,8 @@ class AnomalyDAE(DeepDetector):
         pos_weight_a = self.eta / (1 + self.eta)
         pos_weight_s = self.theta / (1 + self.theta)
 
+        # custom loss function that contains
+        # mean and std of both error arts
         (
             score,
             structural_error_mean,
@@ -151,7 +153,6 @@ class AnomalyDAE(DeepDetector):
 
     # custom fit() method that works with same epochs value
     # and saves resulting metrics inside for-cycle
-    # (used for base training)
     def fit(self, data, label=None):
         start_time = time.time()
         self.array_loss = []
@@ -195,7 +196,7 @@ class AnomalyDAE(DeepDetector):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                # getting structural and attribute reconstruction errors
+                # structural and attribute reconstruction errors can be used here
                 (
                     loss,
                     score,
@@ -228,7 +229,7 @@ class AnomalyDAE(DeepDetector):
                 loss.backward()
                 optimizer.step()
 
-                # saving the loss value on the last epoch
+                # saving loss value on last epoch
                 loss_value = epoch_loss / data.x.shape[0]
                 if self.gan:
                     loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
@@ -244,11 +245,11 @@ class AnomalyDAE(DeepDetector):
                     self_labels = self.labels
                     self_score = self.decision_score_
                     self_k = self.labels.count(1)
-                    recall_k = recall_at_k(
-                        y_true=self_labels, scores=self_score, k=self_k
+                    recall_k = eval_recall_at_k(
+                        label=self_labels, score=self_score, k=self_k
                     )
-                    precision_k = precision_at_k(
-                        y_true=self_labels, scores=self_score, k=self_k
+                    precision_k = eval_precision_at_k(
+                        label=self_labels, score=self_score, k=self_k
                     )
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
@@ -274,7 +275,6 @@ class AnomalyDAE(DeepDetector):
 
     # custom fit() method that works with same epochs value,
     # but calculates every resulting metric only once
-    # (used for training with embedding)
     def fit_emd(self, data):
         start_time = time.time()
         self.process_graph(data)
@@ -312,7 +312,7 @@ class AnomalyDAE(DeepDetector):
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
 
-                # structural and attribute reconstruction errors are not used here
+                # structural and attribute reconstruction errors can be used here
                 (
                     loss,
                     score,
@@ -345,7 +345,7 @@ class AnomalyDAE(DeepDetector):
                 loss.backward()
                 optimizer.step()
 
-            # saving the loss value on the last epoch
+            # saving loss value on last epoch
             loss_value = epoch_loss / data.x.shape[0]
             if self.gan:
                 loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
