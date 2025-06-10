@@ -9,6 +9,7 @@ from collections import defaultdict
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
+from src.helpers.config.datasets_config import CHECK_DATASETS_2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
@@ -53,7 +54,7 @@ def create_metric_plot(
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
-    for dataset in datasets:
+    for dataset in CHECK_DATASETS_2:
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
@@ -99,7 +100,6 @@ def create_metric_plot(
         plot.grid(True)
         plot.tight_layout()
 
-        # if benchmark result is given
         if metric_name == DICT_AUC_ROC:
             y = 0.5
             label = "Baseline (0.5)"

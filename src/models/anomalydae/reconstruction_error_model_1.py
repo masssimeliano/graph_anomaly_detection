@@ -99,7 +99,6 @@ def add_structure_features(nx_graph: nx.Graph):
         )
 
 
-# checking mean and median reconstruction errors of normal and anomaly nodes
 def compare_anomaly_reconstruction_error(nx_graph: nx.Graph, labels: List[int]):
     logging.info("Comparing reconstruction error between normal and anomaly nodes...")
 

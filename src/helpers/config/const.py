@@ -14,8 +14,8 @@ FEATURE_LABEL_ERROR1 = "Attr + Error1"
 FEATURE_LABEL_ERROR2 = "Attr + Error2"
 FEATURE_LABEL_STANDARD = "Attr"
 
-# Order is important here because in parse_logs() it must search for all feature labels through contains()
-# And before FEATURE_LABEL_STANDARD it has to check FEATURE_LABEL_STR2 e.g.
+# order is important here because in parse_logs() it must search for all feature labels through contains()
+# and before FEATURE_LABEL_STANDARD it has to check FEATURE_LABEL_STR2 e.g.
 FEATURE_LABELS = [
     FEATURE_LABEL_STR2,
     FEATURE_LABEL_STR3,

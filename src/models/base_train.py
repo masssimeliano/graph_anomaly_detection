@@ -56,7 +56,6 @@ def base_train(
 
     for i in range(3):
         logging.info(f"Fitting x{i + 1}...")
-        start_time = time.time()
         # adjusted regular method from AnomalyDAE
         model.fit(di_graph)
 

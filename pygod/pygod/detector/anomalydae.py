@@ -138,6 +138,8 @@ class AnomalyDAE(DeepDetector):
             pos_weight_s,
         )
 
+        loss = torch.mean(score)
+
         return (
             loss,
             score.detach().cpu(),

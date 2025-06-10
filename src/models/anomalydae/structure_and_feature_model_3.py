@@ -93,7 +93,7 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         square_clustering = square_clust[node]
         num_neighbours = len(node_neighbours)
 
-        # New features
+        # new features
         betweenness_node = betweenness.get(node, 0.0)
         closeness_node = closeness.get(node, 0.0)
         eigenvector_node = eigenvector.get(node, 0.0)
