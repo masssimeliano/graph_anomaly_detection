@@ -1,3 +1,8 @@
+"""
+datasets_config.py
+This file contains constants used for datasets.
+"""
+
 from enum import Enum
 
 
@@ -7,30 +12,21 @@ class DataSetSize(Enum):
     LARGE = "large"
 
 
-SMALL_DATASETS = ["Disney.mat",
-                  "book.mat",
-                  "BlogCatalog.mat",
-                  "citeseer.mat",
-                  "computers.mat",
-                  "cora.mat",
-                  "cs.mat",
-                  "photo.mat",
-                  "weibo.mat"]
-MEDIUM_DATASETS = ["Flickr.mat",
-                   "Reddit.mat"]
+SMALL_DATASETS = [
+    "Disney.mat",
+    "book.mat",
+    "BlogCatalog.mat",
+    "citeseer.mat",
+    "computers.mat",
+    "cora.mat",
+    "cs.mat",
+    "photo.mat",
+    "weibo.mat",
+]
+MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat"]
 LARGE_DATASETS = []
-
-SMALL_DATASETS_2 = ["Disney",
-                    "book",
-                    "BlogCatalog",
-                    "citeseer"]
-
-DATASETS = ["cora.mat",
-            "cs.mat",
-            "photo.mat",
-            "weibo.mat"]
 
 CHECK_DATASETS = ["Disney.mat"]
 
-CURRENT_DATASETS = DATASETS
-CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(DATASETS)  # '+ [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
+CURRENT_DATASETS = CHECK_DATASETS
+CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(CHECK_DATASETS)

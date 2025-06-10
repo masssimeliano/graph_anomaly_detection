@@ -1,16 +1,9 @@
 Fragen (30.05):
-- LaTeX-Vorlage ganz auf Englisch übersetzen?
-- BOND: [49] Kay Liu, Yingtong Dou, Yue Zhao, Xueying Ding, Xiyang Hu, Ruitong Zhang, Kaize Ding, Canyu
- Chen, Hao Peng, Kai Shu, Lichao Sun, Jundong Li, George H Chen, Zhihao Jia, and Philip S Yu. Bond:
- Benchmarking unsupervised outlier node detection on static attributed graphs. In Advances in Neural
- Information Processing Systems, volume 35, 2022?
-- Zu Runtime noch Zeit von Node-Enrichment-Methods?
-- Kontextuelle und strutuelle Anomalien unterscheiden?
-- Mittlerer Wert von Hyperparamters z.B. in [3, 5, 8]?
+1) Wie kann man die LaTeX-Vorlage völlig auf Englisch übersetzen?
+2) Sollte außer der Runtime-Zeit noch die Node-Enrichment-Zeit gemessen werden?
+3) Sollte man kontextuelle (Attr) und strukturelle Anomalien (Sttr) unterscheiden?
 
 Antworten (30.05):
-- Parameter
-- Ja
-- Nur Runtime jetzt
-- Versuchen
-- Ja
+1) Mithilfe eines Parameters in den Einstellungen
+2) Vielleicht am Ende
+3) Ja, das wäre gut, wenn es klappt

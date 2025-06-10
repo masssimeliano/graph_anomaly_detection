@@ -1,3 +1,9 @@
+"""
+nx_graph_plotter.py
+This file contains custom transfer method from "Graph" to NX-Graph.
+The NX-Graph can be visualized if its wanted.
+"""
+
 import logging
 
 import matplotlib.pyplot as plt
@@ -7,31 +13,26 @@ import torch
 from src.helpers.time.timed import timed
 from src.structure.graph import Graph
 
-logging.basicConfig(level=logging.INFO)
 
-
-def visualize_graph(nx_graph: nx.Graph,
-                    node_color: list[str],
-                    title: str):
+def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title: str):
     logging.info("Visualizing NX graph...")
 
     fig, ax = plt.subplots(figsize=(12, 10))
     pos = nx.spring_layout(nx_graph, seed=42, k=0.15)
 
-    nx.draw(nx_graph,
-            pos=pos,
-            ax=ax,
-            with_labels=False,
-            node_color=node_color,
-            node_size=20,
-            edge_color='gray',
-            width=0.3,
-            alpha=0.7)
+    nx.draw(
+        nx_graph,
+        pos=pos,
+        ax=ax,
+        with_labels=False,
+        node_color=node_color,
+        node_size=20,
+        edge_color="gray",
+        width=0.3,
+        alpha=0.7,
+    )
 
-    ax.set_title(title,
-                 fontsize=20,
-                 fontweight='bold',
-                 pad=20)
+    ax.set_title(title, fontsize=20, fontweight="bold", pad=20)
 
     ax.set_axis_off()
     plt.tight_layout()
@@ -39,18 +40,16 @@ def visualize_graph(nx_graph: nx.Graph,
 
 
 @timed
-def to_networkx_graph(graph: Graph,
-                      do_visualize: bool = False,
-                      title: str = "Graph visualization") -> nx.Graph:
+def to_networkx_graph(
+    graph: Graph, do_visualize: bool = False, title: str = "Graph visualization"
+) -> nx.Graph:
     logging.info("Forming a NX graph...")
 
     nx_graph = nx.Graph()
     node_color = []
 
     for node in graph.nodes:
-        nx_graph.add_node(node.id,
-                          x=torch.tensor(node.features,
-                                         dtype=torch.float))
+        nx_graph.add_node(node.id, x=torch.tensor(node.features, dtype=torch.float))
         if do_visualize:
             if node.is_attr_anomaly:
                 node_color.append("red")

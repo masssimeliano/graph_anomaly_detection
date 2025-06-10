@@ -1,3 +1,9 @@
+"""
+structure_and_feature_model_2.py
+This file contains train wrapper for the model "Attr + Str2".
+It also contains structural attribute extraction method.
+"""
+
 import logging
 from typing import List
 
@@ -9,23 +15,25 @@ from src.helpers.config.const import FEATURE_LABEL_STR2
 from src.helpers.time.timed import timed
 from src.models.base_train import base_train
 
-logging.basicConfig(level=logging.INFO)
 
-
-def train(nx_graph: nx.Graph,
-          labels: List[int],
-          learning_rate: float,
-          hid_dim: int,
-          dataset: str):
+def train(
+    nx_graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
 
-    base_train(di_graph=di_graph,
-               labels=labels,
-               title_prefix=FEATURE_LABEL_STR2,
-               learning_rate=learning_rate,
-               hid_dim=hid_dim,
-               dataset=dataset)
+    base_train(
+        di_graph=di_graph,
+        labels=labels,
+        title_prefix=FEATURE_LABEL_STR2,
+        learning_rate=learning_rate,
+        hid_dim=hid_dim,
+        dataset=dataset,
+    )
 
 
 def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
@@ -44,17 +52,18 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
         square_clustering = square_clust[node]
         num_neighbors = len(node_neighbours)
 
-        node_features = [degree,
-                         clustering,
-                         triangle_count,
-                         average_neighbour_degree[node],
-                         ego_density,
-                         square_clustering,
-                         num_neighbors]
+        node_features = [
+            degree,
+            clustering,
+            triangle_count,
+            average_neighbour_degree[node],
+            ego_density,
+            square_clustering,
+            num_neighbors,
+        ]
         features.append(node_features)
 
-    features_tensor = torch.tensor(features,
-                                   dtype=torch.float32)
+    features_tensor = torch.tensor(features, dtype=torch.float32)
 
     return features_tensor
 
@@ -66,5 +75,7 @@ def add_structure_features(nx_graph: nx.Graph):
     structural_features = extract_node_features_tensor(nx_graph)
 
     for i, node in enumerate(nx_graph.nodes()):
-        original_node_features = nx_graph.nodes[node]['x']
-        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, structural_features[i]])
+        original_node_features = nx_graph.nodes[node]["x"]
+        nx_graph.nodes[node]["x"] = torch.cat(
+            [original_node_features, structural_features[i]]
+        )

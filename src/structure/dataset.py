@@ -1,3 +1,8 @@
+"""
+dataset.py
+This file contains architecture class "DataSet", which maps size of dataset.
+"""
+
 from src.helpers.config.datasets_config import *
 from src.helpers.config.dir_config import *
 
@@ -9,6 +14,8 @@ class DataSet:
         self.location: Path = DATASETS_DIR / size.value / name
 
     def __repr__(self):
-        return (f"DataSet(name={self.name}, "
-                f"size={self.size.value}, "
-                f"location={self.location})")
+        return (
+            f"DataSet(name={self.name}, "
+            f"size={self.size.value}, "
+            f"location={self.location})"
+        )

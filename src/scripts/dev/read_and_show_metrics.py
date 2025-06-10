@@ -1,4 +1,8 @@
-import logging
+"""
+read_and_show_metrics.py
+This file contains script to calculate and plot all metrics from .txt result files.
+"""
+
 import os
 from collections import defaultdict
 
@@ -8,8 +12,6 @@ from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
-
-logging.basicConfig(level=logging.INFO)
 
 FEATURE_LABELS = [
     FEATURE_LABEL_STANDARD,
@@ -43,25 +45,27 @@ FEATURE_LABELS_DICT = {
 }
 
 
-def create_metric_plot(metric_name: str,
-                       y_axis_label: str,
-                       baseline_dict: dict[str, float] = None):
+def create_metric_plot(
+    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+):
     parser = LogParser()
     parser.parse_logs()
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
     for dataset in datasets:
-        max_value = get_max_value_for_dataset_and_metric(dataset=dataset,
-                                                         parser=parser,
-                                                         metric_name=metric_name)
+        max_value = get_max_value_for_dataset_and_metric(
+            dataset=dataset, parser=parser, metric_name=metric_name
+        )
 
         plot.figure(figsize=(10, 6))
 
         for feature_label in FEATURE_LABELS:
             filtered_feature_labels = [
-                result for result in parser.results
-                if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
+                result
+                for result in parser.results
+                if result[DICT_DATASET] == dataset
+                and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -76,13 +80,15 @@ def create_metric_plot(metric_name: str,
                 continue
 
             values = [value_per_epochs[epoch] for epoch in EPOCHS]
-            plot.plot(EPOCHS,
-                      values,
-                      marker='o',
-                      label=FEATURE_LABELS_DICT[feature_label],
-                      color=FEATURE_COLORS_DICT[feature_label])
+            plot.plot(
+                EPOCHS,
+                values,
+                marker="o",
+                label=FEATURE_LABELS_DICT[feature_label],
+                color=FEATURE_COLORS_DICT[feature_label],
+            )
 
-        plot.title(f'{y_axis_label} vs {VALUE_EPOCH} ({dataset})')
+        plot.title(f"{y_axis_label} vs {VALUE_EPOCH} ({dataset})")
         plot.xlabel(VALUE_EPOCH)
         plot.ylabel(y_axis_label)
         # normalizing
@@ -94,17 +100,14 @@ def create_metric_plot(metric_name: str,
         plot.tight_layout()
 
         # if benchmark result is given
-        if (metric_name == DICT_AUC_ROC):
+        if metric_name == DICT_AUC_ROC:
             y = 0.5
-            label = 'Baseline (0.5)'
+            label = "Baseline (0.5)"
             # if benchmark result is given
             if baseline_dict is not None and dataset in baseline_dict:
                 y = baseline_dict[dataset]
-                label = f'Baseline ({baseline_dict[dataset]})'
-            plot.axhline(y=y,
-                         color='purple',
-                         linestyle='--',
-                         label=label)
+                label = f"Baseline ({baseline_dict[dataset]})"
+            plot.axhline(y=y, color="purple", linestyle="--", label=label)
         plot.legend()
 
         save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
@@ -112,9 +115,9 @@ def create_metric_plot(metric_name: str,
         plot.show()
 
 
-def get_max_value_for_dataset_and_metric(dataset: str,
-                                         parser: LogParser,
-                                         metric_name: str) -> float:
+def get_max_value_for_dataset_and_metric(
+    dataset: str, parser: LogParser, metric_name: str
+) -> float:
     if metric_name == DICT_RECALL or metric_name == DICT_PRECISION:
         return 1
     else:
@@ -122,8 +125,10 @@ def get_max_value_for_dataset_and_metric(dataset: str,
 
         for feature_label in FEATURE_LABELS:
             filtered_parser_result = [
-                result for result in parser.results
-                if result[DICT_DATASET] == dataset and result[DICT_FEATURE_LABEL] == feature_label
+                result
+                for result in parser.results
+                if result[DICT_DATASET] == dataset
+                and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_parser_result:
                 continue
@@ -137,29 +142,27 @@ def get_max_value_for_dataset_and_metric(dataset: str,
 
 
 def plot_loss():
-    create_metric_plot(metric_name=DICT_LOSS,
-                       y_axis_label=VALUE_LOSS)
+    create_metric_plot(metric_name=DICT_LOSS, y_axis_label=VALUE_LOSS)
 
 
 def plot_auc_roc():
-    create_metric_plot(metric_name=DICT_AUC_ROC,
-                       y_axis_label=VALUE_AUC_ROC,
-                       baseline_dict=AUC_ROC_PAPER)
+    create_metric_plot(
+        metric_name=DICT_AUC_ROC,
+        y_axis_label=VALUE_AUC_ROC,
+        baseline_dict=AUC_ROC_PAPER,
+    )
 
 
 def plot_recall():
-    create_metric_plot(metric_name=DICT_RECALL,
-                       y_axis_label=VALUE_RECALL)
+    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL)
 
 
 def plot_precision():
-    create_metric_plot(metric_name=DICT_PRECISION,
-                       y_axis_label=VALUE_PRECISION)
+    create_metric_plot(metric_name=DICT_PRECISION, y_axis_label=VALUE_PRECISION)
 
 
 def plot_time():
-    create_metric_plot(metric_name=DICT_TIME,
-                       y_axis_label=VALUE_TIME + " in s")
+    create_metric_plot(metric_name=DICT_TIME, y_axis_label=VALUE_TIME + " in s")
 
 
 if __name__ == "__main__":

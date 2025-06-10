@@ -1,3 +1,9 @@
+"""
+structure_and_feature_model_3.py
+This file contains train wrapper for the model "Attr + Str3".
+It also contains structural attribute extraction method.
+"""
+
 import logging
 from typing import List
 
@@ -6,25 +12,28 @@ import torch
 from torch_geometric.utils import from_networkx
 
 from src.helpers.config.const import FEATURE_LABEL_STR3
+from src.helpers.time.timed import timed
 from src.models.base_train import base_train
 
-logging.basicConfig(level=logging.INFO)
 
-
-def train(nx_graph: nx.Graph,
-          labels: List[int],
-          learning_rate: float,
-          hid_dim: int,
-          dataset: str):
+def train(
+    nx_graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
 
-    base_train(di_graph=di_graph,
-               labels=labels,
-               title_prefix=FEATURE_LABEL_STR3,
-               learning_rate=learning_rate,
-               hid_dim=hid_dim,
-               dataset=dataset)
+    base_train(
+        di_graph=di_graph,
+        labels=labels,
+        title_prefix=FEATURE_LABEL_STR3,
+        learning_rate=learning_rate,
+        hid_dim=hid_dim,
+        dataset=dataset,
+    )
 
 
 def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
@@ -69,7 +78,9 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     except Exception:
         pass
 
-    max_degree = max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 1
+    max_degree = (
+        max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 1
+    )
 
     for node in graph.nodes():
         node_neighbours = list(graph.neighbors(node))
@@ -92,35 +103,39 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         is_cut_vertex = 1.0 if node in articulation_points else 0.0
         degree_ratio = degree / max_degree if max_degree > 0 else 0.0
 
-        node_features = [degree,
-                         clustering,
-                         triangle_count,
-                         average_neighbour_degree.get(node, 0.0),
-                         ego_density,
-                         square_clustering,
-                         num_neighbours,
-                         betweenness_node,
-                         closeness_node,
-                         eigenvector_node,
-                         pagerank_node,
-                         core,
-                         eccentricity_node,
-                         is_cut_vertex,
-                         degree_ratio]
+        node_features = [
+            degree,
+            clustering,
+            triangle_count,
+            average_neighbour_degree.get(node, 0.0),
+            ego_density,
+            square_clustering,
+            num_neighbours,
+            betweenness_node,
+            closeness_node,
+            eigenvector_node,
+            pagerank_node,
+            core,
+            eccentricity_node,
+            is_cut_vertex,
+            degree_ratio,
+        ]
 
         features.append(node_features)
 
-    features_tensor = torch.tensor(features,
-                                   dtype=torch.float32)
+    features_tensor = torch.tensor(features, dtype=torch.float32)
 
     return features_tensor
 
 
+@timed
 def add_structure_features(nx_graph: nx.Graph):
     logging.info("Extracting node features with NetworkX 2...")
 
     structural_features = extract_node_features_tensor(nx_graph)
 
     for i, node in enumerate(nx_graph.nodes()):
-        original_node_features = nx_graph.nodes[node]['x']
-        nx_graph.nodes[node]['x'] = torch.cat([original_node_features, structural_features[i]])
+        original_node_features = nx_graph.nodes[node]["x"]
+        nx_graph.nodes[node]["x"] = torch.cat(
+            [original_node_features, structural_features[i]]
+        )

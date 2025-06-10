@@ -1,3 +1,9 @@
+"""
+structure_and_feature_model_3.py
+This file contains train wrapper for the model "Attr + Str3".
+It also contains structural attribute extraction method.
+"""
+
 import torch.nn as nn
 import torch.nn.functional as F
 

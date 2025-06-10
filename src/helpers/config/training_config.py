@@ -1,7 +1,12 @@
+"""
+trainig_config.py
+This file contains constants for hyperparameters used in machine learning models.
+"""
+
 EPOCH_TO_LEARN = 100
 EPOCHS = list(range(10, 101, 10))
 
-# hyper parameters from benchmark
+# hyperparameters from benchmark
 LEARNING_RATE = 0.005
 HIDDEN_DIMS = 16
 ETA = 5
@@ -18,7 +23,7 @@ AUC_ROC_PAPER = {
     "BlogCatalog": 0.783,
     "weibo": 0.915,
     "Flickr": 0.751,
-    "Reddit": 0.557
+    "Reddit": 0.557,
 }
 
 labels_dict = {}

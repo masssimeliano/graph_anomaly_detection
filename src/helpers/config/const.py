@@ -1,3 +1,8 @@
+"""
+const.py
+This file contains constants used for logging, file naming, and labeling in machine learning tasks.
+"""
+
 FEATURE_LABEL_STR2 = "Attr + Str2"
 FEATURE_LABEL_STR3 = "Attr + Str3"
 FEATURE_LABEL_STR = "Attr + Str"
@@ -9,10 +14,20 @@ FEATURE_LABEL_ERROR1 = "Attr + Error1"
 FEATURE_LABEL_ERROR2 = "Attr + Error2"
 FEATURE_LABEL_STANDARD = "Attr"
 
-# order is important here because in parse_logs() it must search for all feature labels through contains()
-FEATURE_LABELS = [FEATURE_LABEL_STR2, FEATURE_LABEL_STR3, FEATURE_LABEL_STR, FEATURE_LABEL_ALPHA1, FEATURE_LABEL_ALPHA2,
-                  FEATURE_LABEL_EMD1, FEATURE_LABEL_EMD2, FEATURE_LABEL_ERROR1, FEATURE_LABEL_ERROR2,
-                  FEATURE_LABEL_STANDARD]
+# Order is important here because in parse_logs() it must search for all feature labels through contains()
+# And before FEATURE_LABEL_STANDARD it has to check FEATURE_LABEL_STR2 e.g.
+FEATURE_LABELS = [
+    FEATURE_LABEL_STR2,
+    FEATURE_LABEL_STR3,
+    FEATURE_LABEL_STR,
+    FEATURE_LABEL_ALPHA1,
+    FEATURE_LABEL_ALPHA2,
+    FEATURE_LABEL_EMD1,
+    FEATURE_LABEL_EMD2,
+    FEATURE_LABEL_ERROR1,
+    FEATURE_LABEL_ERROR2,
+    FEATURE_LABEL_STANDARD,
+]
 
 DICT_FILE_NAME = "file_name"
 DICT_DATASET = "dataset"
