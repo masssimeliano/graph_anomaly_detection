@@ -109,6 +109,6 @@ The following literature and resources were used or referenced during the resear
    IEEE Paper: https://ieeexplore.ieee.org/abstract/document/9286205  
    Implementation: https://fcdimitr.github.io/pyfglt/
 
-5. Datasets with labeled anomalies for Graph AD.
+5. Datasets with labeled anomalies for Graph AD.  
    https://github.com/mala-lab/Awesome-Deep-Graph-Anomaly-Detection#Datasets
 
