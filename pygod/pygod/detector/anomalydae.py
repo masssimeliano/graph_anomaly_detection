@@ -1,5 +1,6 @@
 """AnomalyDAE: Dual autoencoder for anomaly detection
 on attributed networks"""
+
 import time
 import warnings
 
@@ -17,50 +18,54 @@ from ..nn import AnomalyDAEBase
 
 class AnomalyDAE(DeepDetector):
 
-    def __init__(self,
-                 labels,
-                 title_prefix,
-                 data_set,
-                 emb_dim=64,
-                 hid_dim=64,
-                 num_layers=4,
-                 dropout=0.,
-                 weight_decay=0.,
-                 act=F.relu,
-                 backbone=None,
-                 alpha=0.5,
-                 theta=1.,
-                 eta=1.,
-                 contamination=0.1,
-                 lr=0.004,
-                 epoch=5,
-                 gpu=-1,
-                 batch_size=0,
-                 num_neigh=-1,
-                 verbose=0,
-                 save_emb=False,
-                 compile_model=False,
-                 **kwargs):
+    def __init__(
+        self,
+        labels,
+        title_prefix,
+        data_set,
+        emb_dim=64,
+        hid_dim=64,
+        num_layers=4,
+        dropout=0.0,
+        weight_decay=0.0,
+        act=F.relu,
+        backbone=None,
+        alpha=0.5,
+        theta=1.0,
+        eta=1.0,
+        contamination=0.1,
+        lr=0.004,
+        epoch=5,
+        gpu=-1,
+        batch_size=0,
+        num_neigh=-1,
+        verbose=0,
+        save_emb=False,
+        compile_model=False,
+        **kwargs
+    ):
 
         if backbone is not None or num_layers != 4:
             warnings.warn("Backbone and num_layers are not used in AnomalyDAE")
 
-        super(AnomalyDAE, self).__init__(hid_dim=hid_dim,
-                                         num_layers=num_layers,
-                                         dropout=dropout,
-                                         weight_decay=weight_decay,
-                                         act=act,
-                                         backbone=backbone,
-                                         contamination=contamination,
-                                         lr=lr,
-                                         epoch=epoch,
-                                         gpu=gpu,
-                                         batch_size=batch_size,
-                                         num_neigh=num_neigh,
-                                         verbose=verbose,
-                                         save_emb=save_emb,
-                                         compile_model=compile_model,
-                                         **kwargs)
+        super(AnomalyDAE, self).__init__(
+            hid_dim=hid_dim,
+            num_layers=num_layers,
+            dropout=dropout,
+            weight_decay=weight_decay,
+            act=act,
+            backbone=backbone,
+            contamination=contamination,
+            lr=lr,
+            epoch=epoch,
+            gpu=gpu,
+            batch_size=batch_size,
+            num_neigh=num_neigh,
+            verbose=verbose,
+            save_emb=save_emb,
+            compile_model=compile_model,
+            **kwargs
+        )
 
         self.emb_dim = emb_dim
         self.alpha = alpha
@@ -90,16 +95,17 @@ class AnomalyDAE(DeepDetector):
 
     def init_model(self, **kwargs):
         if self.save_emb:
-            self.emb = torch.zeros(self.num_nodes,
-                                   self.hid_dim)
+            self.emb = torch.zeros(self.num_nodes, self.hid_dim)
 
-        return AnomalyDAEBase(in_dim=self.in_dim,
-                              num_nodes=self.num_nodes,
-                              emb_dim=self.emb_dim,
-                              hid_dim=self.hid_dim,
-                              dropout=self.dropout,
-                              act=self.act,
-                              **kwargs).to(self.device)
+        return AnomalyDAEBase(
+            in_dim=self.in_dim,
+            num_nodes=self.num_nodes,
+            emb_dim=self.emb_dim,
+            hid_dim=self.hid_dim,
+            dropout=self.dropout,
+            act=self.act,
+            **kwargs
+        ).to(self.device)
 
     def forward_model(self, data):
         batch_size = data.batch_size
@@ -116,39 +122,30 @@ class AnomalyDAE(DeepDetector):
         pos_weight_a = self.eta / (1 + self.eta)
         pos_weight_s = self.theta / (1 + self.theta)
 
-        (score,
-         structural_error_mean,
-         structural_error_std,
-         attribute_error_mean,
-         attribute_error_std) = self.model.loss_func(x[:batch_size],
-                                                     x_[:batch_size],
-                                                     s[:batch_size,
-                                                     node_idx],
-                                                     s_[:batch_size],
-                                                     weight,
-                                                     pos_weight_a,
-                                                     pos_weight_s)
+        (
+            score,
+            structural_error_mean,
+            structural_error_std,
+            attribute_error_mean,
+            attribute_error_std,
+        ) = self.model.loss_func(
+            x[:batch_size],
+            x_[:batch_size],
+            s[:batch_size, node_idx],
+            s_[:batch_size],
+            weight,
+            pos_weight_a,
+            pos_weight_s,
+        )
 
-        if not torch.isfinite(score).all():
-            print("❌ NaN or Inf in score detected. Replacing with zeros.")
-            # score = torch.nan_to_num(score, nan=0.0, posinf=1e6, neginf=-1e6)
-
-            # Проверка на вырожденность (все значения нули)
-        if torch.all(score == 0):
-            print("⚠️ Warning: all score values are zero — potential degenerate output")
-
-            # Проверка на взрыв
-        if torch.max(score) > 1e6:
-            print("⚠️ Warning: unusually large score values detected")
-
-        loss = torch.mean(score)
-
-        # Проверка самого loss
-        if not torch.isfinite(loss):
-            print("❌ Loss is NaN or Inf — replacing with default fallback value")
-            # loss = torch.tensor(1e6, device=self.device)
-
-        return loss, score.detach().cpu(), structural_error_mean, structural_error_std, attribute_error_mean, attribute_error_std
+        return (
+            loss,
+            score.detach().cpu(),
+            structural_error_mean,
+            structural_error_std,
+            attribute_error_mean,
+            attribute_error_std,
+        )
 
     # custom fit() method that works with same epochs value
     # and saves resulting metrics inside for-cycle
@@ -165,24 +162,26 @@ class AnomalyDAE(DeepDetector):
         self.num_nodes, self.in_dim = data.x.shape
         if self.batch_size == 0:
             self.batch_size = data.x.shape[0]
-        loader = NeighborLoader(data,
-                                self.num_neigh,
-                                batch_size=self.batch_size)
+        loader = NeighborLoader(data, self.num_neigh, batch_size=self.batch_size)
 
         self.model = self.init_model(**self.kwargs)
         if self.compile_model:
             self.model = compile(self.model)
         if not self.gan:
-            optimizer = torch.optim.Adam(self.model.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
+            optimizer = torch.optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
         else:
-            self.opt_in = torch.optim.Adam(self.model.inner.parameters(),
-                                           lr=self.lr,
-                                           weight_decay=self.weight_decay)
-            optimizer = torch.optim.Adam(self.model.outer.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
+            self.opt_in = torch.optim.Adam(
+                self.model.inner.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+            optimizer = torch.optim.Adam(
+                self.model.outer.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
 
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
@@ -195,8 +194,14 @@ class AnomalyDAE(DeepDetector):
                 node_idx = sampled_data.n_id
 
                 # getting structural and attribute reconstruction errors
-                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
-                    sampled_data)
+                (
+                    loss,
+                    score,
+                    stru_error_mean,
+                    stru_error_std,
+                    attr_error_mean,
+                    attr_error_std,
+                ) = self.forward_model(sampled_data)
                 self.stru_error_mean = stru_error_mean
                 self.stru_error_std = stru_error_std
                 self.attr_error_mean = attr_error_mean
@@ -205,13 +210,16 @@ class AnomalyDAE(DeepDetector):
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
-                        self.emb[0][node_idx[:batch_size]] = \
-                            self.model.emb[0][:batch_size].cpu()
-                        self.emb[1][node_idx[:batch_size]] = \
-                            self.model.emb[1][:batch_size].cpu()
+                        self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
+                            :batch_size
+                        ].cpu()
+                        self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
+                            :batch_size
+                        ].cpu()
                     else:
-                        self.emb[node_idx[:batch_size]] = \
-                            self.model.emb[:batch_size].cpu()
+                        self.emb[node_idx[:batch_size]] = self.model.emb[
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -226,21 +234,20 @@ class AnomalyDAE(DeepDetector):
                 self.last_time = time.time() - start_time
 
                 # calculating AUC-ROC through all epochs
-                if (epoch in EPOCHS):
+                if epoch in EPOCHS:
                     self.array_time.append(time.time() - start_time)
                     self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels,
-                                            self.decision_score_)
+                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
                     self_labels = self.labels
                     self_score = self.decision_score_
                     self_k = self.labels.count(1)
-                    recall_k = recall_at_k(y_true=self_labels,
-                                           scores=self_score,
-                                           k=self_k)
-                    precision_k = precision_at_k(y_true=self_labels,
-                                                 scores=self_score,
-                                                 k=self_k)
+                    recall_k = recall_at_k(
+                        y_true=self_labels, scores=self_score, k=self_k
+                    )
+                    precision_k = precision_at_k(
+                        y_true=self_labels, scores=self_score, k=self_k
+                    )
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
@@ -251,13 +258,14 @@ class AnomalyDAE(DeepDetector):
                         title_prefix = self.title_prefix
                         learning_rate = self.lr
                         hid_dim = self.hid_dim
-                        emd_file = get_emd_file(dataset=dataset,
-                                                title_prefix=title_prefix,
-                                                learning_rate=learning_rate,
-                                                hid_dim=hid_dim,
-                                                epoch=epoch, )
-                        torch.save(obj=self.emb,
-                                   f=emd_file)
+                        emd_file = get_emd_file(
+                            dataset=dataset,
+                            title_prefix=title_prefix,
+                            learning_rate=learning_rate,
+                            hid_dim=hid_dim,
+                            epoch=epoch,
+                        )
+                        torch.save(obj=self.emb, f=emd_file)
 
         self._process_decision_score()
         return self
@@ -271,24 +279,26 @@ class AnomalyDAE(DeepDetector):
         self.num_nodes, self.in_dim = data.x.shape
         if self.batch_size == 0:
             self.batch_size = data.x.shape[0]
-        loader = NeighborLoader(data,
-                                self.num_neigh,
-                                batch_size=self.batch_size)
+        loader = NeighborLoader(data, self.num_neigh, batch_size=self.batch_size)
 
         self.model = self.init_model(**self.kwargs)
         if self.compile_model:
             self.model = compile(self.model)
         if not self.gan:
-            optimizer = torch.optim.Adam(self.model.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
+            optimizer = torch.optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
         else:
-            self.opt_in = torch.optim.Adam(self.model.inner.parameters(),
-                                           lr=self.lr,
-                                           weight_decay=self.weight_decay)
-            optimizer = torch.optim.Adam(self.model.outer.parameters(),
-                                         lr=self.lr,
-                                         weight_decay=self.weight_decay)
+            self.opt_in = torch.optim.Adam(
+                self.model.inner.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+            optimizer = torch.optim.Adam(
+                self.model.outer.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
 
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
@@ -301,8 +311,14 @@ class AnomalyDAE(DeepDetector):
                 node_idx = sampled_data.n_id
 
                 # structural and attribute reconstruction errors are not used here
-                loss, score, stru_error_mean, stru_error_std, attr_error_mean, attr_error_std = self.forward_model(
-                    sampled_data)
+                (
+                    loss,
+                    score,
+                    stru_error_mean,
+                    stru_error_std,
+                    attr_error_mean,
+                    attr_error_std,
+                ) = self.forward_model(sampled_data)
                 self.stru_error_mean = stru_error_mean
                 self.stru_error_std = stru_error_std
                 self.attr_error_mean = attr_error_mean
@@ -311,13 +327,16 @@ class AnomalyDAE(DeepDetector):
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
                     if type(self.emb) is tuple:
-                        self.emb[0][node_idx[:batch_size]] = \
-                            self.model.emb[0][:batch_size].cpu()
-                        self.emb[1][node_idx[:batch_size]] = \
-                            self.model.emb[1][:batch_size].cpu()
+                        self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
+                            :batch_size
+                        ].cpu()
+                        self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
+                            :batch_size
+                        ].cpu()
                     else:
-                        self.emb[node_idx[:batch_size]] = \
-                            self.model.emb[:batch_size].cpu()
+                        self.emb[node_idx[:batch_size]] = self.model.emb[
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -332,19 +351,20 @@ class AnomalyDAE(DeepDetector):
             self.last_time = time.time() - start_time
 
         # saving embedding if its needed
-        if (self.save_emb):
+        if self.save_emb:
             dataset = self.dataset
             title_prefix = self.title_prefix
             learning_rate = self.lr
             hid_dim = self.hid_dim
             epoch = self.epoch
-            emd_file = get_emd_file(dataset=dataset,
-                                    title_prefix=title_prefix,
-                                    learning_rate=learning_rate,
-                                    hid_dim=hid_dim,
-                                    epoch=epoch)
-            torch.save(obj=self.emb,
-                       f=emd_file)
+            emd_file = get_emd_file(
+                dataset=dataset,
+                title_prefix=title_prefix,
+                learning_rate=learning_rate,
+                hid_dim=hid_dim,
+                epoch=epoch,
+            )
+            torch.save(obj=self.emb, f=emd_file)
 
         self._process_decision_score()
         return self

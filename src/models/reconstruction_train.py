@@ -156,8 +156,6 @@ def get_reconstruction_errors(
     attribute_error_mean = model.attr_error_mean
     attribute_error_std = model.attr_error_std
 
-    print(len(structural_error_mean))
-
     for i, node in enumerate(graph.nodes()):
         original_node_features = graph.nodes[node]["x"]
         node_error_features = torch.tensor(

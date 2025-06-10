@@ -10,6 +10,9 @@ from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.mat_loader import load_graph_from_mat
 from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
+from src.models.anomalydae.reconstruction_error_model_1 import (
+    normalize_node_features_via_minmax_and_remove_nan,
+)
 from src.scripts.dev import train_reconstruction_2
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +23,11 @@ def main():
         logging.info(f"Preparing {dataset}...")
         labels, graph = load_graph_from_mat(name=dataset, size=CURRENT_DATASETS_SIZE[i])
         labels_dict[dataset] = labels
-        graph_dict[dataset] = to_networkx_graph(graph=graph, do_visualize=False)
+        nx_graph = to_networkx_graph(graph=graph, do_visualize=False)
+        normalize_node_features_via_minmax_and_remove_nan(
+            nx_graph=to_networkx_graph(graph=graph, do_visualize=False)
+        )
+        graph_dict[dataset] = nx_graph
 
     train_reconstruction_2.main()
 

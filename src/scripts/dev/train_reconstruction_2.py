@@ -12,11 +12,7 @@ import torch
 from src.helpers.config.const import FEATURE_LABEL_ERROR2
 from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
-from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.anomalydae import reconstruction_error_model_2
-from src.models.anomalydae.reconstruction_error_model_1 import (
-    normalize_node_features_via_minmax_and_remove_nan,
-)
 
 
 def main():
@@ -29,10 +25,8 @@ def main():
         logging.info(f"--- Begin training on {dataset} ({FEATURE_LABEL_ERROR2}) ---")
         logging.info(f"-------------------------------")
 
-        nx_graph = to_networkx_graph(graph=graph_dict[dataset], do_visualize=False)
-        normalize_node_features_via_minmax_and_remove_nan(nx_graph=nx_graph)
         reconstruction_error_model_2.train(
-            nx_graph=nx_graph,
+            nx_graph=graph_dict[dataset],
             labels=labels_dict[dataset],
             learning_rate=LEARNING_RATE,
             hid_dim=HIDDEN_DIMS,
