@@ -32,7 +32,7 @@ def train(
         compare_anomaly_reconstruction_error(
             nx_graph=nx_graph, labels=labels_dict[dataset]
         )
-    add_structure_features(nx_graph=nx_graph)
+    add_error_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
 
     base_train(
@@ -86,7 +86,7 @@ def extract_error_features(nx_graph: nx.Graph) -> torch.Tensor:
     return node_errors
 
 
-def add_structure_features(nx_graph: nx.Graph):
+def add_error_features(nx_graph: nx.Graph):
     node_errors = extract_error_features(nx_graph)
 
     for i, node in enumerate(nx_graph.nodes()):
