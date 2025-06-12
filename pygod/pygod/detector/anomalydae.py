@@ -19,30 +19,30 @@ from ..nn import AnomalyDAEBase
 class AnomalyDAE(DeepDetector):
 
     def __init__(
-        self,
-        labels,
-        title_prefix,
-        data_set,
-        emb_dim=64,
-        hid_dim=64,
-        num_layers=4,
-        dropout=0.0,
-        weight_decay=0.0,
-        act=F.relu,
-        backbone=None,
-        alpha=0.5,
-        theta=1.0,
-        eta=1.0,
-        contamination=0.1,
-        lr=0.004,
-        epoch=5,
-        gpu=-1,
-        batch_size=0,
-        num_neigh=-1,
-        verbose=0,
-        save_emb=False,
-        compile_model=False,
-        **kwargs
+            self,
+            labels,
+            title_prefix,
+            data_set,
+            emb_dim=64,
+            hid_dim=64,
+            num_layers=4,
+            dropout=0.0,
+            weight_decay=0.0,
+            act=F.relu,
+            backbone=None,
+            alpha=0.5,
+            theta=1.0,
+            eta=1.0,
+            contamination=0.1,
+            lr=0.004,
+            epoch=5,
+            gpu=-1,
+            batch_size=0,
+            num_neigh=-1,
+            verbose=0,
+            save_emb=False,
+            compile_model=False,
+            **kwargs
     ):
 
         if backbone is not None or num_layers != 4:
@@ -154,6 +154,7 @@ class AnomalyDAE(DeepDetector):
     # custom fit() method that works with same epochs value
     # and saves resulting metrics inside for-cycle
     def fit(self, data, label=None):
+        print("anomalydae")
         start_time = time.time()
         self.array_loss = []
         self.array_auc_roc = []
@@ -214,15 +215,15 @@ class AnomalyDAE(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                            :batch_size
-                        ].cpu()
+                                                          :batch_size
+                                                          ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -330,15 +331,15 @@ class AnomalyDAE(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                            :batch_size
-                        ].cpu()
+                                                          :batch_size
+                                                          ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()

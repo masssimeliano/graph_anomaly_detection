@@ -6,11 +6,12 @@
 # License: BSD 2 clause
 
 import time
+
 import torch
 import torch.nn.functional as F
+from torch_geometric import compile
 from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import GCN
-from torch_geometric import compile
 
 from . import DeepDetector
 from ..nn import GADNRBase
@@ -182,13 +183,13 @@ class GADNR(DeepDetector):
         self.verbose = verbose
 
     def process_graph(self, data):
-        if self.batch_size != data.x.shape[0]: # mini-batch
+        if self.batch_size != data.x.shape[0]:  # mini-batch
             data, neighbor_dict, neighbor_num_list, id_mapping = \
-                                GADNRBase.process_graph(data,
-                                                        data.input_id.tolist())
-        else: # full batch
+                GADNRBase.process_graph(data,
+                                        data.input_id.tolist())
+        else:  # full batch
             data, neighbor_dict, neighbor_num_list, id_mapping = \
-                                GADNRBase.process_graph(data)
+                GADNRBase.process_graph(data)
             self.tot_nodes = data.x.shape[0]
 
         self.neighbor_num_list = neighbor_num_list.to(self.device)
@@ -200,13 +201,13 @@ class GADNR(DeepDetector):
     def init_model(self, **kwargs):
         if self.save_emb:
             self.emb = torch.zeros(self.num_nodes, self.hid_dim)
-                         
+
         return GADNRBase(in_dim=self.in_dim, hid_dim=self.hid_dim,
                          encoder_layers=self.encoder_layers,
                          deg_dec_layers=self.deg_dec_layers,
                          fea_dec_layers=self.fea_dec_layers,
                          sample_size=self.sample_size,
-                         sample_time=self.sample_time, 
+                         sample_time=self.sample_time,
                          neighbor_num_list=self.neighbor_num_list,
                          neigh_loss=self.neigh_loss,
                          lambda_loss1=self.lambda_loss1,
@@ -217,28 +218,28 @@ class GADNR(DeepDetector):
                          device=self.device).to(self.device)
 
     def forward_model(self, data):
-        if not self.full_batch: # mini-batch training
+        if not self.full_batch:  # mini-batch training
             h0, degree_logits, feat_recon_list, neigh_recon_list = \
-                                            self.model(data.x,
-                                                       data.edge_index,
-                                                       data.input_id.tolist(),
-                                                       self.neighbor_dict,
-                                                       self.id_mapping)
-        else: # full batch training
+                self.model(data.x,
+                           data.edge_index,
+                           data.input_id.tolist(),
+                           self.neighbor_dict,
+                           self.id_mapping)
+        else:  # full batch training
             h0, degree_logits, feat_recon_list, neigh_recon_list = \
-                                                self.model(data.x,
-                                                           data.edge_index)
-        
+                self.model(data.x,
+                           data.edge_index)
+
         loss, loss_per_node, h_loss, degree_loss, feature_loss = \
-                                self.model.loss_func(h0,
-                                                     degree_logits,
-                                                     feat_recon_list,
-                                                     neigh_recon_list,
-                                                     self.neighbor_num_list)
+            self.model.loss_func(h0,
+                                 degree_logits,
+                                 feat_recon_list,
+                                 neigh_recon_list,
+                                 self.neighbor_num_list)
 
         return loss, loss_per_node.cpu().detach(), h_loss.cpu().detach(), \
             degree_loss.cpu().detach(), feature_loss.cpu().detach()
-    
+
     def comp_decision_score(self,
                             loss_per_node,
                             h_loss,
@@ -254,15 +255,15 @@ class GADNR(DeepDetector):
             comp_loss = loss_per_node
         else:
             # the weighted decision score
-            h_loss_norm = h_loss / (torch.max(h_loss) - 
+            h_loss_norm = h_loss / (torch.max(h_loss) -
                                     torch.min(h_loss))
             degree_loss_norm = degree_loss / \
-                (torch.max(degree_loss) - torch.min(degree_loss))
+                               (torch.max(degree_loss) - torch.min(degree_loss))
             feature_loss_norm = feature_loss / \
-                (torch.max(feature_loss) - torch.min(feature_loss))
+                                (torch.max(feature_loss) - torch.min(feature_loss))
             comp_loss = h_loss_weight * h_loss_norm \
-                + degree_loss_weight *  degree_loss_norm \
-                    + feature_loss_weight * feature_loss_norm
+                        + degree_loss_weight * degree_loss_norm \
+                        + feature_loss_weight * feature_loss_norm
         return comp_loss
 
     def fit(self,
@@ -273,6 +274,7 @@ class GADNR(DeepDetector):
             feature_loss_weight=2.5,
             loss_step=20
             ):
+        print("gadnr")
         """
         Overwrite the base model fit function since GAD-NR uses 
         multiple personalized loss functions.
@@ -298,11 +300,11 @@ class GADNR(DeepDetector):
         """
 
         self.num_nodes, self.in_dim = data.x.shape
-        if self.batch_size == 0: # full batch training
+        if self.batch_size == 0:  # full batch training
             self.batch_size = data.x.shape[0]
             data = self.process_graph(data)
             self.full_batch = True
-        else: # mini batch training
+        else:  # mini batch training
             loader = NeighborLoader(data,
                                     self.num_neigh,
                                     batch_size=self.batch_size)
@@ -310,33 +312,33 @@ class GADNR(DeepDetector):
         self.model = self.init_model(**self.kwargs)
         if self.compile_model:
             self.model = compile(self.model)
-        
+
         degree_params = list(map(id, self.model.degree_decoder.parameters()))
         base_params = filter(lambda p: id(p) not in degree_params,
-                         self.model.parameters())
-        optimizer = torch.optim.Adam([{'params': base_params}, 
+                             self.model.parameters())
+        optimizer = torch.optim.Adam([{'params': base_params},
                                       {'params': self.model.degree_decoder.
-                                       parameters(), 'lr': 1e-2}],
-                                       lr=self.lr,
-                                       weight_decay=self.weight_decay)
-        
+                                     parameters(), 'lr': 1e-2}],
+                                     lr=self.lr,
+                                     weight_decay=self.weight_decay)
+
         min_loss = float('inf')
         self.arg_min_loss_per_node = None
 
         self.model.train()
         self.decision_score_ = torch.zeros(data.x.shape[0])
-        for epoch in range(1, self.epoch+1, 1):
+        for epoch in range(1, self.epoch + 1, 1):
             start_time = time.time()
             epoch_loss = 0
-            epoch_loss_per_node = torch.zeros(data.x.shape[0]) 
-            if epoch%loss_step==0:
+            epoch_loss_per_node = torch.zeros(data.x.shape[0])
+            if epoch % loss_step == 0:
                 self.model.lambda_loss2 = self.model.lambda_loss2 + 0.5
                 self.model.lambda_loss3 = self.model.lambda_loss3 / 2
-            
+
             # full batch training
             if self.full_batch:
                 loss, loss_per_node, h_loss, degree_loss, feature_loss = \
-                                                self.forward_model(data) 
+                    self.forward_model(data)
 
                 comp_loss = self.comp_decision_score(loss_per_node,
                                                      h_loss,
@@ -345,27 +347,27 @@ class GADNR(DeepDetector):
                                                      h_loss_weight,
                                                      degree_loss_weight,
                                                      feature_loss_weight)
-                
+
                 self.decision_score_ = comp_loss.squeeze(1)
 
                 if self.save_emb:
                     self.emb = self.model.emb.cpu()
-                
+
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                epoch_loss = loss.item() * self.batch_size 
+                epoch_loss = loss.item() * self.batch_size
                 epoch_loss_per_node = loss_per_node.squeeze(1)
-            else: # mini batch training
+            else:  # mini batch training
                 for sampled_data in loader:
                     batch_size = sampled_data.batch_size
                     node_idx = sampled_data.n_id
                     sampled_data = self.process_graph(sampled_data)
 
                     loss, loss_per_node, h_loss, degree_loss, feature_loss = \
-                                            self.forward_model(sampled_data)
-                    
+                        self.forward_model(sampled_data)
+
                     comp_loss = self.comp_decision_score(loss_per_node,
                                                          h_loss,
                                                          degree_loss,
@@ -373,28 +375,28 @@ class GADNR(DeepDetector):
                                                          h_loss_weight,
                                                          degree_loss_weight,
                                                          feature_loss_weight)
-                                                
+
                     self.decision_score_[node_idx[:batch_size]] = \
-                                                        comp_loss.squeeze(1)
+                        comp_loss.squeeze(1)
 
                     if self.save_emb:
                         self.emb[node_idx[:batch_size]] = \
                             self.model.emb[:batch_size].cpu()
-                    
+
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
 
                     epoch_loss += loss.item() * batch_size
                     epoch_loss_per_node[node_idx[:batch_size]] = \
-                                                    loss_per_node.squeeze(1)
-            
+                        loss_per_node.squeeze(1)
+
             loss_value = epoch_loss / data.x.shape[0]
 
             if loss_value < min_loss:
                 min_loss = loss_value
                 self.arg_min_loss_per_node = epoch_loss_per_node
-            
+
             logger(epoch=epoch,
                    loss=loss_value,
                    score=self.decision_score_,
@@ -405,7 +407,7 @@ class GADNR(DeepDetector):
 
         self._process_decision_score()
         return self
-    
+
     def decision_function(self,
                           data,
                           label=None,
@@ -418,8 +420,8 @@ class GADNR(DeepDetector):
         The three loss term weights must be the same as the fit function if
         ``real_loss`` is ``False``.
         """
-         
-        if self.full_batch: # full batch inference
+
+        if self.full_batch:  # full batch inference
             if self.batch_size != data.x.shape[0]:
                 raise ValueError(data, 'should have the same number of nodes '
                                        'as the training data under the full '
@@ -427,7 +429,7 @@ class GADNR(DeepDetector):
                                        'different number of nodes, please use '
                                        'the mini-batch mode.')
             data = self.process_graph(data)
-        else: # mini batch inference
+        else:  # mini batch inference
             loader = NeighborLoader(data,
                                     self.num_neigh,
                                     batch_size=self.batch_size)
@@ -440,9 +442,9 @@ class GADNR(DeepDetector):
             else:
                 self.emb = torch.zeros(data.x.shape[0], self.hid_dim)
         start_time = time.time()
-        if self.batch_size == data.x.shape[0]: # full batch inference
+        if self.batch_size == data.x.shape[0]:  # full batch inference
             loss, loss_per_node, h_loss, degree_loss, feature_loss = \
-                                            self.forward_model(data) 
+                self.forward_model(data)
             comp_loss = self.comp_decision_score(loss_per_node,
                                                  h_loss,
                                                  degree_loss,
@@ -453,13 +455,13 @@ class GADNR(DeepDetector):
             outlier_score = comp_loss.squeeze(1)
             if self.save_emb:
                 self.emb = self.model.emb.cpu()
-        else: # mini batch inference
+        else:  # mini batch inference
             for sampled_data in loader:
                 batch_size = sampled_data.batch_size
                 node_idx = sampled_data.n_id
                 sampled_data = self.process_graph(sampled_data)
                 loss, loss_per_node, h_loss, degree_loss, feature_loss = \
-                                        self.forward_model(sampled_data)
+                    self.forward_model(sampled_data)
                 comp_loss = self.comp_decision_score(loss_per_node,
                                                      h_loss,
                                                      degree_loss,

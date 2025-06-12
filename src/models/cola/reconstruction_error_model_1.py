@@ -16,17 +16,17 @@ from torch_geometric.utils import from_networkx
 from src.helpers.config.const import FEATURE_LABEL_ERROR1
 from src.helpers.config.training_config import *
 from src.helpers.time.timed import timed
-from src.models.anomalydae.base_train import base_train
+from src.models.cola.base_train import base_train
 from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
 
 
 def train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    dataset: str,
-    do_compare: bool = False,
+        nx_graph: nx.Graph,
+        labels: List[int],
+        learning_rate: float,
+        hid_dim: int,
+        dataset: str,
+        do_compare: bool = False,
 ):
     if do_compare:
         compare_anomaly_reconstruction_error(
@@ -58,14 +58,14 @@ def normalize_node_features_via_minmax_and_remove_nan(nx_graph: nx.Graph):
         dim=0
     )[0]
     node_features_stacked_diff = (
-        node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
+            node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
     )
     node_features_stacked_diff[node_features_stacked_diff == 0] = 1
 
     for n in nx_graph.nodes():
         nx_graph.nodes[n]["x"] = (
-            nx_graph.nodes[n]["x"] - node_features_stacked_without_nan_min
-        ) / node_features_stacked_diff
+                                         nx_graph.nodes[n]["x"] - node_features_stacked_without_nan_min
+                                 ) / node_features_stacked_diff
 
 
 @timed

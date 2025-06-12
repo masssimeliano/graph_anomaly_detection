@@ -17,7 +17,7 @@
 # X.YrcN # Release Candidate
 # X.Y # Final release
 #
-# Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
-# 'X.Y.dev0' is the canonical version of 'X.Y.dev'
+# Dev branch marker is: 'X.Y.anomalydae' or 'X.Y.devN' where N is an integer.
+# 'X.Y.dev0' is the canonical version of 'X.Y.anomalydae'
 
 __version__ = '1.1.0'

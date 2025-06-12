@@ -75,6 +75,7 @@ class ANOMALOUS(Detector):
         self.model = None
 
     def fit(self, data, label=None):
+        print("anomalous")
         data.s = to_dense_adj(data.edge_index)[0]
         x, s, l, w_init, r_init = self.process_graph(data)
 
@@ -122,13 +123,13 @@ class ANOMALOUS(Detector):
 
         w_init = torch.randn_like(x.T).to(self.device)
         r_init = torch.inverse((1 + self.weight_decay)
-            * torch.eye(x.shape[0]).to(self.device) + self.gamma * laplacian) @ x
+                               * torch.eye(x.shape[0]).to(self.device) + self.gamma * laplacian) @ x
 
         return x, s, laplacian, w_init, r_init
 
     def _loss(self, x, x_, r, l):
         return torch.norm(x - x_ - r, 2) + \
-               self.gamma * torch.trace(r.T @ l @ r)
+            self.gamma * torch.trace(r.T @ l @ r)
 
 
 class ANOMALOUSBase(nn.Module):

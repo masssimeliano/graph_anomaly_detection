@@ -1,7 +1,6 @@
 """
-structure_and_feature_model_3.py
-This file contains train wrapper for the model "Attr + Str3".
-It also contains structural attribute extraction method.
+node_feature_autoencoder.py
+This file contains simple autoencoder.
 """
 
 import torch.nn as nn

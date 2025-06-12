@@ -13,15 +13,15 @@ from torch_geometric.utils import from_networkx
 
 from src.helpers.config.const import FEATURE_LABEL_STR3
 from src.helpers.time.timed import timed
-from src.models.anomalydae.base_train import base_train
+from src.models.cola.base_train import base_train
 
 
 def train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    dataset: str,
+        nx_graph: nx.Graph,
+        labels: List[int],
+        learning_rate: float,
+        hid_dim: int,
+        dataset: str,
 ):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)

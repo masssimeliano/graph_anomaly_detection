@@ -14,7 +14,7 @@ from pygod.pygod.detector import AnomalyDAE
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.time.timed import timed
-from src.models.emd_train_1 import get_message_for_write_and_log
+from src.models.anomalydae.emd_train_1 import get_message_for_write_and_log
 
 
 @timed

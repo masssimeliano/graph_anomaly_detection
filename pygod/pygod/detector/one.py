@@ -86,6 +86,7 @@ class ONE(Detector):
         self.model = None
 
     def fit(self, data, label=None):
+        print("one")
 
         self.process_graph(data)
 
@@ -149,7 +150,6 @@ class ONE(Detector):
 
 class ONEBase(torch.nn.Module):
     def __init__(self, g, h, u, v, w, alpha=1., beta=1., gamma=1.):
-
         super(ONEBase, self).__init__()
 
         self.alpha = alpha

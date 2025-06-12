@@ -8,8 +8,8 @@ import math
 import time
 import warnings
 
-import torch
 import numpy as np
+import torch
 
 from . import Detector
 from ..utils import logger
@@ -87,6 +87,7 @@ class SCAN(Detector):
         pass
 
     def fit(self, data, label=None):
+        print("scan")
 
         c = 0
         self.edge_index = data.edge_index

@@ -21,7 +21,7 @@ from src.helpers.time.timed import timed
 from src.models.anomalydae.reconstruction_error_model_1 import (
     normalize_node_features_via_minmax_and_remove_nan,
 )
-from src.models.emd_train_1 import get_message_for_write_and_log
+from src.models.anomalydae.emd_train_1 import get_message_for_write_and_log
 
 
 @timed

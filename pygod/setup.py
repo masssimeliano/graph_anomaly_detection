@@ -1,7 +1,7 @@
-from setuptools import find_packages, setup
-
 # read the contents of README file
 from os import path
+
+from setuptools import find_packages, setup
 
 # get __version__ from _version.py
 ver_file = path.join('pygod', 'version.py')
@@ -29,7 +29,7 @@ setup(name='pygod',
       long_description=readme(),
       long_description_content_type='text/x-rst',
       author='PyGOD Team',
-      author_email='dev@pygod.org',
+      author_email='anomalydae@pygod.org',
       url='https://github.com/pygod-team/pygod/',
       download_url='https://github.com/pygod-team/pygod/archive/main.zip',
       keywords=['outlier detection', 'anomaly detection', 'graph mining',
@@ -53,4 +53,4 @@ setup(name='pygod',
           'Programming Language :: Python :: 3.11',
           'License :: OSI Approved :: BSD License'
       ],
-)
+      )
