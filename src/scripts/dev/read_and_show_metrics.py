@@ -47,7 +47,7 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser()
     parser.parse_logs()
@@ -58,6 +58,9 @@ def create_metric_plot(
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
+        min_value = get_min_value_for_dataset_and_metric(
+            dataset=dataset, parser=parser, metric_name=metric_name
+        )
 
         plot.figure(figsize=(10, 6))
 
@@ -66,7 +69,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
+                   and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -91,12 +94,19 @@ def create_metric_plot(
 
         plot.title(f"{y_axis_label} vs {VALUE_EPOCH} ({dataset})")
         plot.xlabel(VALUE_EPOCH)
-        plot.ylabel(y_axis_label)
-        # normalizing
-        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
-            plot.ylim(0.0, 1.5 * max_value)
+        if (y_axis_label == VALUE_TIME):
+            plot.ylabel(y_axis_label + " in s")
         else:
-            plot.ylim(0.0, max_value)
+            plot.ylabel(y_axis_label)
+
+        # normalizing
+        if metric_name == DICT_TIME or metric_name == DICT_AUC_ROC or metric_name == DICT_PRECISION or metric_name == DICT_RECALL:
+            plot.ylim(0.75 * min_value + 0.05 * max_value, 1.25 * max_value)
+        elif metric_name == DICT_LOSS:
+            plot.ylim(0.75 * min_value + 0.05 * max_value, 0.25 * max_value)
+        else:
+            plot.ylim(0.75 * min_value + 0.05 * max_value, max_value)
+
         plot.grid(True)
         plot.tight_layout()
 
@@ -116,29 +126,49 @@ def create_metric_plot(
 
 
 def get_max_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
-    if metric_name == DICT_RECALL or metric_name == DICT_PRECISION:
-        return 1
-    else:
-        max_value = 0
+    max_value = 0
 
-        for feature_label in FEATURE_LABELS:
-            filtered_parser_result = [
-                result
-                for result in parser.results
-                if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
-            ]
-            if not filtered_parser_result:
-                continue
+    for feature_label in FEATURE_LABELS:
+        filtered_parser_result = [
+            result
+            for result in parser.results
+            if result[DICT_DATASET] == dataset
+               and result[DICT_FEATURE_LABEL] == feature_label
+        ]
+        if not filtered_parser_result:
+            continue
 
-            for result in filtered_parser_result:
-                value = result.get(metric_name, 0)
-                if value > max_value:
-                    max_value = value
+        for result in filtered_parser_result:
+            value = result.get(metric_name, 0)
+            if value > max_value:
+                max_value = value
 
-        return max(max_value, 1)
+    return max_value
+
+
+def get_min_value_for_dataset_and_metric(
+        dataset: str, parser: LogParser, metric_name: str
+) -> float:
+    min_value = get_max_value_for_dataset_and_metric(dataset=dataset, parser=parser, metric_name=metric_name)
+
+    for feature_label in FEATURE_LABELS:
+        filtered_parser_result = [
+            result
+            for result in parser.results
+            if result[DICT_DATASET] == dataset
+               and result[DICT_FEATURE_LABEL] == feature_label
+        ]
+        if not filtered_parser_result:
+            continue
+
+        for result in filtered_parser_result:
+            value = result.get(metric_name, 0)
+            if value < min_value:
+                min_value = value
+
+    return min_value
 
 
 def plot_loss():
@@ -162,7 +192,7 @@ def plot_precision():
 
 
 def plot_time():
-    create_metric_plot(metric_name=DICT_TIME, y_axis_label=VALUE_TIME + " in s")
+    create_metric_plot(metric_name=DICT_TIME, y_axis_label=VALUE_TIME)
 
 
 if __name__ == "__main__":
