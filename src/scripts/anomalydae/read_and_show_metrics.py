@@ -49,7 +49,7 @@ FEATURE_LABELS_DICT = {
 def create_metric_plot(
         metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
-    parser = LogParser()
+    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser.parse_logs()
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
@@ -120,7 +120,7 @@ def create_metric_plot(
             plot.axhline(y=y, color="purple", linestyle="--", label=label)
         plot.legend()
 
-        save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
+        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 

@@ -24,6 +24,5 @@ def train(
         title_prefix=FEATURE_LABEL_ALPHA1,
         learning_rate=learning_rate,
         hid_dim=hid_dim,
-        dataset=dataset,
-        alpha=0,
+        dataset=dataset
     )

@@ -74,7 +74,7 @@ def base_train(
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
         log_file = (
-                RESULTS_DIR
+                RESULTS_DIR_COLA
                 / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         )
 

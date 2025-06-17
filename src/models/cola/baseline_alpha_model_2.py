@@ -25,5 +25,4 @@ def train(
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         dataset=dataset,
-        alpha=1,
     )

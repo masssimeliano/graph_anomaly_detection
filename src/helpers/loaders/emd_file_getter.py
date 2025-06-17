@@ -3,13 +3,22 @@ emd_file_getter.py
 This file returns get-method to specific embedding file.
 """
 
-from src.helpers.config.dir_config import RESULTS_DIR
+from src.helpers.config.dir_config import RESULTS_DIR_ANOMALYDAE, RESULTS_DIR_COLA
 
 
-def get_emd_file(
-    dataset: str, title_prefix: str, learning_rate: float, hid_dim: int, epoch: int
+def get_emd_file_anomalydae(
+        dataset: str, title_prefix: str, learning_rate: float, hid_dim: int, epoch: int
 ):
     return (
-        RESULTS_DIR
-        / f"emd_{dataset}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.pt"
+            RESULTS_DIR_ANOMALYDAE
+            / f"emd_{dataset}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.pt"
+    )
+
+
+def get_emd_file_cola(
+        dataset: str, title_prefix: str, learning_rate: float, hid_dim: int, epoch: int
+):
+    return (
+            RESULTS_DIR_COLA
+            / f"emd_{dataset}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.pt"
     )

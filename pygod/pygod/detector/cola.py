@@ -9,7 +9,7 @@ from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import GCN
 
 from src.helpers.config.training_config import EPOCHS
-from src.helpers.loaders.emd_file_getter import get_emd_file
+from src.helpers.loaders.emd_file_getter import get_emd_file_cola
 from .base import DeepDetector
 from ..metric import eval_recall_at_k, eval_precision_at_k
 from ..nn import CoLABase
@@ -145,8 +145,8 @@ class CoLA(DeepDetector):
         self.loss_last = 0
         self.last_time = 0
         self.array_time = []
-        self.error_mean = []
-        self.error_std = []
+        self.error = []
+        self.save_emb = True
 
     def process_graph(self, data):
         pass
@@ -175,16 +175,15 @@ class CoLA(DeepDetector):
         con_label = torch.cat([torch.ones(batch_size),
                                torch.zeros(batch_size)]).to(self.device)
 
-        loss, error_mean, error_std = self.model.loss_func(logits, con_label)
+        loss = self.model.loss_func(logits, con_label)
 
         score = neg_logits[:batch_size] - pos_logits[:batch_size]
 
-        return loss, score.detach().cpu(), error_mean, error_std
+        return loss, score.detach().cpu()
 
     # custom fit() method that works with same epochs value
     # and saves resulting metrics inside for-cycle
     def fit(self, data, label=None):
-        print("cola")
         start_time = time.time()
         self.array_loss = []
         self.array_auc_roc = []
@@ -231,11 +230,10 @@ class CoLA(DeepDetector):
                 (
                     loss,
                     score,
-                    error_mean,
-                    error_std,
                 ) = self.forward_model(sampled_data)
-                self.error_mean = error_mean
-                self.error_std = error_std
+                self.error = loss
+
+                loss = loss.mean()
 
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
@@ -269,7 +267,7 @@ class CoLA(DeepDetector):
                     self.array_loss.append(loss_value)
                     auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
-                    self_labels = self.labels
+                    self_labels = torch.tensor(self.labels)
                     self_score = self.decision_score_
                     self_k = self.labels.count(1)
                     recall_k = eval_recall_at_k(
@@ -288,7 +286,7 @@ class CoLA(DeepDetector):
                         title_prefix = self.title_prefix
                         learning_rate = self.lr
                         hid_dim = self.hid_dim
-                        emd_file = get_emd_file(
+                        emd_file = get_emd_file_cola(
                             dataset=dataset,
                             title_prefix=title_prefix,
                             learning_rate=learning_rate,
@@ -342,12 +340,11 @@ class CoLA(DeepDetector):
                 # structural and attribute reconstruction errors can be used here
                 (
                     loss,
-                    score,
-                    error_mean,
-                    error_std,
+                    score
                 ) = self.forward_model(sampled_data)
-                self.error_mean = error_mean
-                self.error_std = error_std
+                self.error = loss
+
+                loss = loss.mean()
 
                 epoch_loss += loss.item() * batch_size
                 if self.save_emb:
@@ -382,7 +379,7 @@ class CoLA(DeepDetector):
             learning_rate = self.lr
             hid_dim = self.hid_dim
             epoch = self.epoch
-            emd_file = get_emd_file(
+            emd_file = get_emd_file_cola(
                 dataset=dataset,
                 title_prefix=title_prefix,
                 learning_rate=learning_rate,

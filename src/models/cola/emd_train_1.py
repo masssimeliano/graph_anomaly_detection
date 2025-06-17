@@ -17,7 +17,7 @@ from pygod.pygod.metric import eval_recall_at_k, eval_precision_at_k
 from src.helpers.config.const import FEATURE_LABEL_ALPHA1
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
-from src.helpers.loaders.emd_loader import load_emd_model
+from src.helpers.loaders.emd_loader import load_emd_model_cola
 from src.helpers.time.timed import timed
 
 
@@ -29,9 +29,6 @@ def emd_train(
         learning_rate: float,
         hid_dim: int,
         dataset: str,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
         gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -55,16 +52,13 @@ def emd_train(
             labels=labels,
             title_prefix=title_prefix,
             data_set=dataset_name,
-            eta=eta,
-            theta=theta,
             lr=learning_rate,
             hid_dim=hid_dim,
-            alpha=alpha,
             gpu=gpu,
         )
 
         log_file = (
-                RESULTS_DIR
+                RESULTS_DIR_COLA
                 / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
 
@@ -83,7 +77,7 @@ def emd_train(
                 torch.tensor(labels), model.decision_score_, labels.count(1)
             )
             precision += eval_precision_at_k(
-                labels, model.decision_score_, labels.count(1)
+                torch.tensor(labels), model.decision_score_, labels.count(1)
             )
             timer += model.last_time
 
@@ -128,7 +122,7 @@ def get_message_for_write_and_log(
             + f"Epoch: {epoch} - AUC-ROC ({title_prefix}): {auc_roc:.4f}\n"
             + f"Loss ({title_prefix}): {loss:.4f}\n"
             + f"Recall@k ({title_prefix}) for k={k}: {recall_at_k:.4f}\n"
-            + f"Precision@k ({title_prefix}) for k={k}: {precision_at_k:.4f}"
+            + f"Precision@k ({title_prefix}) for k={k}: {precision_at_k:.4f}\n"
             + f"Time: {time:.4f}"
     )
 
@@ -145,7 +139,7 @@ def extract_embedding_features(
 ):
     logging.info("Loading embedding features to graph nodes...")
 
-    emd_model = load_emd_model(
+    emd_model = load_emd_model_cola(
         dataset=dataset.replace(".mat", ""),
         labels=labels,
         feature_label=FEATURE_LABEL_ALPHA1,

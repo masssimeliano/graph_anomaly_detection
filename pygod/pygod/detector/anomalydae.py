@@ -10,7 +10,7 @@ from sklearn.metrics import roc_auc_score
 from torch_geometric.loader import NeighborLoader
 
 from src.helpers.config.training_config import *
-from src.helpers.loaders.emd_file_getter import get_emd_file
+from src.helpers.loaders.emd_file_getter import get_emd_file_anomalydae
 from . import DeepDetector
 from ..metric import eval_precision_at_k, eval_recall_at_k
 from ..nn import AnomalyDAEBase
@@ -154,7 +154,6 @@ class AnomalyDAE(DeepDetector):
     # custom fit() method that works with same epochs value
     # and saves resulting metrics inside for-cycle
     def fit(self, data, label=None):
-        print("anomalydae")
         start_time = time.time()
         self.array_loss = []
         self.array_auc_roc = []
@@ -243,7 +242,7 @@ class AnomalyDAE(DeepDetector):
                     self.array_loss.append(loss_value)
                     auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
-                    self_labels = self.labels
+                    self_labels = torch.tensor(self.labels)
                     self_score = self.decision_score_
                     self_k = self.labels.count(1)
                     recall_k = eval_recall_at_k(
@@ -262,7 +261,7 @@ class AnomalyDAE(DeepDetector):
                         title_prefix = self.title_prefix
                         learning_rate = self.lr
                         hid_dim = self.hid_dim
-                        emd_file = get_emd_file(
+                        emd_file = get_emd_file_anomalydae(
                             dataset=dataset,
                             title_prefix=title_prefix,
                             learning_rate=learning_rate,
@@ -360,7 +359,7 @@ class AnomalyDAE(DeepDetector):
             learning_rate = self.lr
             hid_dim = self.hid_dim
             epoch = self.epoch
-            emd_file = get_emd_file(
+            emd_file = get_emd_file_anomalydae(
                 dataset=dataset,
                 title_prefix=title_prefix,
                 learning_rate=learning_rate,

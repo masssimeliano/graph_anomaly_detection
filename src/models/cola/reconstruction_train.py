@@ -32,9 +32,6 @@ def reconstruction_train(
         learning_rate: float,
         hid_dim: int,
         dataset: str,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
         gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,15 +57,12 @@ def reconstruction_train(
             data_set=dataset_name,
             lr=learning_rate,
             hid_dim=hid_dim,
-            alpha=alpha,
-            eta=eta,
-            theta=theta,
             gpu=gpu,
             save_emb=True,
         )
 
         log_file = (
-                RESULTS_DIR
+                RESULTS_DIR_COLA
                 / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
         with open(log_file, "w") as log:
@@ -121,9 +115,6 @@ def get_reconstruction_errors(
         epoch: int,
         dataset: str,
         hid_dim: int = HIDDEN_DIMS,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
         gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     logging.info("Calculating errors for graph nodes...")
@@ -134,9 +125,6 @@ def get_reconstruction_errors(
         epoch=epoch,
         lr=learning_rate,
         hid_dim=hid_dim,
-        alpha=alpha,
-        eta=eta,
-        theta=theta,
         gpu=gpu,
         labels=labels,
         title_prefix=FEATURE_LABEL_ERROR2,
@@ -145,19 +133,13 @@ def get_reconstruction_errors(
 
     logging.info(f"Training-Fitting...")
     model.fit_emd(di_graph)
-    structural_error_mean = model.stru_error_mean
-    structural_error_std = model.stru_error_std
-    attribute_error_mean = model.attr_error_mean
-    attribute_error_std = model.attr_error_std
+    error = model.error
 
     for i, node in enumerate(graph.nodes()):
         original_node_features = graph.nodes[node]["x"]
         node_error_features = torch.tensor(
             [
-                structural_error_mean[i].item(),
-                structural_error_std[i].item(),
-                attribute_error_mean[i].item(),
-                attribute_error_std[i].item(),
+                error[i].item(),
             ],
             dtype=torch.float32,
         )

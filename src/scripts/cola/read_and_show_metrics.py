@@ -9,7 +9,6 @@ from collections import defaultdict
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
-from src.helpers.config.datasets_config import CHECK_DATASETS_2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
@@ -49,12 +48,12 @@ FEATURE_LABELS_DICT = {
 def create_metric_plot(
         metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
-    parser = LogParser()
+    parser = LogParser(log_dir=RESULTS_DIR_COLA)
     parser.parse_logs()
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
-    for dataset in CHECK_DATASETS_2:
+    for dataset in datasets:
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
@@ -120,7 +119,7 @@ def create_metric_plot(
             plot.axhline(y=y, color="purple", linestyle="--", label=label)
         plot.legend()
 
-        save_path = os.path.join(SAVE_DIR, f"{dataset}_{y_axis_label}.png")
+        save_path = os.path.join(SAVE_DIR_COLA, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 
@@ -139,7 +138,6 @@ def get_max_value_for_dataset_and_metric(
         ]
         if not filtered_parser_result:
             continue
-
         for result in filtered_parser_result:
             value = result.get(metric_name, 0)
             if value > max_value:

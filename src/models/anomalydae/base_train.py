@@ -19,16 +19,16 @@ from src.models.anomalydae.emd_train_1 import get_message_for_write_and_log
 
 @timed
 def base_train(
-    di_graph: torch_geometric.data.Data,
-    labels: List[int],
-    title_prefix: str,
-    dataset: str,
-    learning_rate: float = LEARNING_RATE,
-    hid_dim: int = HIDDEN_DIMS,
-    alpha: float = ALPHA,
-    eta: int = ETA,
-    theta: int = THETA,
-    gpu: int = 0 if torch.cuda.is_available() else 1,
+        di_graph: torch_geometric.data.Data,
+        labels: List[int],
+        title_prefix: str,
+        dataset: str,
+        learning_rate: float = LEARNING_RATE,
+        hid_dim: int = HIDDEN_DIMS,
+        alpha: float = ALPHA,
+        eta: int = ETA,
+        theta: int = THETA,
+        gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
@@ -80,8 +80,8 @@ def base_train(
 
     for i, current_epoch in enumerate(EPOCHS, start=0):
         log_file = (
-            RESULTS_DIR
-            / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
+                RESULTS_DIR_ANOMALYDAE
+                / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{current_epoch}.txt"
         )
 
         with open(log_file, "w") as log:

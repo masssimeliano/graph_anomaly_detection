@@ -26,8 +26,14 @@ SMALL_DATASETS = [
 MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat"]
 LARGE_DATASETS = []
 
-CHECK_DATASETS = ["Disney.mat"]
-CHECK_DATASETS_2 = ["Disney"]
+CHECK_DATASETS_TRAIN_SCRIPT = ["Disney.mat"]
+CHECK_DATASETS = ["Disney"]
+CHECK_DATASETS_2 = ["book",
+                    "BlogCatalog",
+                    "citeseer",
+                    "computers",
+                    "cora", ]
 
-CURRENT_DATASETS = CHECK_DATASETS
-CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(CHECK_DATASETS)
+CURRENT_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS
+CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(SMALL_DATASETS) + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS) + [
+    DataSetSize.LARGE]

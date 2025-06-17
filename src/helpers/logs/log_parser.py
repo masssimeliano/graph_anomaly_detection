@@ -16,7 +16,7 @@ def extract_value(line: str) -> float:
 
 
 class LogParser:
-    def __init__(self, log_dir: Path = RESULTS_DIR):
+    def __init__(self, log_dir: Path):
         self.log_dir = log_dir
         self.results: List[Dict[str, Any]] = []
 
@@ -63,13 +63,13 @@ class LogParser:
                 logging.warning(f"Failed to parse {file.name}: {e}")
 
     def get_result_by_params(
-        self,
-        file_name: str = None,
-        dataset: str = None,
-        feature_label: str = None,
-        lr: float = None,
-        epoch: int = None,
-        hid_dim: int = None,
+            self,
+            file_name: str = None,
+            dataset: str = None,
+            feature_label: str = None,
+            lr: float = None,
+            epoch: int = None,
+            hid_dim: int = None,
     ) -> Optional[Dict[str, Any]]:
         for result in self.results:
             if file_name is not None and result[DICT_FILE_NAME] != file_name:
@@ -77,8 +77,8 @@ class LogParser:
             if dataset is not None and result[DICT_DATASET] != dataset:
                 continue
             if (
-                feature_label is not None
-                and result[DICT_FEATURE_LABEL] != feature_label
+                    feature_label is not None
+                    and result[DICT_FEATURE_LABEL] != feature_label
             ):
                 continue
             if lr is not None and result[DICT_LR] != lr:
