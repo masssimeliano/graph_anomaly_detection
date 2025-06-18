@@ -46,7 +46,7 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser(log_dir=RESULTS_DIR_COLA)
     parser.parse_logs()
@@ -68,7 +68,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                   and result[DICT_FEATURE_LABEL] == feature_label
+                and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -91,20 +91,19 @@ def create_metric_plot(
                 color=FEATURE_COLORS_DICT[feature_label],
             )
 
-        plot.title(f"{y_axis_label} vs {VALUE_EPOCH} ({dataset})")
+        plot.title(f"COLA - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
         plot.xlabel(VALUE_EPOCH)
-        if (y_axis_label == VALUE_TIME):
+        if y_axis_label == VALUE_TIME:
             plot.ylabel(y_axis_label + " in s")
         else:
             plot.ylabel(y_axis_label)
 
         # normalizing
-        if metric_name == DICT_TIME or metric_name == DICT_AUC_ROC or metric_name == DICT_PRECISION or metric_name == DICT_RECALL:
-            plot.ylim(0.75 * min_value + 0.05 * max_value, 1.25 * max_value)
-        elif metric_name == DICT_LOSS:
-            plot.ylim(0.75 * min_value + 0.05 * max_value, 0.25 * max_value)
+        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
+            plot.ylim(min_value, max_value)
+            plot.yscale("log")
         else:
-            plot.ylim(0.75 * min_value + 0.05 * max_value, max_value)
+            plot.ylim(0.9 * min_value, 0.75 * (max_value + min_value))
 
         plot.grid(True)
         plot.tight_layout()
@@ -125,7 +124,7 @@ def create_metric_plot(
 
 
 def get_max_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -134,7 +133,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -147,16 +146,18 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
-    min_value = get_max_value_for_dataset_and_metric(dataset=dataset, parser=parser, metric_name=metric_name)
+    min_value = get_max_value_for_dataset_and_metric(
+        dataset=dataset, parser=parser, metric_name=metric_name
+    )
 
     for feature_label in FEATURE_LABELS:
         filtered_parser_result = [
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
