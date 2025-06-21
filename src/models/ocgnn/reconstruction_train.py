@@ -12,14 +12,14 @@ import torch
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import from_networkx
 
-from pygod.pygod.detector import CoLA
+from pygod.pygod.detector import OCGNN
 from pygod.pygod.metric import eval_precision_at_k, eval_recall_at_k
 from src.helpers.config.const import FEATURE_LABEL_ERROR2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.time.timed import timed
-from src.models.cola.emd_train_1 import get_message_for_write_and_log
-from src.models.cola.reconstruction_error_model_1 import (
+from src.models.ocgnn.emd_train_1 import get_message_for_write_and_log
+from src.models.ocgnn.reconstruction_error_model_1 import (
     normalize_node_features_via_minmax_and_remove_nan,
 )
 
@@ -50,7 +50,7 @@ def reconstruction_train(
 
         dataset_name = f"{dataset.replace('.mat', '')}"
 
-        model = CoLA(
+        model = OCGNN(
             epoch=epoch,
             labels=labels,
             title_prefix=title_prefix,
@@ -62,7 +62,7 @@ def reconstruction_train(
         )
 
         log_file = (
-            RESULTS_DIR_COLA
+            RESULTS_DIR_OCGNN
             / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
         with open(log_file, "w") as log:
@@ -121,7 +121,7 @@ def get_reconstruction_errors(
 
     di_graph = from_networkx(graph)
 
-    model = CoLA(
+    model = OCGNN(
         epoch=epoch,
         lr=learning_rate,
         hid_dim=hid_dim,
@@ -137,7 +137,6 @@ def get_reconstruction_errors(
 
     for i, node in enumerate(graph.nodes()):
         original_node_features = graph.nodes[node]["x"]
-        print(error)
         node_error_features = torch.tensor(
             [
                 error[i].item(),

@@ -28,12 +28,17 @@ LARGE_DATASETS = []
 
 CHECK_DATASETS_TRAIN_SCRIPT = ["Disney.mat"]
 CHECK_DATASETS = ["Disney"]
-CHECK_DATASETS_2 = ["book",
-                    "BlogCatalog",
-                    "citeseer",
-                    "computers",
-                    "cora", ]
+CHECK_DATASETS_2 = [
+    "book",
+    "BlogCatalog",
+    "citeseer",
+    "computers",
+    "cora",
+]
 
-CURRENT_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS
-CURRENT_DATASETS_SIZE = [DataSetSize.SMALL] * len(SMALL_DATASETS) + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS) + [
-    DataSetSize.LARGE]
+CURRENT_DATASETS = CHECK_DATASETS_TRAIN_SCRIPT  # SMALL_DATASETS + MEDIUM_DATASETS
+CURRENT_DATASETS_SIZE = (
+    [DataSetSize.SMALL] * len(SMALL_DATASETS)
+    + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
+    + [DataSetSize.LARGE]
+)

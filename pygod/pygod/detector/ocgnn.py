@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-""" One-Class Graph Neural Networks for Anomaly Detection in Attributed
+"""One-Class Graph Neural Networks for Anomaly Detection in Attributed
 Networks"""
-# Author: Xueying Ding <xding2@andrew.cmu.edu>
-# License: BSD 2 clause
+import time
 
 import torch
+from sklearn.metrics import roc_auc_score
+from torch_geometric.loader import NeighborLoader
 from torch_geometric.nn import GCN
 
-from . import DeepDetector
+from src.helpers.config.training_config import EPOCHS
+from src.helpers.loaders.emd_file_getter import get_emd_file_ocgnn
+from .base import DeepDetector
+from ..metric import eval_recall_at_k, eval_precision_at_k
 from ..nn import OCGNNBase
 
 
@@ -95,65 +99,77 @@ class OCGNN(DeepDetector):
         ``emb`` is a tuple of torch.Tensor.
     """
 
-    def __init__(self,
-                 hid_dim=64,
-                 num_layers=2,
-                 dropout=0.,
-                 weight_decay=0.,
-                 act=torch.nn.functional.relu,
-                 backbone=GCN,
-                 contamination=0.1,
-                 lr=4e-3,
-                 epoch=100,
-                 gpu=-1,
-                 batch_size=0,
-                 num_neigh=-1,
-                 beta=0.5,
-                 warmup=2,
-                 eps=0.001,
-                 verbose=0,
-                 save_emb=False,
-                 compile_model=False,
-                 **kwargs):
-        super(OCGNN, self).__init__(hid_dim=hid_dim,
-                                    num_layers=num_layers,
-                                    dropout=dropout,
-                                    weight_decay=weight_decay,
-                                    act=act,
-                                    backbone=backbone,
-                                    contamination=contamination,
-                                    lr=lr,
-                                    epoch=epoch,
-                                    gpu=gpu,
-                                    batch_size=batch_size,
-                                    num_neigh=num_neigh,
-                                    verbose=verbose,
-                                    save_emb=save_emb,
-                                    compile_model=compile_model,
-                                    **kwargs)
+    def __init__(
+        self,
+        labels,
+        title_prefix,
+        data_set,
+        hid_dim=64,
+        num_layers=2,
+        dropout=0.0,
+        weight_decay=0.0,
+        act=torch.nn.functional.relu,
+        backbone=GCN,
+        contamination=0.1,
+        lr=4e-3,
+        epoch=100,
+        gpu=-1,
+        batch_size=0,
+        num_neigh=-1,
+        beta=0.5,
+        warmup=2,
+        eps=0.001,
+        verbose=0,
+        save_emb=True,
+        compile_model=False,
+        **kwargs,
+    ):
+        super(OCGNN, self).__init__(
+            hid_dim=hid_dim,
+            num_layers=num_layers,
+            dropout=dropout,
+            weight_decay=weight_decay,
+            act=act,
+            backbone=backbone,
+            contamination=contamination,
+            lr=lr,
+            epoch=epoch,
+            gpu=gpu,
+            batch_size=batch_size,
+            num_neigh=num_neigh,
+            verbose=verbose,
+            save_emb=save_emb,
+            compile_model=compile_model,
+            **kwargs,
+        )
 
+        self.labels = labels
+        self.title_prefix = title_prefix
+        self.data_set = data_set
         self.beta = beta
         self.warmup = warmup
         self.eps = eps
+        self.save_emb = True
 
     def process_graph(self, data):
         pass
 
     def init_model(self, **kwargs):
         if self.save_emb:
-            self.emb = torch.zeros(self.num_nodes,
-                                   self.hid_dim)
+            self.emb = torch.zeros(self.num_nodes, self.hid_dim)
 
-        return OCGNNBase(in_dim=self.in_dim,
-                         hid_dim=self.hid_dim,
-                         num_layers=self.num_layers,
-                         dropout=self.dropout,
-                         act=self.act,
-                         beta=self.beta,
-                         warmup=self.warmup,
-                         eps=self.eps,
-                         backbone=self.backbone,
-                         **kwargs).to(self.device)
+        return OCGNNBase(
+            in_dim=self.in_dim,
+            hid_dim=self.hid_dim,
+            num_layers=self.num_layers,
+            dropout=self.dropout,
+            act=self.act,
+            beta=self.beta,
+            warmup=self.warmup,
+            eps=self.eps,
+            backbone=self.backbone,
+            **kwargs,
+        ).to(self.device)
 
     def forward_model(self, data):
         batch_size = data.batch_size
@@ -162,6 +178,212 @@ class OCGNN(DeepDetector):
         edge_index = data.edge_index.to(self.device)
 
         emb = self.model(x, edge_index)
-        loss, score = self.model.loss_func(emb[:batch_size])
+        loss, score, loss_node = self.model.loss_func(emb[:batch_size])
 
-        return loss, score.detach().cpu()
+        return loss, score.detach().cpu(), loss_node
+
+        # custom fit() method that works with same epochs value
+        # and saves resulting metrics inside for-cycle
+
+    def fit(self, data, label=None):
+        start_time = time.time()
+        self.array_loss = []
+        self.array_auc_roc = []
+        self.array_recall_k = []
+        self.array_precision_k = []
+        self.array_time = []
+
+        self.process_graph(data)
+        self.num_nodes, self.in_dim = data.x.shape
+        if self.batch_size == 0:
+            self.batch_size = data.x.shape[0]
+        loader = NeighborLoader(data, self.num_neigh, batch_size=self.batch_size)
+
+        self.model = self.init_model(**self.kwargs)
+        if self.compile_model:
+            self.model = compile(self.model)
+        if not self.gan:
+            optimizer = torch.optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
+        else:
+            self.opt_in = torch.optim.Adam(
+                self.model.inner.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+            optimizer = torch.optim.Adam(
+                self.model.outer.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+
+        self.model.train()
+        self.decision_score_ = torch.zeros(data.x.shape[0])
+        for epoch in range(self.epoch + 1):
+            epoch_loss = 0
+            if self.gan:
+                self.epoch_loss_in = 0
+            for sampled_data in loader:
+                batch_size = sampled_data.batch_size
+                node_idx = sampled_data.n_id
+
+                # structural and attribute reconstruction errors can be used here
+                (loss, score, loss_node) = self.forward_model(sampled_data)
+                self.error = loss_node
+
+                loss = loss.mean()
+
+                epoch_loss += loss.item() * batch_size
+                if self.save_emb:
+                    if type(self.emb) is tuple:
+                        self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
+                            :batch_size
+                        ].cpu()
+                        self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
+                            :batch_size
+                        ].cpu()
+                    else:
+                        self.emb[node_idx[:batch_size]] = self.model.emb[
+                            :batch_size
+                        ].cpu()
+                self.decision_score_[node_idx[:batch_size]] = score
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                # saving loss value on last epoch
+                loss_value = epoch_loss / data.x.shape[0]
+                if self.gan:
+                    loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
+                self.loss_last = loss_value
+                self.last_time = time.time() - start_time
+
+                # calculating AUC-ROC through all epochs
+                if epoch in EPOCHS:
+                    self.array_time.append(time.time() - start_time)
+                    self.array_loss.append(loss_value)
+                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
+
+                    self_labels = torch.tensor(self.labels)
+                    self_score = self.decision_score_
+                    self_k = self.labels.count(1)
+                    recall_k = eval_recall_at_k(
+                        label=self_labels, score=self_score, k=self_k
+                    )
+                    precision_k = eval_precision_at_k(
+                        label=self_labels, score=self_score, k=self_k
+                    )
+                    self.array_auc_roc.append(auc_roc)
+                    self.array_recall_k.append(recall_k)
+                    self.array_precision_k.append(precision_k)
+
+                    # saving embedding if its needed
+                    if self.save_emb:
+                        dataset = self.data_set
+                        title_prefix = self.title_prefix
+                        learning_rate = self.lr
+                        hid_dim = self.hid_dim
+                        emd_file = get_emd_file_ocgnn(
+                            dataset=dataset,
+                            title_prefix=title_prefix,
+                            learning_rate=learning_rate,
+                            hid_dim=hid_dim,
+                            epoch=epoch,
+                        )
+                        torch.save(obj=self.emb, f=emd_file)
+
+        self._process_decision_score()
+        return self
+
+        # custom fit() method that works with same epochs value,
+        # but calculates every resulting metric only once
+
+    def fit_emd(self, data):
+        start_time = time.time()
+        self.process_graph(data)
+        self.num_nodes, self.in_dim = data.x.shape
+        if self.batch_size == 0:
+            self.batch_size = data.x.shape[0]
+        loader = NeighborLoader(data, self.num_neigh, batch_size=self.batch_size)
+
+        self.model = self.init_model(**self.kwargs)
+        if self.compile_model:
+            self.model = compile(self.model)
+        if not self.gan:
+            optimizer = torch.optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
+        else:
+            self.opt_in = torch.optim.Adam(
+                self.model.inner.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+            optimizer = torch.optim.Adam(
+                self.model.outer.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay,
+            )
+
+        self.model.train()
+        self.decision_score_ = torch.zeros(data.x.shape[0])
+        for epoch in range(self.epoch + 1):
+            epoch_loss = 0
+            if self.gan:
+                self.epoch_loss_in = 0
+            for sampled_data in loader:
+                batch_size = sampled_data.batch_size
+                node_idx = sampled_data.n_id
+
+                # structural and attribute reconstruction errors can be used here
+                (loss, score, loss_node) = self.forward_model(sampled_data)
+                self.error = loss_node
+
+                loss = loss.mean()
+
+                epoch_loss += loss.item() * batch_size
+                if self.save_emb:
+                    if type(self.emb) is tuple:
+                        self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
+                            :batch_size
+                        ].cpu()
+                        self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
+                            :batch_size
+                        ].cpu()
+                    else:
+                        self.emb[node_idx[:batch_size]] = self.model.emb[
+                            :batch_size
+                        ].cpu()
+                self.decision_score_[node_idx[:batch_size]] = score
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+            # saving loss value on last epoch
+            loss_value = epoch_loss / data.x.shape[0]
+            if self.gan:
+                loss_value = (self.epoch_loss_in / data.x.shape[0], loss_value)
+            self.loss_last = loss_value
+            self.last_time = time.time() - start_time
+
+        # saving embedding if its needed
+        if self.save_emb:
+            dataset = self.data_set
+            title_prefix = self.title_prefix
+            learning_rate = self.lr
+            hid_dim = self.hid_dim
+            epoch = self.epoch
+            emd_file = get_emd_file_ocgnn(
+                dataset=dataset,
+                title_prefix=title_prefix,
+                learning_rate=learning_rate,
+                hid_dim=hid_dim,
+                epoch=epoch,
+            )
+            torch.save(obj=self.emb, f=emd_file)
+
+        self._process_decision_score()
+        return self

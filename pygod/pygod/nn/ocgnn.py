@@ -42,30 +42,34 @@ class OCGNNBase(nn.Module):
         Other parameters for the backbone model.
     """
 
-    def __init__(self,
-                 in_dim,
-                 hid_dim,
-                 num_layers=2,
-                 dropout=0.,
-                 act=torch.nn.functional.relu,
-                 backbone=GCN,
-                 beta=0.5,
-                 warmup=2,
-                 eps=0.001,
-                 **kwargs):
+    def __init__(
+        self,
+        in_dim,
+        hid_dim,
+        num_layers=2,
+        dropout=0.0,
+        act=torch.nn.functional.relu,
+        backbone=GCN,
+        beta=0.5,
+        warmup=2,
+        eps=0.001,
+        **kwargs
+    ):
         super(OCGNNBase, self).__init__()
 
         self.beta = beta
         self.warmup = warmup
         self.eps = eps
 
-        self.gnn = backbone(in_channels=in_dim,
-                            hidden_channels=hid_dim,
-                            num_layers=num_layers,
-                            out_channels=hid_dim,
-                            dropout=dropout,
-                            act=act,
-                            **kwargs)
+        self.gnn = backbone(
+            in_channels=in_dim,
+            hidden_channels=hid_dim,
+            num_layers=num_layers,
+            out_channels=hid_dim,
+            dropout=dropout,
+            act=act,
+            **kwargs
+        )
 
         self.r = 0
         self.c = torch.zeros(hid_dim)
@@ -116,11 +120,12 @@ class OCGNNBase(nn.Module):
                 self.c[(abs(self.c) < self.eps) & (self.c > 0)] = self.eps
 
         dist = torch.sum(torch.pow(emb - self.c, 2), 1)
-        score = dist - self.r ** 2
-        loss = self.r ** 2 + 1 / self.beta * torch.mean(torch.relu(score))
+        score = dist - self.r**2
+        loss = self.r**2 + 1 / self.beta * torch.mean(torch.relu(score))
+        loss_node = self.r**2 + 1 / self.beta * torch.relu(score)
 
         if self.warmup > 0:
             with torch.no_grad():
                 self.r = torch.quantile(torch.sqrt(dist), 1 - self.beta)
 
-        return loss, score
+        return loss, score, loss_node

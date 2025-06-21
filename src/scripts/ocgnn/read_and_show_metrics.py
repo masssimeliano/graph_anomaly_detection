@@ -6,11 +6,10 @@ This file contains script to calculate and plot all metrics from .txt result fil
 import os
 from collections import defaultdict
 
-import numpy as np
-import seaborn as sns
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
+from src.helpers.config.datasets_config import CHECK_DATASETS_2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
@@ -41,7 +40,7 @@ FEATURE_LABELS_DICT = {
     FEATURE_LABEL_STR2: "Attribute + Structure 2 (NetworkX Features v1)",
     FEATURE_LABEL_STR3: "Attribute + Structure 3 (NetworkX Features v2)",
     FEATURE_LABEL_ERROR1: "Attribute + Error 1 (Reconstruction error from simple encoder)",
-    FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from CoLA encoder)",
+    FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from OCGNN encoder)",
     FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0 (node features)))",
     FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1 (adjacent matrix)))",
 }
@@ -50,12 +49,12 @@ FEATURE_LABELS_DICT = {
 def create_metric_plot(
     metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
-    parser = LogParser(log_dir=RESULTS_DIR_COLA)
+    parser = LogParser(log_dir=RESULTS_DIR_OCGNN)
     parser.parse_logs()
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
-    for dataset in datasets:
+    for dataset in CHECK_DATASETS_2:
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
@@ -93,7 +92,7 @@ def create_metric_plot(
                 color=FEATURE_COLORS_DICT[feature_label],
             )
 
-        plot.title(f"COLA - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
+        plot.title(f"OCGNN - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
         plot.xlabel(VALUE_EPOCH)
         if y_axis_label == VALUE_TIME:
             plot.ylabel(y_axis_label + " in s")
@@ -120,56 +119,9 @@ def create_metric_plot(
             plot.axhline(y=y, color="purple", linestyle="--", label=label)
         plot.legend()
 
-        save_path = os.path.join(SAVE_DIR_COLA, f"{dataset}_{y_axis_label}.png")
+        save_path = os.path.join(SAVE_DIR_OCGNN, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
-
-
-def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
-    parser = LogParser(log_dir=RESULTS_DIR_COLA)
-    parser.parse_logs()
-
-    datasets = sorted(set(result[DICT_DATASET] for result in parser.results))
-    target_epoch = 60
-
-    heatmap_data = []
-    for feature_label in FEATURE_LABELS:
-        row = []
-        for dataset in datasets:
-            filtered = [
-                result
-                for result in parser.results
-                if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
-                and result[DICT_EPOCH] == target_epoch
-            ]
-            if not filtered:
-                row.append(np.nan)
-                continue
-            value = filtered[0].get(metric_name, np.nan)
-            row.append(value)
-        heatmap_data.append(row)
-
-    fig, ax = plot.subplots(figsize=(12, 6))
-    sns.heatmap(
-        heatmap_data,
-        xticklabels=datasets,
-        yticklabels=[FEATURE_LABELS_DICT[label] for label in FEATURE_LABELS],
-        annot=True,
-        fmt=".3f",
-        cmap=cmap,
-        cbar=True,
-        linewidths=0.5,
-        ax=ax,
-    )
-
-    plot.title(f"{title} (Epoch {target_epoch})")
-    plot.tight_layout()
-    save_path = os.path.join(
-        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}.png"
-    )
-    plot.savefig(save_path, dpi=300)
-    plot.show()
 
 
 def get_max_value_for_dataset_and_metric(
@@ -186,6 +138,7 @@ def get_max_value_for_dataset_and_metric(
         ]
         if not filtered_parser_result:
             continue
+
         for result in filtered_parser_result:
             value = result.get(metric_name, 0)
             if value > max_value:
@@ -249,7 +202,3 @@ if __name__ == "__main__":
     plot_recall()
     plot_precision()
     plot_time()
-    plot_heatmap(DICT_PRECISION, "Precision")
-    plot_heatmap(DICT_RECALL, "Recall")
-    plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    plot_heatmap(DICT_TIME, "Time")
