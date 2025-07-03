@@ -103,8 +103,6 @@ def create_metric_plot(
         if metric_name == DICT_LOSS or metric_name == DICT_TIME:
             plot.ylim(min_value, max_value)
             plot.yscale("log")
-        else:
-            plot.ylim(0.9 * min_value, 0.75 * (max_value + min_value))
 
         plot.grid(True)
         plot.tight_layout()
@@ -117,7 +115,15 @@ def create_metric_plot(
                 y = baseline_dict[dataset]
                 label = f"Baseline ({baseline_dict[dataset]})"
             plot.axhline(y=y, color="purple", linestyle="--", label=label)
-        plot.legend()
+        plot.subplots_adjust(bottom=0.3)
+        plot.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.25),
+            ncol=2,
+            frameon=True,
+            fontsize="small",
+            borderaxespad=0.0,
+        )
 
         save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)

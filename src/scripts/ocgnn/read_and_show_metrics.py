@@ -100,7 +100,7 @@ def create_metric_plot(
             plot.ylabel(y_axis_label)
 
         # normalizing
-        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
+        if metric_name == DICT_TIME:
             plot.ylim(min_value, max_value)
             plot.yscale("log")
         else:
@@ -117,7 +117,15 @@ def create_metric_plot(
                 y = baseline_dict[dataset]
                 label = f"Baseline ({baseline_dict[dataset]})"
             plot.axhline(y=y, color="purple", linestyle="--", label=label)
-        plot.legend()
+        plot.subplots_adjust(bottom=0.3)
+        plot.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.25),
+            ncol=2,
+            frameon=True,
+            fontsize="small",
+            borderaxespad=0.0,
+        )
 
         save_path = os.path.join(SAVE_DIR_OCGNN, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
