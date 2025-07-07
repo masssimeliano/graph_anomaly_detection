@@ -6,6 +6,7 @@ This file contains script to run all given models and then plot results of their
 import logging
 
 import read_and_show_metrics
+import src.scripts.anomalydae.check_train
 from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.mat_loader import load_graph_from_mat
@@ -51,5 +52,12 @@ def train_all():
     read_and_show_metrics.plot_time()
 
 
+def check_all():
+    read_all()
+    train_all()
+    src.scripts.anomalydae.check_train.train_all()
+    src.scripts.cola.check_train.train_all()
+
+
 if __name__ == "__main__":
-    main()
+    check_all()

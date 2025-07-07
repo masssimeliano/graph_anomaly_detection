@@ -36,9 +36,5 @@ CHECK_DATASETS_2 = [
     "cora",
 ]
 
-CURRENT_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS
-CURRENT_DATASETS_SIZE = (
-        [DataSetSize.SMALL] * len(SMALL_DATASETS)
-        + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
-        + [DataSetSize.LARGE]
-)
+CURRENT_DATASETS = ["Enron.mat", "questions.mat", "tolokers.mat"]
+CURRENT_DATASETS_SIZE = [DataSetSize.MEDIUM] * len(CURRENT_DATASETS)
