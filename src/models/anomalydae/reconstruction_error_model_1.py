@@ -1,7 +1,8 @@
 """
 reconstruction_error_model_1.py
-This file contains train wrapper for the model "Attr + Err1".
-It also contains attribute features normalizing method, error comparison method and error extraction method.
+This file contains:
+- train wrapper for the model "Attr + Err1".
+- attribute features normalizing method, error comparison method and error extraction method.
 """
 
 import logging

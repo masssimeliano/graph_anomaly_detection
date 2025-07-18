@@ -1,8 +1,3 @@
-"""
-baseline_alpha_model_2.py
-This file contains train wrapper for the model "Attr + Alpha2".
-"""
-
 from typing import List
 
 import torch_geometric
@@ -12,11 +7,11 @@ from src.models.cola.base_train import base_train
 
 
 def train(
-        di_graph: torch_geometric.data.Data,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
+    di_graph: torch_geometric.data.Data,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
 ):
     base_train(
         di_graph=di_graph,

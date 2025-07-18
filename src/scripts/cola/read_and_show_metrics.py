@@ -1,8 +1,3 @@
-"""
-read_and_show_metrics.py
-This file contains script to calculate and plot all metrics from .txt result files.
-"""
-
 import os
 from collections import defaultdict
 
@@ -101,7 +96,10 @@ def create_metric_plot(
             plot.ylabel(y_axis_label)
 
         # normalizing
-        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
+        if metric_name == DICT_TIME or (
+            metric_name == DICT_LOSS
+            and dataset not in ["cs", "computers", "citeseer", "cora"]
+        ):
             plot.ylim(min_value, max_value)
             plot.yscale("log")
 
@@ -233,7 +231,7 @@ def plot_auc_roc():
     create_metric_plot(
         metric_name=DICT_AUC_ROC,
         y_axis_label=VALUE_AUC_ROC,
-        baseline_dict=AUC_ROC_PAPER,
+        baseline_dict=AUC_ROC_PAPER_COLA,
     )
 
 
@@ -255,7 +253,7 @@ if __name__ == "__main__":
     plot_recall()
     plot_precision()
     plot_time()
-    plot_heatmap(DICT_PRECISION, "Precision")
-    plot_heatmap(DICT_RECALL, "Recall")
-    plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    plot_heatmap(DICT_TIME, "Time")
+    # plot_heatmap(DICT_PRECISION, "Precision")
+    # plot_heatmap(DICT_RECALL, "Recall")
+    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
+    # plot_heatmap(DICT_TIME, "Time")

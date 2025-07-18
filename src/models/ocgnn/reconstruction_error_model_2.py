@@ -1,8 +1,3 @@
-"""
-reconstruction_error_model_2.py
-This file contains train wrapper for the model "Attr + Err2".
-"""
-
 from typing import List
 
 import networkx as nx

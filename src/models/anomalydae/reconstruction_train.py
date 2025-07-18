@@ -1,7 +1,8 @@
 """
 reconstruction_train.py
-This file contains training method realization for feature model "Attr + Err2".
-It also contains reconstruction features extractor method.
+This file contains:
+- training method realization for feature model "Attr + Err2"
+- reconstruction features extractor method.
 """
 
 import logging
@@ -26,16 +27,16 @@ from src.models.anomalydae.reconstruction_error_model_1 import (
 
 @timed
 def reconstruction_train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        title_prefix: str,
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
-        gpu: int = 0 if torch.cuda.is_available() else 1,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    title_prefix: str,
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+    alpha: float = ALPHA,
+    eta: int = ETA,
+    theta: int = THETA,
+    gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
@@ -68,8 +69,8 @@ def reconstruction_train(
         )
 
         log_file = (
-                RESULTS_DIR_ANOMALYDAE
-                / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
+            RESULTS_DIR_ANOMALYDAE
+            / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
         with open(log_file, "w") as log:
             loss = 0
@@ -115,16 +116,16 @@ def reconstruction_train(
 
 
 def get_reconstruction_errors(
-        graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        epoch: int,
-        dataset: str,
-        hid_dim: int = HIDDEN_DIMS,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
-        gpu: int = 0 if torch.cuda.is_available() else 1,
+    graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    epoch: int,
+    dataset: str,
+    hid_dim: int = HIDDEN_DIMS,
+    alpha: float = ALPHA,
+    eta: int = ETA,
+    theta: int = THETA,
+    gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     logging.info("Calculating errors for graph nodes...")
 

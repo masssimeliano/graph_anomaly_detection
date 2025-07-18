@@ -1,5 +1,5 @@
 """
-nx_graph_plotter.py
+timed.py
 This file contains timing annotation which measures time of method below annotation.
 """
 

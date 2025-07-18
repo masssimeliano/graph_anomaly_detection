@@ -1,9 +1,0 @@
-Fragen (30.05):
-1) Wie kann man die LaTeX-Vorlage völlig auf Englisch übersetzen?
-2) Sollte außer der Runtime-Zeit noch die Node-Enrichment-Zeit gemessen werden?
-3) Sollte man kontextuelle (Attr) und strukturelle Anomalien (Sttr) unterscheiden?
-
-Antworten (30.05):
-1) Mithilfe eines Parameters in den Einstellungen
-2) Vielleicht am Ende
-3) Ja, das wäre gut, wenn es klappt

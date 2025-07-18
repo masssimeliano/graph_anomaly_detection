@@ -1,8 +1,3 @@
-"""
-embedding_and_feature_model_1.py
-This file contains train wrapper for the model "Attr + Emd1".
-"""
-
 from typing import List
 
 import networkx as nx

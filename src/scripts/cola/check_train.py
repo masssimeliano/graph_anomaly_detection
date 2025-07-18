@@ -1,8 +1,3 @@
-"""
-check_train.py
-This file contains script to run all given models and then plot results of their learning.
-"""
-
 import logging
 
 import read_and_show_metrics
@@ -17,7 +12,6 @@ from src.scripts.cola import (
     train_reconstruction_2,
     train_reconstruction_1,
 )
-from src.scripts.cola.tg_bot import TelegramLogHandler
 from src.scripts.ocgnn import (
     train_reconstruction_2 as train_reconstruction_2_o,
     train_reconstruction_1 as train_reconstruction_1_o,
@@ -35,28 +29,6 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    # Получаем root-логгер
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-
-    # Добавляем TelegramHandler к root-логгеру
-    telegram_handler = TelegramLogHandler()
-    telegram_handler.setLevel(logging.INFO)
-    telegram_handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    )
-
-    root_logger.addHandler(telegram_handler)
-
-    # Также добавим консоль для наглядности
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    )
-
-    root_logger.addHandler(console_handler)
-
     read_all()
     train_all()
 

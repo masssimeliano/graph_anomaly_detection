@@ -1,7 +1,8 @@
 """
 structure_and_feature_model_2.py
-This file contains train wrapper for the model "Attr + Str2".
-It also contains structural attribute extraction method.
+This file contains:
+- train wrapper for the model "Attr + Str2"
+- structural attribute extraction method.
 """
 
 import logging

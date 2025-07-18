@@ -1,8 +1,3 @@
-"""
-reconstruction_error_model_2.py
-This file contains train wrapper for the model "Attr + Err2".
-"""
-
 from typing import List
 
 import networkx as nx
@@ -12,11 +7,11 @@ from src.models.cola.reconstruction_train import reconstruction_train
 
 
 def train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
 ):
     reconstruction_train(
         nx_graph=nx_graph,

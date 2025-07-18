@@ -1,6 +1,6 @@
 """
 emd_file_getter.py
-This file returns get-method to specific embedding file.
+This file creates get-method to specific embedding file for each model.
 """
 
 from src.helpers.config.dir_config import (

@@ -1,15 +1,11 @@
-"""
-read_and_show_metrics.py
-This file contains script to calculate and plot all metrics from .txt result files.
-"""
-
 import os
 from collections import defaultdict
 
+import numpy as np
+import seaborn as sns
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
-from src.helpers.config.datasets_config import CHECK_DATASETS_2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.logs.log_parser import LogParser
@@ -54,7 +50,7 @@ def create_metric_plot(
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
-    for dataset in CHECK_DATASETS_2:
+    for dataset in datasets:
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
@@ -103,8 +99,6 @@ def create_metric_plot(
         if metric_name == DICT_TIME:
             plot.ylim(min_value, max_value)
             plot.yscale("log")
-        else:
-            plot.ylim(0.9 * min_value, 0.75 * (max_value + min_value))
 
         plot.grid(True)
         plot.tight_layout()
@@ -130,6 +124,53 @@ def create_metric_plot(
         save_path = os.path.join(SAVE_DIR_OCGNN, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
+
+
+def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
+    parser = LogParser(log_dir=RESULTS_DIR_OCGNN)
+    parser.parse_logs()
+
+    datasets = sorted(set(result[DICT_DATASET] for result in parser.results))
+    target_epoch = 60
+
+    heatmap_data = []
+    for feature_label in FEATURE_LABELS:
+        row = []
+        for dataset in datasets:
+            filtered = [
+                result
+                for result in parser.results
+                if result[DICT_DATASET] == dataset
+                and result[DICT_FEATURE_LABEL] == feature_label
+                and result[DICT_EPOCH] == target_epoch
+            ]
+            if not filtered:
+                row.append(np.nan)
+                continue
+            value = filtered[0].get(metric_name, np.nan)
+            row.append(value)
+        heatmap_data.append(row)
+
+    fig, ax = plot.subplots(figsize=(12, 6))
+    sns.heatmap(
+        heatmap_data,
+        xticklabels=datasets,
+        yticklabels=[FEATURE_LABELS_DICT[label] for label in FEATURE_LABELS],
+        annot=True,
+        fmt=".3f",
+        cmap=cmap,
+        cbar=True,
+        linewidths=0.5,
+        ax=ax,
+    )
+
+    plot.title(f"{title} (Epoch {target_epoch})")
+    plot.tight_layout()
+    save_path = os.path.join(
+        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}.png"
+    )
+    plot.savefig(save_path, dpi=300)
+    plot.show()
 
 
 def get_max_value_for_dataset_and_metric(
@@ -188,7 +229,7 @@ def plot_auc_roc():
     create_metric_plot(
         metric_name=DICT_AUC_ROC,
         y_axis_label=VALUE_AUC_ROC,
-        baseline_dict=AUC_ROC_PAPER,
+        baseline_dict=AUC_ROC_PAPER_OCGNN,
     )
 
 
@@ -210,3 +251,7 @@ if __name__ == "__main__":
     plot_recall()
     plot_precision()
     plot_time()
+    # plot_heatmap(DICT_PRECISION, "Precision")
+    # plot_heatmap(DICT_RECALL, "Recall")
+    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
+    # plot_heatmap(DICT_TIME, "Time")

@@ -1,7 +1,8 @@
 """
 emd_train_2.py
-This file contains training method realization for feature model "Attr + Emd2".
-It also contains embedding features extractor method.
+This file contains:
+- training method realization for feature model "Attr + Emd2"
+- embedding features extractor method.
 """
 
 import logging
@@ -24,16 +25,16 @@ from src.models.anomalydae.emd_train_1 import get_message_for_write_and_log
 
 @timed
 def emd_train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        title_prefix: str,
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
-        gpu: int = 0 if torch.cuda.is_available() else 1,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    title_prefix: str,
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+    alpha: float = ALPHA,
+    eta: int = ETA,
+    theta: int = THETA,
+    gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
@@ -65,8 +66,8 @@ def emd_train(
         )
 
         log_file = (
-                RESULTS_DIR_ANOMALYDAE
-                / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
+            RESULTS_DIR_ANOMALYDAE
+            / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
 
         loss = 0
@@ -113,12 +114,12 @@ def emd_train(
 
 
 def extract_embedding_features(
-        graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        epoch: int,
-        dataset: str,
+    graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    epoch: int,
+    dataset: str,
 ):
     logging.info("Loading embedding features to graph nodes...")
 

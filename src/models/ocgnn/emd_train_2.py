@@ -1,9 +1,3 @@
-"""
-emd_train_2.py
-This file contains training method realization for feature model "Attr + Emd2".
-It also contains embedding features extractor method.
-"""
-
 import logging
 from typing import List
 

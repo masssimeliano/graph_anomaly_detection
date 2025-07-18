@@ -1,7 +1,7 @@
 """
 nx_graph_plotter.py
 This file contains custom transfer method from "Graph" to NX-Graph.
-The NX-Graph can be visualized if its wanted.
+The NX-Graph can be visualized if it is wanted.
 """
 
 import logging
@@ -21,7 +21,7 @@ def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title: str):
     pos = nx.spring_layout(nx_graph, seed=42, k=0.15)
 
     nx.draw(
-        nx_graph,
+        G=nx_graph,
         pos=pos,
         ax=ax,
         with_labels=False,
@@ -32,7 +32,7 @@ def visualize_graph(nx_graph: nx.Graph, node_color: list[str], title: str):
         alpha=0.7,
     )
 
-    ax.set_title(title, fontsize=20, fontweight="bold", pad=20)
+    ax.set_title(label=title, fontsize=20, fontweight="bold", pad=20)
 
     ax.set_axis_off()
     plt.tight_layout()

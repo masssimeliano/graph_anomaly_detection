@@ -1,8 +1,3 @@
-"""
-train_reconstruction_2.py
-This file contains script to train a feature model "Attr + Err2"
-"""
-
 import logging
 import random
 

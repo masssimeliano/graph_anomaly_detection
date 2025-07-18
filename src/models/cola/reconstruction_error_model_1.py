@@ -1,9 +1,3 @@
-"""
-reconstruction_error_model_1.py
-This file contains train wrapper for the model "Attr + Err1".
-It also contains attribute features normalizing method, error comparison method and error extraction method.
-"""
-
 import logging
 from typing import List
 
@@ -21,12 +15,12 @@ from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
 
 
 def train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
-        do_compare: bool = False,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+    do_compare: bool = False,
 ):
     if do_compare:
         compare_anomaly_reconstruction_error(
@@ -58,14 +52,14 @@ def normalize_node_features_via_minmax_and_remove_nan(nx_graph: nx.Graph):
         dim=0
     )[0]
     node_features_stacked_diff = (
-            node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
+        node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
     )
     node_features_stacked_diff[node_features_stacked_diff == 0] = 1
 
     for n in nx_graph.nodes():
         nx_graph.nodes[n]["x"] = (
-                                         nx_graph.nodes[n]["x"] - node_features_stacked_without_nan_min
-                                 ) / node_features_stacked_diff
+            nx_graph.nodes[n]["x"] - node_features_stacked_without_nan_min
+        ) / node_features_stacked_diff
 
 
 @timed

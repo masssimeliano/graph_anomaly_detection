@@ -4,7 +4,7 @@ This file generates log dictionaries from .txt result files.
 """
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
 
 from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
@@ -61,31 +61,3 @@ class LogParser:
 
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
-
-    def get_result_by_params(
-            self,
-            file_name: str = None,
-            dataset: str = None,
-            feature_label: str = None,
-            lr: float = None,
-            epoch: int = None,
-            hid_dim: int = None,
-    ) -> Optional[Dict[str, Any]]:
-        for result in self.results:
-            if file_name is not None and result[DICT_FILE_NAME] != file_name:
-                continue
-            if dataset is not None and result[DICT_DATASET] != dataset:
-                continue
-            if (
-                    feature_label is not None
-                    and result[DICT_FEATURE_LABEL] != feature_label
-            ):
-                continue
-            if lr is not None and result[DICT_LR] != lr:
-                continue
-            if epoch is not None and result[DICT_EPOCH] != epoch:
-                continue
-            if hid_dim is not None and result[DICT_HID_DIM] != hid_dim:
-                continue
-            return result
-        return None

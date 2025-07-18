@@ -1,7 +1,7 @@
 """
 mat_loader.py
-This file transfers datasets from .mat-type to custom "Graph" class.
-It also extracts graph and labels from file.
+This helper file transfers datasets from .mat-type to custom "Graph" class.
+It also creates graph and extract labels with anomaly types from file.
 """
 
 import logging

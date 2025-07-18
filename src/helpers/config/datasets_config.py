@@ -1,6 +1,8 @@
 """
 datasets_config.py
-This file contains constants used for datasets.
+This config file contains:
+- datasets names and their sizes with corresponding enum class
+- names of current classes that are used to train models.
 """
 
 from enum import Enum
@@ -26,15 +28,12 @@ SMALL_DATASETS = [
 MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat"]
 LARGE_DATASETS = []
 
-CHECK_DATASETS_TRAIN_SCRIPT = ["Disney.mat"]
-CHECK_DATASETS = ["Disney"]
-CHECK_DATASETS_2 = [
-    "book",
-    "BlogCatalog",
-    "citeseer",
-    "computers",
-    "cora",
-]
+ALL_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS + LARGE_DATASETS
+ALL_DATASETS_SIZE = (
+    [DataSetSize.SMALL] * len(SMALL_DATASETS)
+    + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
+    + [DataSetSize.LARGE] * len(LARGE_DATASETS)
+)
 
-CURRENT_DATASETS = ["Enron.mat", "questions.mat", "tolokers.mat"]
-CURRENT_DATASETS_SIZE = [DataSetSize.MEDIUM] * len(CURRENT_DATASETS)
+CURRENT_DATASETS = ALL_DATASETS
+CURRENT_DATASETS_SIZE = ALL_DATASETS_SIZE

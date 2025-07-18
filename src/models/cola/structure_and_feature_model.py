@@ -1,9 +1,3 @@
-"""
-structure_and_feature_model.py
-This file contains train wrapper for the model "Attr + Str".
-It also contains structural attribute extraction method.
-"""
-
 import logging
 from typing import List
 
@@ -18,11 +12,11 @@ from src.models.cola.base_train import base_train
 
 
 def train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
 ):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)

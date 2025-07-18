@@ -1,8 +1,3 @@
-"""
-train_and_save_emd_from_baseline_alpha_2.py
-This file contains script to train a feature model "Attr + Alpha2"
-"""
-
 import logging
 import random
 

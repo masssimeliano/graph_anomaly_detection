@@ -1,6 +1,6 @@
 """
 node_feature_autoencoder.py
-This file contains simple autoencoder.
+This file contains implementation of simple features autoencoder.
 """
 
 import torch.nn as nn

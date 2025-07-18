@@ -1,6 +1,7 @@
 """
 const.py
-This file contains constants used for logging, file naming, and labeling in machine learning tasks.
+This file contains:
+- constants used for logging, file naming, and labeling in machine learning tasks.
 """
 
 FEATURE_LABEL_STR2 = "Attr + Str2"

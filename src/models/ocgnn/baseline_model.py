@@ -1,8 +1,3 @@
-"""
-baseline_model.py
-This file contains train wrapper for the model "Attr".
-"""
-
 from typing import List
 
 import torch_geometric

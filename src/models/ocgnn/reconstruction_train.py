@@ -1,9 +1,3 @@
-"""
-reconstruction_train.py
-This file contains training method realization for feature model "Attr + Err2".
-It also contains reconstruction features extractor method.
-"""
-
 import logging
 from typing import List
 

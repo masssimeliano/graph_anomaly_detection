@@ -1,8 +1,3 @@
-"""
-train_structure_and_feature.py
-This file contains script to train a feature model "Attr + Str"
-"""
-
 import logging
 import random
 

@@ -1,8 +1,3 @@
-"""
-train_baseline.py
-This file contains script to train a feature model "Attr"
-"""
-
 import logging
 import random
 

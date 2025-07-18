@@ -1,8 +1,3 @@
-"""
-check_train.py
-This file contains script to run all given models and then plot results of their learning.
-"""
-
 import logging
 
 import read_and_show_metrics

@@ -1,6 +1,7 @@
 """
 dir_config.py
-This file contains constants used for routes and directories in project.
+This config file contains:
+- constants used for routes and directories in project.
 """
 
 from pathlib import Path

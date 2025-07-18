@@ -1,8 +1,3 @@
-"""
-base_train.py
-This file contains training method realization for feature model "Attr".
-"""
-
 import logging
 from typing import List
 
