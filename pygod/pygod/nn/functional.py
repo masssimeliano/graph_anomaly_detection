@@ -10,14 +10,9 @@ import torch.nn.functional as F
 from scipy.linalg import sqrtm
 
 
-def double_recon_loss(x,
-                      x_,
-                      s,
-                      s_,
-                      weight=0.5,
-                      pos_weight_a=0.5,
-                      pos_weight_s=0.5,
-                      bce_s=False):
+def double_recon_loss(
+    x, x_, s, s_, weight=0.5, pos_weight_a=0.5, pos_weight_s=0.5, bce_s=False
+):
     r"""
     Double reconstruction loss function for feature and structure.
     The loss function is defined as :math:`\alpha \symbf{E_a} +
@@ -68,8 +63,9 @@ def double_recon_loss(x,
     """
 
     assert 0 <= weight <= 1, "weight must be a float between 0 and 1."
-    assert 0 <= pos_weight_a <= 1 and 0 <= pos_weight_s <= 1, \
-        "positive weight must be a float between 0 and 1."
+    assert (
+        0 <= pos_weight_a <= 1 and 0 <= pos_weight_s <= 1
+    ), "positive weight must be a float between 0 and 1."
 
     # print(f"x = {torch.isfinite(x).all().item()}")
     # print(f"x_ = {torch.isfinite(x_).all().item()}")
@@ -80,11 +76,9 @@ def double_recon_loss(x,
     diff_attr = torch.pow(x - x_, 2)
 
     if pos_weight_a != 0.5:
-        diff_attr = torch.where(x > 0,
-                                diff_attr * pos_weight_a,
-                                diff_attr * (1 - pos_weight_a))
-
-    # print(f"x = {torch.isfinite(diff_attr).all().item()}")
+        diff_attr = torch.where(
+            x > 0, diff_attr * pos_weight_a, diff_attr * (1 - pos_weight_a)
+        )
 
     # calculating mean and std of attribute errors
     attr_error = torch.sqrt(torch.sum(diff_attr, 1))
@@ -93,14 +87,14 @@ def double_recon_loss(x,
 
     # structure reconstruction loss
     if bce_s:
-        diff_stru = F.binary_cross_entropy(s_, s, reduction='none')
+        diff_stru = F.binary_cross_entropy(s_, s, reduction="none")
     else:
         diff_stru = torch.pow(s - s_, 2)
 
     if pos_weight_s != 0.5:
-        diff_stru = torch.where(s > 0,
-                                diff_stru * pos_weight_s,
-                                diff_stru * (1 - pos_weight_s))
+        diff_stru = torch.where(
+            s > 0, diff_stru * pos_weight_s, diff_stru * (1 - pos_weight_s)
+        )
 
     # calculating mean and std of structural errors
     stru_error = torch.sqrt(torch.sum(diff_stru, 1))
@@ -135,11 +129,15 @@ def KL_neighbor_loss(predictions, targets, mask_len, device):
     cov_x1 = cov_x1 + eye
     cov_x2 = cov_x2 + eye
 
-    KL_loss = 0.5 * (math.log(torch.det(cov_x1) / torch.det(cov_x2)) - h_dim
-                     + torch.trace(torch.inverse(cov_x2).matmul(cov_x1)) + (mean_x2 -
-                                                                            mean_x1).reshape(1, -1).matmul(
-                torch.inverse(cov_x2)).matmul(mean_x2 -
-                                              mean_x1))
+    KL_loss = 0.5 * (
+        math.log(torch.det(cov_x1) / torch.det(cov_x2))
+        - h_dim
+        + torch.trace(torch.inverse(cov_x2).matmul(cov_x1))
+        + (mean_x2 - mean_x1)
+        .reshape(1, -1)
+        .matmul(torch.inverse(cov_x2))
+        .matmul(mean_x2 - mean_x1)
+    )
     KL_loss = KL_loss.to(device)
     return KL_loss
 
@@ -163,8 +161,9 @@ def W2_neighbor_loss(predictions, targets, mask_len, device):
     cov_x2 = (x2 - mean_x2).transpose(1, 0).matmul(x2 - mean_x2) / max((nn - 1), 1)
 
     W2_loss = torch.square(mean_x1 - mean_x2).sum()
-    + torch.trace(cov_x1 + cov_x2
-                  + 2 * sqrtm(sqrtm(cov_x1) @ (cov_x2.numpy()) @ (sqrtm(cov_x1))))
+    +torch.trace(
+        cov_x1 + cov_x2 + 2 * sqrtm(sqrtm(cov_x1) @ (cov_x2.numpy()) @ (sqrtm(cov_x1)))
+    )
 
     W2_loss = W2_loss.to(device)
 
