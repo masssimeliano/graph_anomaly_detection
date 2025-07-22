@@ -12,18 +12,7 @@ from src.scripts.cola import (
     train_reconstruction_2,
     train_reconstruction_1,
 )
-from src.scripts.ocgnn import (
-    train_reconstruction_2 as train_reconstruction_2_o,
-    train_reconstruction_1 as train_reconstruction_1_o,
-    train_structure_and_feature as train_structure_and_feature_o,
-    train_structure_and_feature_3 as train_structure_and_feature_3_o,
-    train_structure_and_feature_2 as train_structure_and_feature_2_o,
-    train_baseline as train_baseline_o,
-    train_and_save_emd_from_baseline_alpha_1 as train_and_save_emd_from_baseline_alpha_1_o,
-    train_and_save_emd_from_baseline_alpha_2 as train_and_save_emd_from_baseline_alpha_2_o,
-    train_from_emd_baseline_with_alpha_1 as train_from_emd_baseline_with_alpha_1_o,
-    train_from_emd_baseline_with_alpha_2 as train_from_emd_baseline_with_alpha_2_o,
-)
+from src.scripts.ocgnn import train_reconstruction_2, train_reconstruction_1
 
 logging.basicConfig(level=logging.INFO)
 

@@ -27,13 +27,13 @@ SMALL_DATASETS = [
 ]
 MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat"]
 LARGE_DATASETS = []
-ONE_CLASS_DATASETS = ["tolokers.mat", "questions.mat"]
+ONE_CLASS_DATASETS = ["questions.mat"]
 
 ALL_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS + LARGE_DATASETS
 ALL_DATASETS_SIZE = (
-    [DataSetSize.SMALL] * len(SMALL_DATASETS)
-    + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
-    + [DataSetSize.LARGE] * len(LARGE_DATASETS)
+        [DataSetSize.SMALL] * len(SMALL_DATASETS)
+        + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
+        + [DataSetSize.LARGE] * len(LARGE_DATASETS)
 )
 
 CURRENT_DATASETS = ONE_CLASS_DATASETS

@@ -9,12 +9,10 @@ from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.ocgnn.reconstruction_error_model_1 import (
     normalize_node_features_via_minmax_and_remove_nan,
 )
-from src.scripts.ocgnn import (
-    train_reconstruction_2,
-    train_structure_and_feature,
-    train_structure_and_feature_3,
-    train_structure_and_feature_2,
-)
+from src.scripts.ocgnn import train_baseline, train_reconstruction_2, train_reconstruction_1, \
+    train_structure_and_feature, train_structure_and_feature_3, train_structure_and_feature_2, \
+    train_and_save_emd_from_baseline_alpha_2, train_and_save_emd_from_baseline_alpha_1, \
+    train_from_emd_baseline_with_alpha_1, train_from_emd_baseline_with_alpha_2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -39,6 +37,12 @@ def read_all():
 
 
 def train_all():
+    train_baseline.main()
+    train_and_save_emd_from_baseline_alpha_1.main()
+    train_and_save_emd_from_baseline_alpha_2.main()
+    train_from_emd_baseline_with_alpha_1.main()
+    train_from_emd_baseline_with_alpha_2.main()
+    train_reconstruction_1.main()
     train_reconstruction_2.main()
     train_structure_and_feature.main()
     train_structure_and_feature_2.main()
@@ -50,7 +54,6 @@ def train_all():
 def check_all():
     read_all()
     train_all()
-    src.scripts.anomalydae.check_train.train_all()
     src.scripts.cola.check_train.train_all()
 
 
