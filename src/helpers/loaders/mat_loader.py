@@ -52,11 +52,18 @@ def load_graph_from_mat(name: str, size: DataSetSize) -> Tuple[List[int], Graph]
     dataset = DataSet(name, size)
     data = scipy.io.loadmat(dataset.location)
 
-    adj_matrix = data["Network"].toarray()
-    attributes = data["Attributes"].toarray()
-    labels = data["Label"].flatten()
-    is_str_anomaly = data["str_anomaly_label"].flatten()
-    is_attr_anomaly = data["attr_anomaly_label"].flatten()
+    if name not in ONE_CLASS_DATASETS:
+        adj_matrix = data["Network"].toarray()
+        attributes = data["Attributes"].toarray()
+        labels = data["Label"].flatten()
+        is_str_anomaly = data["str_anomaly_label"].flatten()
+        is_attr_anomaly = data["attr_anomaly_label"].flatten()
+    else:
+        adj_matrix = data["Network"].toarray()
+        attributes = data["Attributes"].toarray()
+        labels = data["Label"].flatten()
+        is_attr_anomaly = labels
+        is_str_anomaly = np.zeros(len(labels))
 
     nodes = build_nodes(
         adj_matrix=adj_matrix,
