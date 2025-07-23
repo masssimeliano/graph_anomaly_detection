@@ -34,7 +34,18 @@ def base_train(
     logging.info(f"Device: {device}")
 
     data_set_name = f"{dataset.replace('.mat', '')}"
-
+    model = AnomalyDAE(
+        epoch=EPOCH_TO_LEARN,
+        lr=learning_rate,
+        hid_dim=hid_dim,
+        alpha=alpha,
+        eta=eta,
+        theta=theta,
+        gpu=gpu,
+        labels=labels,
+        title_prefix=title_prefix,
+        data_set=data_set_name,
+    )
     array_loss = []
     array_precision_k = []
     array_recall_k = []
@@ -46,18 +57,6 @@ def base_train(
         logging.info(f"Fitting x{i + 1}...")
         # adjusted regular method from AnomalyDAE
         torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = AnomalyDAE(
-            epoch=EPOCH_TO_LEARN,
-            lr=learning_rate,
-            hid_dim=hid_dim,
-            alpha=alpha,
-            eta=eta,
-            theta=theta,
-            gpu=gpu,
-            labels=labels,
-            title_prefix=title_prefix,
-            data_set=data_set_name,
-        )
         model.fit(di_graph)
 
         if i == 0:
@@ -72,8 +71,6 @@ def base_train(
             array_recall_k += np.array(model.array_recall_k)
             array_auc_roc += np.array(model.array_auc_roc)
             array_time += np.array(model.array_time)
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats()
 
     array_loss /= 3
     array_precision_k /= 3

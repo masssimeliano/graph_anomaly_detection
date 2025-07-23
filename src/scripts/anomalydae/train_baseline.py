@@ -34,8 +34,6 @@ def main():
             hid_dim=HIDDEN_DIMS,
             dataset=dataset,
         )
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats()
 
         logging.info(f"-------------------------------")
         logging.info(f"--- End training on {dataset} ({FEATURE_LABEL_STANDARD}) ---")

@@ -1,7 +1,5 @@
 import logging
 
-import read_and_show_metrics
-import src.scripts.anomalydae.check_train
 from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.mat_loader import load_graph_from_mat
@@ -20,8 +18,6 @@ logging.basicConfig(level=logging.INFO)
 def main():
     read_all()
     train_all()
-
-    read_and_show_metrics.plot_time()
 
 
 def read_all():
@@ -48,14 +44,6 @@ def train_all():
     train_structure_and_feature_2.main()
     train_structure_and_feature_3.main()
 
-    read_and_show_metrics.plot_time()
-
-
-def check_all():
-    read_all()
-    train_all()
-    src.scripts.cola.check_train.train_all()
-
 
 if __name__ == "__main__":
-    check_all()
+    main()

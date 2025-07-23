@@ -43,7 +43,7 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser(log_dir=RESULTS_DIR_COLA)
     parser.parse_logs()
@@ -65,7 +65,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
+                   and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -97,8 +97,8 @@ def create_metric_plot(
 
         # normalizing
         if metric_name == DICT_TIME or (
-            metric_name == DICT_LOSS
-            and dataset not in ["cs", "computers", "citeseer", "cora"]
+                metric_name == DICT_LOSS
+                and dataset not in ["cs", "computers", "citeseer", "cora"]
         ):
             plot.ylim(min_value, max_value)
             plot.yscale("log")
@@ -117,7 +117,7 @@ def create_metric_plot(
         plot.subplots_adjust(bottom=0.3)
         plot.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.25),
+            bbox_to_anchor=(0.5, -0.2),
             ncol=2,
             frameon=True,
             fontsize="small",
@@ -144,8 +144,8 @@ def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
-                and result[DICT_EPOCH] == target_epoch
+                   and result[DICT_FEATURE_LABEL] == feature_label
+                   and result[DICT_EPOCH] == target_epoch
             ]
             if not filtered:
                 row.append(np.nan)
@@ -177,7 +177,7 @@ def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
 
 
 def get_max_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -186,7 +186,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -199,7 +199,7 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     min_value = get_max_value_for_dataset_and_metric(
         dataset=dataset, parser=parser, metric_name=metric_name
@@ -210,7 +210,7 @@ def get_min_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue

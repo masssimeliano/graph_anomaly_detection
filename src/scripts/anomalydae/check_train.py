@@ -5,7 +5,6 @@ This file contains script to run all given models and then plot results of their
 
 import logging
 
-import read_and_show_metrics
 from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.mat_loader import load_graph_from_mat
@@ -24,8 +23,6 @@ logging.basicConfig(level=logging.INFO)
 def main():
     read_all()
     train_all()
-
-    read_and_show_metrics.plot_time()
 
 
 def read_all():
@@ -51,8 +48,6 @@ def train_all():
     train_structure_and_feature.main()
     train_structure_and_feature_2.main()
     train_structure_and_feature_3.main()
-
-    read_and_show_metrics.plot_time()
 
 
 if __name__ == "__main__":

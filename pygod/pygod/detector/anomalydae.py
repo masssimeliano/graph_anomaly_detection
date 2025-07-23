@@ -88,7 +88,7 @@ class AnomalyDAE(DeepDetector):
         self.attr_error_mean = []
         self.attr_error_std = []
 
-        self.save_emb = save_emb
+        self.save_emb = True
 
     def process_graph(self, data):
         AnomalyDAEBase.process_graph(data)
