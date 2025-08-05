@@ -18,11 +18,11 @@ from src.models.anomalydae.base_train import base_train
 
 
 def train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    dataset: str,
+        nx_graph: nx.Graph,
+        labels: List[int],
+        learning_rate: float,
+        hid_dim: int,
+        dataset: str,
 ):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
@@ -43,7 +43,6 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
     square_clust = nx.square_clustering(nx_graph)
 
     for node in nx_graph.nodes():
-        node_neighbours = list(nx_graph.neighbors(node))
         ego = nx.ego_graph(nx_graph, node)
 
         degree = nx_graph.degree(node)
@@ -51,7 +50,6 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
         triangle_count = nx.triangles(nx_graph, node)
         ego_density = nx.density(ego)
         square_clustering = square_clust[node]
-        num_neighbors = len(node_neighbours)
 
         node_features = [
             degree,
@@ -60,7 +58,6 @@ def extract_node_features_tensor(nx_graph: nx.Graph) -> torch.Tensor:
             average_neighbour_degree[node],
             ego_density,
             square_clustering,
-            num_neighbors,
         ]
         features.append(node_features)
 

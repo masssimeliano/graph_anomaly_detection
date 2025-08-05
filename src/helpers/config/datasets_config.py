@@ -25,7 +25,7 @@ SMALL_DATASETS = [
     "photo.mat",
     "weibo.mat",
 ]
-MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat"]
+MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat", "tolokers.mat"]
 LARGE_DATASETS = []
 ONE_CLASS_DATASETS = ["tolokers.mat"]
 
@@ -36,5 +36,5 @@ ALL_DATASETS_SIZE = (
         + [DataSetSize.LARGE] * len(LARGE_DATASETS)
 )
 
-CURRENT_DATASETS = ONE_CLASS_DATASETS
-CURRENT_DATASETS_SIZE = [DataSetSize.MEDIUM] * len(ONE_CLASS_DATASETS)
+CURRENT_DATASETS = ALL_DATASETS
+CURRENT_DATASETS_SIZE = ALL_DATASETS_SIZE

@@ -11,11 +11,11 @@ from src.models.ocgnn.base_train import base_train
 
 
 def train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    dataset: str,
+        nx_graph: nx.Graph,
+        labels: List[int],
+        learning_rate: float,
+        hid_dim: int,
+        dataset: str,
 ):
     add_structure_features(nx_graph=nx_graph)
     di_graph = from_networkx(G=nx_graph)
@@ -77,7 +77,6 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
     )
 
     for node in graph.nodes():
-        node_neighbours = list(graph.neighbors(node))
         ego = nx.ego_graph(graph, node)
 
         degree = graph.degree(node)
@@ -85,7 +84,6 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
         triangle_count = nx.triangles(graph, node)
         ego_density = nx.density(ego)
         square_clustering = square_clust[node]
-        num_neighbours = len(node_neighbours)
 
         # new features
         betweenness_node = betweenness.get(node, 0.0)
@@ -104,7 +102,6 @@ def extract_node_features_tensor(graph: nx.Graph) -> torch.Tensor:
             average_neighbour_degree.get(node, 0.0),
             ego_density,
             square_clustering,
-            num_neighbours,
             betweenness_node,
             closeness_node,
             eigenvector_node,

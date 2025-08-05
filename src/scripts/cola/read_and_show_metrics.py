@@ -18,7 +18,6 @@ FEATURE_LABELS = [
     FEATURE_LABEL_ERROR1,
     FEATURE_LABEL_ERROR2,
     FEATURE_LABEL_EMD1,
-    FEATURE_LABEL_EMD2,
 ]
 FEATURE_COLORS_DICT = {
     FEATURE_LABEL_STANDARD: "blue",
@@ -28,17 +27,15 @@ FEATURE_COLORS_DICT = {
     FEATURE_LABEL_ERROR1: "yellow",
     FEATURE_LABEL_ERROR2: "pink",
     FEATURE_LABEL_EMD1: "black",
-    FEATURE_LABEL_EMD2: "gray",
 }
 FEATURE_LABELS_DICT = {
-    FEATURE_LABEL_STANDARD: "Attribute (alpha = 0.5)",
-    FEATURE_LABEL_STR: "Attribute + Structure (pyfglt)",
-    FEATURE_LABEL_STR2: "Attribute + Structure 2 (NetworkX Features v1)",
-    FEATURE_LABEL_STR3: "Attribute + Structure 3 (NetworkX Features v2)",
-    FEATURE_LABEL_ERROR1: "Attribute + Error 1 (Reconstruction error from simple encoder)",
-    FEATURE_LABEL_ERROR2: "Attribute + Error 2 (Reconstruction error from CoLA encoder)",
-    FEATURE_LABEL_EMD1: "Attribute + Embedding 1 (Embedding of Attribute (alpha = 0 (node features)))",
-    FEATURE_LABEL_EMD2: "Attribute + Embedding 2 (Embedding of Attribute (alpha = 1 (adjacent matrix)))",
+    FEATURE_LABEL_STANDARD: "Basic node features",
+    FEATURE_LABEL_STR: "Basic node features with structural features (pyFGLT)",
+    FEATURE_LABEL_STR2: "Basic node features with structural features (NetworkX Features v1)",
+    FEATURE_LABEL_STR3: "Basic node features with structural features (NetworkX Features v2)",
+    FEATURE_LABEL_ERROR1: "Basic node features with reconstruction errors 1 (Simple autoencoder)",
+    FEATURE_LABEL_ERROR2: "Basic node features with reconstruction errors 2 (CoLA encoder)",
+    FEATURE_LABEL_EMD1: "Basic node features with embeddings",
 }
 
 
