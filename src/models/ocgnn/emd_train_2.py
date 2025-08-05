@@ -8,7 +8,7 @@ from torch_geometric.utils import from_networkx
 
 from pygod.pygod.detector import OCGNN
 from pygod.pygod.metric import eval_recall_at_k, eval_precision_at_k
-from src.helpers.config.const import FEATURE_LABEL_ALPHA1
+from src.helpers.config.const import FEATURE_LABEL_ALPHA2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model_anomalydae
@@ -136,7 +136,7 @@ def extract_embedding_features(
     emd_model = load_emd_model_anomalydae(
         dataset=dataset.replace(".mat", ""),
         labels=labels,
-        feature_label=FEATURE_LABEL_ALPHA1,
+        feature_label=FEATURE_LABEL_ALPHA2,
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         epoch=epoch,

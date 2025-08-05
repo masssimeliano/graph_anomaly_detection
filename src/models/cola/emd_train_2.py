@@ -6,9 +6,9 @@ import torch
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import from_networkx
 
-from pygod.pygod.detector import OCGNN
+from pygod.pygod.detector import CoLA
 from pygod.pygod.metric import eval_recall_at_k, eval_precision_at_k
-from src.helpers.config.const import FEATURE_LABEL_ALPHA1
+from src.helpers.config.const import FEATURE_LABEL_ALPHA2
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model_anomalydae
@@ -41,7 +41,7 @@ def emd_train(
 
         dataset_name = f"{dataset.replace('.mat', '')}"
 
-        model = OCGNN(
+        model = CoLA(
             epoch=epoch,
             labels=labels,
             title_prefix=title_prefix,
@@ -52,7 +52,7 @@ def emd_train(
         )
 
         log_file = (
-                RESULTS_DIR_OCGNN
+                RESULTS_DIR_COLA
                 / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
 
@@ -112,7 +112,7 @@ def get_message_for_write_and_log(
         time: float,
 ):
     result = (
-            f"OCGNN(epoch={epoch}, lr={learning_rate}, hid_dim={hid_dim})\n"
+            f"CoLA(epoch={epoch}, lr={learning_rate}, hid_dim={hid_dim})\n"
             + f"Epoch: {epoch} - AUC-ROC ({title_prefix}): {auc_roc:.4f}\n"
             + f"Loss ({title_prefix}): {loss:.4f}\n"
             + f"Recall@k ({title_prefix}) for k={k}: {recall_at_k:.4f}\n"
@@ -136,7 +136,7 @@ def extract_embedding_features(
     emd_model = load_emd_model_anomalydae(
         dataset=dataset.replace(".mat", ""),
         labels=labels,
-        feature_label=FEATURE_LABEL_ALPHA1,
+        feature_label=FEATURE_LABEL_ALPHA2,
         learning_rate=learning_rate,
         hid_dim=hid_dim,
         epoch=epoch,

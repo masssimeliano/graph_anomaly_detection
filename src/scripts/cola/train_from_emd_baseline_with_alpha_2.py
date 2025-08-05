@@ -3,12 +3,11 @@ import random
 
 import numpy as np
 import torch
-from torch_geometric.utils import from_networkx
 
-from src.helpers.config.const import FEATURE_LABEL_ALPHA1
+from src.helpers.config.const import FEATURE_LABEL_EMD2
 from src.helpers.config.datasets_config import *
 from src.helpers.config.training_config import *
-from src.models.ocgnn import baseline_alpha_model_1
+from src.models.cola import embedding_and_feature_model_2
 
 
 def main():
@@ -18,12 +17,11 @@ def main():
 
     for i, dataset in enumerate(iterable=CURRENT_DATASETS):
         logging.info(f"-------------------------------")
-        logging.info(f"--- Begin training on {dataset} ({FEATURE_LABEL_ALPHA1}) ---")
+        logging.info(f"--- Begin training on {dataset} ({FEATURE_LABEL_EMD2}) ---")
         logging.info(f"-------------------------------")
 
-        di_graph = from_networkx(G=graph_dict[dataset])
-        baseline_alpha_model_1.train(
-            di_graph=di_graph,
+        embedding_and_feature_model_2.train(
+            nx_graph=graph_dict[dataset],
             labels=labels_dict[dataset],
             learning_rate=LEARNING_RATE,
             hid_dim=HIDDEN_DIMS,
@@ -31,7 +29,7 @@ def main():
         )
 
         logging.info(f"-------------------------------")
-        logging.info(f"--- End training on {dataset} ({FEATURE_LABEL_ALPHA1}) ---")
+        logging.info(f"--- End training on {dataset} ({FEATURE_LABEL_EMD2}) ---")
         logging.info(f"-------------------------------\n")
 
 
