@@ -239,18 +239,10 @@ class AnomalyDAE(DeepDetector):
                 # calculating AUC-ROC through all epochs
                 if epoch in EPOCHS:
                     self.array_time.append(time.time() - start_time)
-                    self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
-                    self_labels = torch.tensor(self.labels)
-                    self_score = self.decision_score_
-                    self_k = self.labels.count(1)
-                    recall_k = eval_recall_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
-                    precision_k = eval_precision_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
+                    (auc_roc, recall_k, precision_k) = self.evaluate(data)
+                    self.array_loss.append(loss_value)
+
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
@@ -369,4 +361,24 @@ class AnomalyDAE(DeepDetector):
             torch.save(obj=self.emb, f=emd_file)
 
         self._process_decision_score()
-        return self
+        return self.evaluate(data)
+
+    def evaluate(self, data):
+        self.model.eval()
+        with torch.no_grad():
+            data_full = data.clone()
+            data_full.batch_size = data.x.size(0)
+            data_full.n_id = torch.arange(data.x.size(0))
+
+            loss, score_eval, _, _, _, _ = self.forward_model(data_full)
+            y_score = score_eval.detach().cpu().view(-1).to(torch.float32)
+
+            y_true = torch.as_tensor(self.labels, dtype=torch.long, device='cpu').view(-1)
+            k = self.labels.count(1)
+
+            auc = roc_auc_score(y_true.numpy(), y_score.numpy())
+            recall_k = eval_recall_at_k(label=y_true, score=y_score, k=k)
+            precision_k = eval_precision_at_k(label=y_true, score=y_score, k=k)
+        self.model.train()
+
+        return (auc, recall_k, precision_k)

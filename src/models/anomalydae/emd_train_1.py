@@ -10,11 +10,9 @@ from typing import List
 
 import networkx as nx
 import torch
-from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import from_networkx
 
 from pygod.pygod.detector import AnomalyDAE
-from pygod.pygod.metric import eval_recall_at_k, eval_precision_at_k
 from src.helpers.config.const import FEATURE_LABEL_ALPHA1
 from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
@@ -24,16 +22,16 @@ from src.helpers.time.timed import timed
 
 @timed
 def emd_train(
-    nx_graph: nx.Graph,
-    labels: List[int],
-    title_prefix: str,
-    learning_rate: float,
-    hid_dim: int,
-    dataset: str,
-    alpha: float = ALPHA,
-    eta: int = ETA,
-    theta: int = THETA,
-    gpu: int = 0 if torch.cuda.is_available() else 1,
+        nx_graph: nx.Graph,
+        labels: List[int],
+        title_prefix: str,
+        learning_rate: float,
+        hid_dim: int,
+        dataset: str,
+        alpha: float = ALPHA,
+        eta: int = ETA,
+        theta: int = THETA,
+        gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
@@ -65,8 +63,8 @@ def emd_train(
         )
 
         log_file = (
-            RESULTS_DIR_ANOMALYDAE
-            / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
+                RESULTS_DIR_ANOMALYDAE
+                / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
 
         loss = 0
@@ -76,16 +74,13 @@ def emd_train(
         timer = 0
         for i in range(3):
             logging.info(f"Fitting x{i + 1}...")
-            model.fit_emd(di_graph)
+
+            (auc_i, recall_i, precision_i) = model.fit_emd(di_graph)
 
             loss += model.loss_last / di_graph.num_nodes
-            auc += roc_auc_score(labels, model.decision_score_)
-            recall += eval_recall_at_k(
-                torch.tensor(labels), model.decision_score_, labels.count(1)
-            )
-            precision += eval_precision_at_k(
-                torch.tensor(labels), model.decision_score_, labels.count(1)
-            )
+            auc += auc_i
+            recall += recall_i
+            precision += precision_i
             timer += model.last_time
 
         loss = loss / 3
@@ -113,36 +108,36 @@ def emd_train(
 
 
 def get_message_for_write_and_log(
-    epoch: int,
-    learning_rate: float,
-    hid_dim: int,
-    title_prefix: str,
-    loss: float,
-    auc_roc: float,
-    recall_at_k: float,
-    precision_at_k: float,
-    k: int,
-    time: float,
+        epoch: int,
+        learning_rate: float,
+        hid_dim: int,
+        title_prefix: str,
+        loss: float,
+        auc_roc: float,
+        recall_at_k: float,
+        precision_at_k: float,
+        k: int,
+        time: float,
 ):
     result = (
-        f"AnomalyDAE(epoch={epoch}, lr={learning_rate}, hid_dim={hid_dim})\n"
-        + f"Epoch: {epoch} - AUC-ROC ({title_prefix}): {auc_roc:.4f}\n"
-        + f"Loss ({title_prefix}): {loss:.4f}\n"
-        + f"Recall@k ({title_prefix}) for k={k}: {recall_at_k:.4f}\n"
-        + f"Precision@k ({title_prefix}) for k={k}: {precision_at_k:.4f}\n"
-        + f"Time: {time:.4f}"
+            f"AnomalyDAE(epoch={epoch}, lr={learning_rate}, hid_dim={hid_dim})\n"
+            + f"Epoch: {epoch} - AUC-ROC ({title_prefix}): {auc_roc:.4f}\n"
+            + f"Loss ({title_prefix}): {loss:.4f}\n"
+            + f"Recall@k ({title_prefix}) for k={k}: {recall_at_k:.4f}\n"
+            + f"Precision@k ({title_prefix}) for k={k}: {precision_at_k:.4f}\n"
+            + f"Time: {time:.4f}"
     )
 
     return result
 
 
 def extract_embedding_features(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    epoch: int,
-    dataset: str,
+        graph: nx.Graph,
+        labels: List[int],
+        learning_rate: float,
+        hid_dim: int,
+        epoch: int,
+        dataset: str,
 ):
     logging.info("Loading embedding features to graph nodes...")
 

@@ -25,8 +25,13 @@ SMALL_DATASETS = [
     "photo.mat",
     "weibo.mat",
 ]
-MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat", "tolokers.mat"]
+MEDIUM_DATASETS = [
+    "Flickr.mat",
+    "Reddit.mat",
+    "tolokers.mat"
+]
 LARGE_DATASETS = []
+
 ONE_CLASS_DATASETS = ["tolokers.mat"]
 
 ALL_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS + LARGE_DATASETS
