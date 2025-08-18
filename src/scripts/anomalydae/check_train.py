@@ -12,7 +12,7 @@ from src.helpers.plotters.nx_graph_plotter import to_networkx_graph
 from src.models.anomalydae.reconstruction_error_model_1 import (
     normalize_node_features_via_minmax_and_remove_nan,
 )
-from src.scripts.anomalydae import train_structure_and_feature_3, train_structure_and_feature_2, train_reconstruction_2
+from src.scripts.anomalydae import train_reconstruction_2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,8 +43,8 @@ def train_all():
     # train_reconstruction_1.main()
     train_reconstruction_2.main()
     # train_structure_and_feature.main()
-    train_structure_and_feature_2.main()
-    train_structure_and_feature_3.main()
+    # train_structure_and_feature_2.main()
+    # train_structure_and_feature_3.main()
 
 
 if __name__ == "__main__":

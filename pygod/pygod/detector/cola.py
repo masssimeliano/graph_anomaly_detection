@@ -96,42 +96,46 @@ class CoLA(DeepDetector):
         ``emb`` is a tuple of torch.Tensor.
     """
 
-    def __init__(self,
-                 labels,
-                 title_prefix,
-                 data_set,
-                 hid_dim=64,
-                 num_layers=4,
-                 dropout=0.,
-                 weight_decay=0.,
-                 act=torch.nn.functional.relu,
-                 backbone=GCN,
-                 contamination=0.1,
-                 lr=4e-3,
-                 epoch=100,
-                 gpu=-1,
-                 batch_size=0,
-                 num_neigh=-1,
-                 verbose=0,
-                 save_emb=False,
-                 compile_model=False,
-                 **kwargs):
-        super(CoLA, self).__init__(hid_dim=hid_dim,
-                                   num_layers=num_layers,
-                                   dropout=dropout,
-                                   weight_decay=weight_decay,
-                                   act=act,
-                                   backbone=backbone,
-                                   contamination=contamination,
-                                   lr=lr,
-                                   epoch=epoch,
-                                   gpu=gpu,
-                                   batch_size=batch_size,
-                                   num_neigh=num_neigh,
-                                   verbose=verbose,
-                                   save_emb=save_emb,
-                                   compile_model=compile_model,
-                                   **kwargs)
+    def __init__(
+        self,
+        labels,
+        title_prefix,
+        data_set,
+        hid_dim=64,
+        num_layers=4,
+        dropout=0.0,
+        weight_decay=0.0,
+        act=torch.nn.functional.relu,
+        backbone=GCN,
+        contamination=0.1,
+        lr=4e-3,
+        epoch=100,
+        gpu=-1,
+        batch_size=0,
+        num_neigh=-1,
+        verbose=0,
+        save_emb=False,
+        compile_model=False,
+        **kwargs
+    ):
+        super(CoLA, self).__init__(
+            hid_dim=hid_dim,
+            num_layers=num_layers,
+            dropout=dropout,
+            weight_decay=weight_decay,
+            act=act,
+            backbone=backbone,
+            contamination=contamination,
+            lr=lr,
+            epoch=epoch,
+            gpu=gpu,
+            batch_size=batch_size,
+            num_neigh=num_neigh,
+            verbose=verbose,
+            save_emb=save_emb,
+            compile_model=compile_model,
+            **kwargs
+        )
 
         self.title_prefix = title_prefix
 
@@ -153,15 +157,16 @@ class CoLA(DeepDetector):
 
     def init_model(self, **kwargs):
         if self.save_emb:
-            self.emb = torch.zeros(self.num_nodes,
-                                   self.hid_dim)
-        return CoLABase(in_dim=self.in_dim,
-                        hid_dim=self.hid_dim,
-                        num_layers=self.num_layers,
-                        dropout=self.dropout,
-                        act=self.act,
-                        backbone=self.backbone,
-                        **kwargs).to(self.device)
+            self.emb = torch.zeros(self.num_nodes, self.hid_dim)
+        return CoLABase(
+            in_dim=self.in_dim,
+            hid_dim=self.hid_dim,
+            num_layers=self.num_layers,
+            dropout=self.dropout,
+            act=self.act,
+            backbone=self.backbone,
+            **kwargs
+        ).to(self.device)
 
     def forward_model(self, data):
         batch_size = data.batch_size
@@ -170,10 +175,10 @@ class CoLA(DeepDetector):
         edge_index = data.edge_index.to(self.device)
 
         pos_logits, neg_logits = self.model(x, edge_index)
-        logits = torch.cat([pos_logits[:batch_size],
-                            neg_logits[:batch_size]])
-        con_label = torch.cat([torch.ones(batch_size),
-                               torch.zeros(batch_size)]).to(self.device)
+        logits = torch.cat([pos_logits[:batch_size], neg_logits[:batch_size]])
+        con_label = torch.cat([torch.ones(batch_size), torch.zeros(batch_size)]).to(
+            self.device
+        )
 
         loss = self.model.loss_func(logits, con_label)
 
@@ -239,15 +244,15 @@ class CoLA(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                                                          :batch_size
-                                                          ].cpu()
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -265,17 +270,10 @@ class CoLA(DeepDetector):
                 if epoch in EPOCHS:
                     self.array_time.append(time.time() - start_time)
                     self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
-                    self_labels = torch.tensor(self.labels)
-                    self_score = self.decision_score_
-                    self_k = self.labels.count(1)
-                    recall_k = eval_recall_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
-                    precision_k = eval_precision_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
+                    (auc_roc, recall_k, precision_k) = self.evaluate(data)
+                    self.array_loss.append(loss_value)
+
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
@@ -338,10 +336,7 @@ class CoLA(DeepDetector):
                 node_idx = sampled_data.n_id
 
                 # structural and attribute reconstruction errors can be used here
-                (
-                    loss,
-                    score
-                ) = self.forward_model(sampled_data)
+                (loss, score) = self.forward_model(sampled_data)
                 self.error = loss
 
                 loss = loss.mean()
@@ -350,15 +345,15 @@ class CoLA(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                                                          :batch_size
-                                                          ].cpu()
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -389,4 +384,26 @@ class CoLA(DeepDetector):
             torch.save(obj=self.emb, f=emd_file)
 
         self._process_decision_score()
-        return self
+        return self.evaluate(data)
+
+    def evaluate(self, data):
+        self.model.eval()
+        with torch.no_grad():
+            data_full = data.clone()
+            data_full.batch_size = data.x.size(0)
+            data_full.n_id = torch.arange(data.x.size(0))
+
+            loss, score_eval, _, _, _, _ = self.forward_model(data_full)
+            y_score = score_eval.detach().cpu().view(-1).to(torch.float32)
+
+            y_true = torch.as_tensor(self.labels, dtype=torch.long, device="cpu").view(
+                -1
+            )
+            k = self.labels.count(1)
+
+            auc = roc_auc_score(y_true.numpy(), y_score.numpy())
+            recall_k = eval_recall_at_k(label=y_true, score=y_score, k=k)
+            precision_k = eval_precision_at_k(label=y_true, score=y_score, k=k)
+        self.model.train()
+
+        return (auc, recall_k, precision_k)
