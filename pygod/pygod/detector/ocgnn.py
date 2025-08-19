@@ -100,29 +100,29 @@ class OCGNN(DeepDetector):
     """
 
     def __init__(
-            self,
-            labels,
-            title_prefix,
-            data_set,
-            hid_dim=64,
-            num_layers=2,
-            dropout=0.0,
-            weight_decay=0.0,
-            act=torch.nn.functional.relu,
-            backbone=GCN,
-            contamination=0.1,
-            lr=4e-3,
-            epoch=100,
-            gpu=-1,
-            batch_size=0,
-            num_neigh=-1,
-            beta=0.5,
-            warmup=2,
-            eps=0.001,
-            verbose=0,
-            save_emb=True,
-            compile_model=False,
-            **kwargs,
+        self,
+        labels,
+        title_prefix,
+        data_set,
+        hid_dim=64,
+        num_layers=2,
+        dropout=0.0,
+        weight_decay=0.0,
+        act=torch.nn.functional.relu,
+        backbone=GCN,
+        contamination=0.1,
+        lr=4e-3,
+        epoch=100,
+        gpu=-1,
+        batch_size=0,
+        num_neigh=-1,
+        beta=0.5,
+        warmup=2,
+        eps=0.001,
+        verbose=0,
+        save_emb=True,
+        compile_model=False,
+        **kwargs,
     ):
         super(OCGNN, self).__init__(
             hid_dim=hid_dim,
@@ -182,9 +182,8 @@ class OCGNN(DeepDetector):
 
         return loss, score.detach().cpu(), loss_node
 
-        # custom fit() method that works with same epochs value
-        # and saves resulting metrics inside for-cycle
-
+    # custom fit() method that works with same epochs value
+    # and saves resulting metrics inside for-cycle
     def fit(self, data, label=None):
         start_time = time.time()
         self.array_loss = []
@@ -238,15 +237,15 @@ class OCGNN(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                                                          :batch_size
-                                                          ].cpu()
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -264,17 +263,10 @@ class OCGNN(DeepDetector):
                 if epoch in EPOCHS:
                     self.array_time.append(time.time() - start_time)
                     self.array_loss.append(loss_value)
-                    auc_roc = roc_auc_score(self.labels, self.decision_score_)
 
-                    self_labels = torch.tensor(self.labels)
-                    self_score = self.decision_score_
-                    self_k = self.labels.count(1)
-                    recall_k = eval_recall_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
-                    precision_k = eval_precision_at_k(
-                        label=self_labels, score=self_score, k=self_k
-                    )
+                    (auc_roc, recall_k, precision_k) = self.evaluate(data)
+                    self.array_loss.append(loss_value)
+
                     self.array_auc_roc.append(auc_roc)
                     self.array_recall_k.append(recall_k)
                     self.array_precision_k.append(precision_k)
@@ -297,9 +289,8 @@ class OCGNN(DeepDetector):
         self._process_decision_score()
         return self
 
-        # custom fit() method that works with same epochs value,
-        # but calculates every resulting metric only once
-
+    # custom fit() method that works with same epochs value,
+    # but calculates every resulting metric only once
     def fit_emd(self, data):
         start_time = time.time()
         self.process_graph(data)
@@ -347,15 +338,15 @@ class OCGNN(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                                                             :batch_size
-                                                             ].cpu()
+                            :batch_size
+                        ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                                                          :batch_size
-                                                          ].cpu()
+                            :batch_size
+                        ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -386,4 +377,26 @@ class OCGNN(DeepDetector):
             torch.save(obj=self.emb, f=emd_file)
 
         self._process_decision_score()
-        return self
+        return self.evaluate(data)
+
+    def evaluate(self, data):
+        self.model.eval()
+        with torch.no_grad():
+            data_full = data.clone()
+            data_full.batch_size = data.x.size(0)
+            data_full.n_id = torch.arange(data.x.size(0))
+
+            loss, score_eval, _ = self.forward_model(data_full)
+            y_score = score_eval.detach().cpu().view(-1).to(torch.float32)
+
+            y_true = torch.as_tensor(self.labels, dtype=torch.long, device="cpu").view(
+                -1
+            )
+            k = self.labels.count(1)
+
+            auc = roc_auc_score(y_true.numpy(), y_score.numpy())
+            recall_k = eval_recall_at_k(label=y_true, score=y_score, k=k)
+            precision_k = eval_precision_at_k(label=y_true, score=y_score, k=k)
+        self.model.train()
+
+        return (auc, recall_k, precision_k)
