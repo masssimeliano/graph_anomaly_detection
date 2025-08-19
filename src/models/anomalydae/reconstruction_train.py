@@ -81,7 +81,7 @@ def reconstruction_train(
             for i in range(3):
                 logging.info(f"Fitting x{i + 1}...")
 
-                (auc_i, recall_i, precision_i) = model.fit_emd(di_graph)
+                (auc_i, recall_i, precision_i, _, _, _, _) = model.fit_emd(di_graph)
 
                 loss += model.loss_last / di_graph.num_nodes
                 auc += auc_i
