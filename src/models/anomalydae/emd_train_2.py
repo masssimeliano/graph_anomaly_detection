@@ -23,16 +23,16 @@ from src.models.anomalydae.emd_train_1 import get_message_for_write_and_log
 
 @timed
 def emd_train(
-        nx_graph: nx.Graph,
-        labels: List[int],
-        title_prefix: str,
-        learning_rate: float,
-        hid_dim: int,
-        dataset: str,
-        alpha: float = ALPHA,
-        eta: int = ETA,
-        theta: int = THETA,
-        gpu: int = 0 if torch.cuda.is_available() else 1,
+    nx_graph: nx.Graph,
+    labels: List[int],
+    title_prefix: str,
+    learning_rate: float,
+    hid_dim: int,
+    dataset: str,
+    alpha: float = ALPHA,
+    eta: int = ETA,
+    theta: int = THETA,
+    gpu: int = 0 if torch.cuda.is_available() else 1,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Device: {device}")
@@ -64,8 +64,8 @@ def emd_train(
         )
 
         log_file = (
-                RESULTS_DIR_ANOMALYDAE
-                / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
+            RESULTS_DIR_ANOMALYDAE
+            / f"{dataset.replace('.mat', '')}_{title_prefix}_{str(learning_rate).replace('.', '')}_{hid_dim}_{epoch}.txt"
         )
 
         loss = 0
@@ -76,7 +76,7 @@ def emd_train(
         for i in range(3):
             logging.info(f"Fitting x{i + 1}...")
 
-            (auc_i, recall_i, precision_i) = model.fit_emd(di_graph)
+            (auc_i, recall_i, precision_i, _, _, _, _) = model.fit_emd(di_graph)
 
             loss += model.loss_last / di_graph.num_nodes
             auc += auc_i
@@ -109,12 +109,12 @@ def emd_train(
 
 
 def extract_embedding_features(
-        graph: nx.Graph,
-        labels: List[int],
-        learning_rate: float,
-        hid_dim: int,
-        epoch: int,
-        dataset: str,
+    graph: nx.Graph,
+    labels: List[int],
+    learning_rate: float,
+    hid_dim: int,
+    epoch: int,
+    dataset: str,
 ):
     logging.info("Loading embedding features to graph nodes...")
 

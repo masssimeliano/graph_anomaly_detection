@@ -393,7 +393,7 @@ class CoLA(DeepDetector):
             data_full.batch_size = data.x.size(0)
             data_full.n_id = torch.arange(data.x.size(0))
 
-            loss, score_eval, _, _, _, _ = self.forward_model(data_full)
+            loss, score_eval = self.forward_model(data_full)
             y_score = score_eval.detach().cpu().view(-1).to(torch.float32)
 
             y_true = torch.as_tensor(self.labels, dtype=torch.long, device="cpu").view(

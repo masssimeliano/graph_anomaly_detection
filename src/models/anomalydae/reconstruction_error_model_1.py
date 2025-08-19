@@ -49,24 +49,41 @@ def train(
 def normalize_node_features_via_minmax_and_remove_nan(nx_graph: nx.Graph):
     node_features = [nx_graph.nodes[node]["x"] for node in nx_graph.nodes()]
     node_features_stacked = torch.stack(node_features)
+
+    # Проверка исходных фич
+    if torch.isnan(node_features_stacked).any():
+        print("⚠️ Найдены NaN в исходных признаках узлов")
+    if torch.isinf(node_features_stacked).any():
+        print("⚠️ Найдены Inf в исходных признаках узлов")
+
     node_features_stacked_without_nan = torch.nan_to_num(
-        input=node_features_stacked, nan=0.0
+        input=node_features_stacked, nan=0.0, posinf=0.0, neginf=0.0
     )
+
     node_features_stacked_without_nan_min = node_features_stacked_without_nan.min(
         dim=0
     )[0]
     node_features_stacked_without_nan_max = node_features_stacked_without_nan.max(
         dim=0
     )[0]
+
     node_features_stacked_diff = (
         node_features_stacked_without_nan_max - node_features_stacked_without_nan_min
     )
     node_features_stacked_diff[node_features_stacked_diff == 0] = 1
 
     for n in nx_graph.nodes():
-        nx_graph.nodes[n]["x"] = (
+        new_x = (
             nx_graph.nodes[n]["x"] - node_features_stacked_without_nan_min
         ) / node_features_stacked_diff
+
+        # Проверка после нормализации
+        if torch.isnan(new_x).any():
+            print(f"⚠️ Узел {n}: найдены NaN после нормализации")
+        if torch.isinf(new_x).any():
+            print(f"⚠️ Узел {n}: найдены Inf после нормализации")
+
+        nx_graph.nodes[n]["x"] = new_x
 
 
 @timed
