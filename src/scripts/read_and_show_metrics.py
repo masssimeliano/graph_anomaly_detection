@@ -55,12 +55,16 @@ def create_metric_plot(
     parser_2 = LogParser(log_dir=RESULTS_DIR_COLA)
     parser_2.parse_logs()
 
-    results = sorted(parser_1.results, key=lambda x: x[DICT_DATASET])
-    sorted_results = sorted(results, key=lambda x: x[DICT_DATASET])
-    datasets = [result[DICT_DATASET] for result in sorted_results]
+    results_1 = sorted(parser_1.results, key=lambda x: x[DICT_DATASET])
+    sorted_results_1 = sorted(results_1, key=lambda x: x[DICT_DATASET])
+    datasets_1 = [result[DICT_DATASET] for result in sorted_results_1]
 
-    for dataset in datasets:
-        datasets_current = [dataset]
+    results_2 = sorted(parser_2.results, key=lambda x: x[DICT_DATASET])
+    sorted_results_2 = sorted(results_2, key=lambda x: x[DICT_DATASET])
+    datasets_2 = [result[DICT_DATASET] for result in sorted_results_2]
+
+    for i, dataset_1 in enumerate(datasets_1):
+        datasets_current = [dataset_1, datasets_2[i]]
 
         for dataset in datasets_current:
             max_value = get_max_value_for_dataset_and_metric(
