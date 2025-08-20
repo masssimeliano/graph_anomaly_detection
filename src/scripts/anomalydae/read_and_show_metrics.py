@@ -50,85 +50,98 @@ FEATURE_LABELS_DICT = {
 def create_metric_plot(
     metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
-    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
-    parser.parse_logs()
+    parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
+    parser_1.parse_logs()
+    parser_2 = LogParser(log_dir=RESULTS_DIR_COLA)
+    parser_2.parse_logs()
 
-    datasets = set(result[DICT_DATASET] for result in parser.results)
+    results_1 = sorted(parser_1.results, key=lambda x: x[DICT_DATASET])
+    sorted_results_1 = sorted(results_1, key=lambda x: x[DICT_DATASET])
+    datasets_1 = [result[DICT_DATASET] for result in sorted_results_1]
 
-    for dataset in datasets:
-        max_value = get_max_value_for_dataset_and_metric(
-            dataset=dataset, parser=parser, metric_name=metric_name
-        )
-        min_value = get_min_value_for_dataset_and_metric(
-            dataset=dataset, parser=parser, metric_name=metric_name
-        )
+    results_2 = sorted(parser_2.results, key=lambda x: x[DICT_DATASET])
+    sorted_results_2 = sorted(results_2, key=lambda x: x[DICT_DATASET])
+    datasets_2 = [result[DICT_DATASET] for result in sorted_results_2]
 
-        plot.figure(figsize=(10, 6))
+    for i, dataset_1 in enumerate(datasets_1):
+        datasets_current = [dataset_1, datasets_2[i]]
 
-        for feature_label in FEATURE_LABELS:
-            filtered_feature_labels = [
-                result
-                for result in parser.results
-                if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
-            ]
-            if not filtered_feature_labels:
-                continue
-
-            value_per_epochs = defaultdict(float)
-            for result in filtered_feature_labels:
-                epoch = result[DICT_EPOCH]
-                value = result.get(metric_name, 0)
-                value_per_epochs[epoch] = value
-
-            if not value_per_epochs:
-                continue
-
-            values = [value_per_epochs[epoch] for epoch in EPOCHS]
-            plot.plot(
-                EPOCHS,
-                values,
-                marker="o",
-                label=FEATURE_LABELS_DICT[feature_label],
-                color=FEATURE_COLORS_DICT[feature_label],
+        for dataset in datasets_current:
+            max_value = get_max_value_for_dataset_and_metric(
+                dataset=dataset, parser=parser_1, metric_name=metric_name
+            )
+            min_value = get_min_value_for_dataset_and_metric(
+                dataset=dataset, parser=parser_1, metric_name=metric_name
             )
 
-        plot.title(f"AnomalyDAE - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
-        plot.xlabel(VALUE_EPOCH)
-        if y_axis_label == VALUE_TIME:
-            plot.ylabel(y_axis_label + " in s")
-        else:
-            plot.ylabel(y_axis_label)
+            plot.figure(figsize=(10, 6))
 
-        # normalizing
-        if metric_name == DICT_LOSS or metric_name == DICT_TIME:
-            plot.ylim(min_value, max_value)
-            plot.yscale("log")
+            for feature_label in FEATURE_LABELS:
+                filtered_feature_labels = [
+                    result
+                    for result in parser_1.results
+                    if result[DICT_DATASET] == dataset
+                    and result[DICT_FEATURE_LABEL] == feature_label
+                ]
+                if not filtered_feature_labels:
+                    continue
 
-        plot.grid(True)
-        plot.tight_layout()
+                value_per_epochs = defaultdict(float)
+                for result in filtered_feature_labels:
+                    epoch = result[DICT_EPOCH]
+                    value = result.get(metric_name, 0)
+                    value_per_epochs[epoch] = value
 
-        if metric_name == DICT_AUC_ROC:
-            y = 0.5
-            label = "Baseline (0.5)"
-            # if benchmark result is given
-            if baseline_dict is not None and dataset in baseline_dict:
-                y = baseline_dict[dataset]
-                label = f"Baseline ({baseline_dict[dataset]})"
-            plot.axhline(y=y, color="purple", linestyle="--", label=label)
-        plot.subplots_adjust(bottom=0.3)
-        plot.legend(
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.2),
-            ncol=2,
-            frameon=True,
-            fontsize="small",
-            borderaxespad=0.0,
-        )
+                if not value_per_epochs:
+                    continue
 
-        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png")
-        plot.savefig(save_path, dpi=300)
-        plot.show()
+                values = [value_per_epochs[epoch] for epoch in EPOCHS]
+                plot.plot(
+                    EPOCHS,
+                    values,
+                    marker="o",
+                    label=FEATURE_LABELS_DICT[feature_label],
+                    color=FEATURE_COLORS_DICT[feature_label],
+                )
+
+            plot.title(f"AnomalyDAE - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
+            plot.xlabel(VALUE_EPOCH)
+            if y_axis_label == VALUE_TIME:
+                plot.ylabel(y_axis_label + " in s")
+            else:
+                plot.ylabel(y_axis_label)
+
+            # normalizing
+            if metric_name == DICT_LOSS or metric_name == DICT_TIME:
+                plot.ylim(min_value, max_value)
+                plot.yscale("log")
+
+            plot.grid(True)
+            plot.tight_layout()
+
+            if metric_name == DICT_AUC_ROC:
+                y = 0.5
+                label = "Baseline (0.5)"
+                # if benchmark result is given
+                if baseline_dict is not None and dataset in baseline_dict:
+                    y = baseline_dict[dataset]
+                    label = f"Baseline ({baseline_dict[dataset]})"
+                plot.axhline(y=y, color="purple", linestyle="--", label=label)
+            plot.subplots_adjust(bottom=0.3)
+            plot.legend(
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.2),
+                ncol=2,
+                frameon=True,
+                fontsize="small",
+                borderaxespad=0.0,
+            )
+
+            save_path = os.path.join(
+                SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png"
+            )
+            plot.savefig(save_path, dpi=300)
+            plot.show()
 
 
 def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
