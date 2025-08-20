@@ -3,11 +3,8 @@ read_and_show_metrics.py
 This file contains script to calculate and plot all metrics from .txt result files.
 """
 
-import os
 from collections import defaultdict
 
-import numpy as np
-import seaborn as sns
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
@@ -48,7 +45,9 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+        metric_name: str, y_axis_label: str,
+        baseline_dict_1: dict[str, float] = None,
+        baseline_dict_2: dict[str, float] = None
 ):
     parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser_1.parse_logs()
@@ -56,22 +55,25 @@ def create_metric_plot(
     parser_2.parse_logs()
 
     results_1 = sorted(parser_1.results, key=lambda x: x[DICT_DATASET])
-    sorted_results_1 = sorted(results_1, key=lambda x: x[DICT_DATASET])
-    datasets_1 = [result[DICT_DATASET] for result in sorted_results_1]
+    parser_1.results = results_1
 
     results_2 = sorted(parser_2.results, key=lambda x: x[DICT_DATASET])
-    sorted_results_2 = sorted(results_2, key=lambda x: x[DICT_DATASET])
-    datasets_2 = [result[DICT_DATASET] for result in sorted_results_2]
+    parser_2.results = results_2
 
-    for i, dataset_1 in enumerate(datasets_1):
-        datasets_current = [dataset_1, datasets_2[i]]
+    datasets = [result[DICT_DATASET] for result in results_1]
+    datasets = list(set(datasets))
 
-        for dataset in datasets_current:
+    for dataset in datasets:
+        for i in range(0, 2):
+            if i == 0:
+                parser = parser_1
+            else:
+                parser = parser_2
             max_value = get_max_value_for_dataset_and_metric(
-                dataset=dataset, parser=parser_1, metric_name=metric_name
+                dataset=dataset, parser=parser, metric_name=metric_name
             )
             min_value = get_min_value_for_dataset_and_metric(
-                dataset=dataset, parser=parser_1, metric_name=metric_name
+                dataset=dataset, parser=parser, metric_name=metric_name
             )
 
             plot.figure(figsize=(10, 6))
@@ -79,9 +81,9 @@ def create_metric_plot(
             for feature_label in FEATURE_LABELS:
                 filtered_feature_labels = [
                     result
-                    for result in parser_1.results
+                    for result in parser.results
                     if result[DICT_DATASET] == dataset
-                    and result[DICT_FEATURE_LABEL] == feature_label
+                       and result[DICT_FEATURE_LABEL] == feature_label
                 ]
                 if not filtered_feature_labels:
                     continue
@@ -104,7 +106,10 @@ def create_metric_plot(
                     color=FEATURE_COLORS_DICT[feature_label],
                 )
 
-            plot.title(f"AnomalyDAE - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
+            if i == 0:
+                plot.title(f"AnomalyDAE - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
+            else:
+                plot.title(f"CoLA - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
             plot.xlabel(VALUE_EPOCH)
             if y_axis_label == VALUE_TIME:
                 plot.ylabel(y_axis_label + " in s")
@@ -123,6 +128,10 @@ def create_metric_plot(
                 y = 0.5
                 label = "Baseline (0.5)"
                 # if benchmark result is given
+                if i == 0:
+                    baseline_dict = baseline_dict_1
+                else:
+                    baseline_dict = baseline_dict_2
                 if baseline_dict is not None and dataset in baseline_dict:
                     y = baseline_dict[dataset]
                     label = f"Baseline ({baseline_dict[dataset]})"
@@ -137,62 +146,11 @@ def create_metric_plot(
                 borderaxespad=0.0,
             )
 
-            save_path = os.path.join(
-                SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png"
-            )
-            plot.savefig(save_path, dpi=300)
             plot.show()
 
 
-def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
-    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
-    parser.parse_logs()
-
-    datasets = sorted(set(result[DICT_DATASET] for result in parser.results))
-    target_epoch = 60
-
-    heatmap_data = []
-    for feature_label in FEATURE_LABELS:
-        row = []
-        for dataset in datasets:
-            filtered = [
-                result
-                for result in parser.results
-                if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
-                and result[DICT_EPOCH] == target_epoch
-            ]
-            if not filtered:
-                row.append(np.nan)
-                continue
-            value = filtered[0].get(metric_name, np.nan)
-            row.append(value)
-        heatmap_data.append(row)
-
-    fig, ax = plot.subplots(figsize=(12, 6))
-    sns.heatmap(
-        heatmap_data,
-        xticklabels=datasets,
-        yticklabels=[FEATURE_LABELS_DICT[label] for label in FEATURE_LABELS],
-        annot=True,
-        fmt=".3f",
-        cmap=cmap,
-        cbar=True,
-        linewidths=0.5,
-        ax=ax,
-    )
-
-    plot.title(f"{title} (Epoch {target_epoch})")
-    plot.tight_layout()
-    save_path = os.path.join(
-        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}.png"
-    )
-    plot.savefig(save_path, dpi=300)
-    plot.show()
-
-
 def get_max_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -201,7 +159,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -215,7 +173,7 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     min_value = get_max_value_for_dataset_and_metric(
         dataset=dataset, parser=parser, metric_name=metric_name
@@ -226,7 +184,7 @@ def get_min_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -247,7 +205,8 @@ def plot_auc_roc():
     create_metric_plot(
         metric_name=DICT_AUC_ROC,
         y_axis_label=VALUE_AUC_ROC,
-        baseline_dict=AUC_ROC_PAPER_ANOMALYDAE,
+        baseline_dict_1=AUC_ROC_PAPER_ANOMALYDAE,
+        baseline_dict_2=AUC_ROC_PAPER_COLA,
     )
 
 
@@ -269,7 +228,3 @@ if __name__ == "__main__":
     # plot_recall()
     # plot_precision()
     # plot_time()
-    # plot_heatmap(DICT_PRECISION, "Precision")
-    # plot_heatmap(DICT_RECALL, "Recall")
-    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    # plot_heatmap(DICT_TIME, "Time")
