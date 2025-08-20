@@ -48,7 +48,7 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser.parse_logs()
@@ -70,7 +70,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                   and result[DICT_FEATURE_LABEL] == feature_label
+                and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -146,8 +146,8 @@ def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                   and result[DICT_FEATURE_LABEL] == feature_label
-                   and result[DICT_EPOCH] == target_epoch
+                and result[DICT_FEATURE_LABEL] == feature_label
+                and result[DICT_EPOCH] == target_epoch
             ]
             if not filtered:
                 row.append(np.nan)
@@ -179,7 +179,7 @@ def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
 
 
 def get_max_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -188,7 +188,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -202,7 +202,7 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     min_value = get_max_value_for_dataset_and_metric(
         dataset=dataset, parser=parser, metric_name=metric_name
@@ -213,7 +213,7 @@ def get_min_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -251,11 +251,11 @@ def plot_time():
 
 
 if __name__ == "__main__":
-    plot_loss()
+    # plot_loss()
     plot_auc_roc()
-    plot_recall()
-    plot_precision()
-    plot_time()
+    # plot_recall()
+    # plot_precision()
+    # plot_time()
     # plot_heatmap(DICT_PRECISION, "Precision")
     # plot_heatmap(DICT_RECALL, "Recall")
     # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
