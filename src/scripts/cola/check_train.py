@@ -11,7 +11,8 @@ from src.scripts.anomalydae import train_structure_and_feature
 from src.scripts.cola import (
     train_structure_and_feature_3,
     train_structure_and_feature_2,
-    train_reconstruction_2,
+    train_reconstruction_2, train_baseline, train_from_emd_baseline_with_alpha_1, train_from_emd_baseline_with_alpha_2,
+    train_reconstruction_1,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -35,10 +36,10 @@ def read_all():
 
 
 def train_all():
-    # train_baseline.main()
-    # train_from_emd_baseline_with_alpha_1.main()
-    # train_from_emd_baseline_with_alpha_2.main()
-    # train_reconstruction_1.main()
+    train_baseline.main()
+    train_from_emd_baseline_with_alpha_1.main()
+    train_from_emd_baseline_with_alpha_2.main()
+    train_reconstruction_1.main()
     train_reconstruction_2.main()
     train_structure_and_feature.main()
     train_structure_and_feature_2.main()

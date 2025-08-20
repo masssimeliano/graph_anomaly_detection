@@ -32,10 +32,10 @@ ONE_CLASS_DATASETS = ["tolokers.mat"]
 
 ALL_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS + LARGE_DATASETS
 ALL_DATASETS_SIZE = (
-    [DataSetSize.SMALL] * len(SMALL_DATASETS)
-    + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
-    + [DataSetSize.LARGE] * len(LARGE_DATASETS)
+        [DataSetSize.SMALL] * len(SMALL_DATASETS)
+        + [DataSetSize.MEDIUM] * len(MEDIUM_DATASETS)
+        + [DataSetSize.LARGE] * len(LARGE_DATASETS)
 )
 
-CURRENT_DATASETS = ["book.mat"]
+CURRENT_DATASETS = ["citeseer.mat"]
 CURRENT_DATASETS_SIZE = ALL_DATASETS_SIZE

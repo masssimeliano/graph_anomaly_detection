@@ -97,26 +97,26 @@ class CoLA(DeepDetector):
     """
 
     def __init__(
-        self,
-        labels,
-        title_prefix,
-        data_set,
-        hid_dim=64,
-        num_layers=4,
-        dropout=0.0,
-        weight_decay=0.0,
-        act=torch.nn.functional.relu,
-        backbone=GCN,
-        contamination=0.1,
-        lr=4e-3,
-        epoch=100,
-        gpu=-1,
-        batch_size=0,
-        num_neigh=-1,
-        verbose=0,
-        save_emb=False,
-        compile_model=False,
-        **kwargs
+            self,
+            labels,
+            title_prefix,
+            data_set,
+            hid_dim=64,
+            num_layers=4,
+            dropout=0.0,
+            weight_decay=0.0,
+            act=torch.nn.functional.relu,
+            backbone=GCN,
+            contamination=0.1,
+            lr=4e-3,
+            epoch=100,
+            gpu=-1,
+            batch_size=0,
+            num_neigh=-1,
+            verbose=0,
+            save_emb=False,
+            compile_model=False,
+            **kwargs
     ):
         super(CoLA, self).__init__(
             hid_dim=hid_dim,
@@ -244,15 +244,15 @@ class CoLA(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                            :batch_size
-                        ].cpu()
+                                                          :batch_size
+                                                          ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
@@ -345,15 +345,15 @@ class CoLA(DeepDetector):
                 if self.save_emb:
                     if type(self.emb) is tuple:
                         self.emb[0][node_idx[:batch_size]] = self.model.emb[0][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                         self.emb[1][node_idx[:batch_size]] = self.model.emb[1][
-                            :batch_size
-                        ].cpu()
+                                                             :batch_size
+                                                             ].cpu()
                     else:
                         self.emb[node_idx[:batch_size]] = self.model.emb[
-                            :batch_size
-                        ].cpu()
+                                                          :batch_size
+                                                          ].cpu()
                 self.decision_score_[node_idx[:batch_size]] = score
 
                 optimizer.zero_grad()
