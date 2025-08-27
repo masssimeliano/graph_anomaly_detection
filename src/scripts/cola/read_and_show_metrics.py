@@ -12,13 +12,13 @@ from src.helpers.logs.log_parser import LogParser
 
 FEATURE_LABELS = [
     FEATURE_LABEL_STANDARD,
-    FEATURE_LABEL_STR,
-    FEATURE_LABEL_STR2,
-    FEATURE_LABEL_STR3,
-    FEATURE_LABEL_ERROR1,
-    FEATURE_LABEL_ERROR2,
-    FEATURE_LABEL_EMD1,
-    FEATURE_LABEL_EMD2,
+    # FEATURE_LABEL_STR,
+    # FEATURE_LABEL_STR2,
+    # FEATURE_LABEL_STR3,
+    # FEATURE_LABEL_ERROR1,
+    # FEATURE_LABEL_ERROR2,
+    # FEATURE_LABEL_EMD1,
+    # FEATURE_LABEL_EMD2,
 ]
 FEATURE_COLORS_DICT = {
     FEATURE_LABEL_STANDARD: "blue",
@@ -50,7 +50,7 @@ def create_metric_plot(
 
     datasets = set(result[DICT_DATASET] for result in parser.results)
 
-    for dataset in ["citeseer"]:
+    for dataset in datasets:
         max_value = get_max_value_for_dataset_and_metric(
             dataset=dataset, parser=parser, metric_name=metric_name
         )
