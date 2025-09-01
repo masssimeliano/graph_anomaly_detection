@@ -43,6 +43,16 @@ class LogParser:
                 with file.open() as f:
                     content = f.read()
 
+                if self.log_dir == RESULTS_DIR_ANOMALYDAE:
+                    model = "AnomalyDAE"
+                else:
+                    if self.log_dir == RESULTS_DIR_COLA:
+                        model = "CoLA"
+                    else:
+                        model = "OCGNN"
+
+                print(model)
+
                 self.results.append(
                     {
                         DICT_FILE_NAME: file.name,
@@ -56,6 +66,7 @@ class LogParser:
                         DICT_RECALL: extract_value(content.splitlines()[3]),
                         DICT_PRECISION: extract_value(content.splitlines()[4]),
                         DICT_TIME: extract_value(content.splitlines()[5]),
+                        DICT_MODEL: model,
                     }
                 )
 

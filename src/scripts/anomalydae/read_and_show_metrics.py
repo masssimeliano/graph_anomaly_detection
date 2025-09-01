@@ -49,7 +49,7 @@ FEATURE_LABELS_DICT = {
 
 
 def create_metric_plot(
-        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser.parse_logs()
@@ -74,7 +74,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                   and result[DICT_FEATURE_LABEL] == feature_label
+                and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -130,62 +130,116 @@ def create_metric_plot(
             borderaxespad=0.0,
         )
 
-        save_path = os.path.join(
-            SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png"
-        )
+        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 
 
-def plot_heatmap(metric_name: str, title: str, cmap: str = "viridis"):
-    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
-    parser.parse_logs()
+def plot_heatmap_with_models(
+    metric_name: str, title: str, models: list[str], cmap: str = "viridis"
+):
+    parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
+    parser_1.parse_logs()
+    parser_2 = LogParser(log_dir=RESULTS_DIR_COLA)
+    parser_2.parse_logs()
+    parser_3 = LogParser(log_dir=RESULTS_DIR_OCGNN)
+    parser_3.parse_logs()
 
-    datasets = sorted(set(result[DICT_DATASET] for result in parser.results))
-    target_epoch = 60
+    results = parser_1.results + parser_2.results + parser_3.results
 
-    heatmap_data = []
+    datasets = sorted(set(r[DICT_DATASET] for r in results))
+    target_epoch = 100
+
+    # собираем матрицу (строки = фичи, колонки = датасеты*модели)
+    values = []
     for feature_label in FEATURE_LABELS:
         row = []
-        for dataset in datasets:
-            filtered = [
-                result
-                for result in parser.results
-                if result[DICT_DATASET] == dataset
-                   and result[DICT_FEATURE_LABEL] == feature_label
-                   and result[DICT_EPOCH] == target_epoch
-            ]
-            if not filtered:
-                row.append(np.nan)
-                continue
-            value = filtered[0].get(metric_name, np.nan)
-            row.append(value)
-        heatmap_data.append(row)
+        for ds in datasets:
+            for model in models:
+                items = [
+                    r
+                    for r in results
+                    if r[DICT_DATASET] == ds
+                    and r.get("model") == model
+                    and r[DICT_FEATURE_LABEL] == feature_label
+                    and r[DICT_EPOCH] == target_epoch
+                ]
+                row.append(items[0].get(metric_name, np.nan) if items else np.nan)
+        values.append(row)
 
-    fig, ax = plot.subplots(figsize=(12, 6))
+    # === ТРАНСПОНИРУЕМ ===
+    values = np.array(values).T  # теперь строки = датасеты*модели, колонки = фичи
+
+    # индексы по X теперь фичи
+    x_index = [FEATURE_LABELS_DICT[l] for l in FEATURE_LABELS]
+
+    fig, ax = plot.subplots(figsize=(36, 50))
     sns.heatmap(
-        heatmap_data,
-        xticklabels=datasets,
-        yticklabels=[FEATURE_LABELS_DICT[label] for label in FEATURE_LABELS],
-        annot=True,
-        fmt=".3f",
+        values,
         cmap=cmap,
         cbar=True,
+        annot=False,
         linewidths=0.5,
+        xticklabels=x_index,
+        yticklabels=False,
         ax=ax,
     )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right", fontsize=20)
 
-    plot.title(f"{title} (Epoch {target_epoch})")
+    n_datasets = len(datasets)
+    m = len(models)
+    nrows = n_datasets * m
+
+    row_centers = np.arange(nrows) + 0.5
+
+    # --- теперь по Y делаем подписи ---
+    # крупные: датасеты
+    group_centers = np.arange(n_datasets) * m + (m / 2) + 0.5
+    ax.set_yticks(group_centers)
+    ax.set_yticklabels(datasets, rotation=0, va="center", fontsize=20)
+
+    # мелкие: модели
+    ax.set_yticks(row_centers, minor=True)
+    ax.set_yticklabels(
+        [models[j % m] for j in range(nrows)],
+        minor=True,
+        rotation=0,
+        va="center",
+        fontsize=20,
+    )
+
+    ax.tick_params(
+        axis="y",
+        which="major",
+        left=True,
+        right=False,
+        labelleft=True,
+        labelright=False,
+        pad=2,
+    )
+    ax.tick_params(
+        axis="y",
+        which="minor",
+        left=True,
+        right=False,
+        labelleft=True,
+        labelright=False,
+        pad=80,
+    )
+
+    # жирный заголовок
+    plot.title(f"{title} (Epoch {target_epoch})", fontweight="bold")
     plot.tight_layout()
+
     save_path = os.path.join(
-        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}.png"
+        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}_swapped.png"
     )
     plot.savefig(save_path, dpi=300)
     plot.show()
 
 
 def get_max_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -194,7 +248,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -208,7 +262,7 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
+    dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     min_value = get_max_value_for_dataset_and_metric(
         dataset=dataset, parser=parser, metric_name=metric_name
@@ -219,7 +273,7 @@ def get_min_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
+            and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -257,9 +311,9 @@ def plot_time():
 
 
 def make_epoch_pivot_table(
-        target_epoch: int = 100,
-        metrics: tuple[str, ...] = (DICT_AUC_ROC, DICT_RECALL, DICT_PRECISION),
-        metric_display: dict[str, str] = None,
+    target_epoch: int = 100,
+    metrics: tuple[str, ...] = (DICT_AUC_ROC, DICT_RECALL, DICT_PRECISION),
+    metric_display: dict[str, str] = None,
 ):
     if metric_display is None:
         metric_display = {
@@ -276,8 +330,7 @@ def make_epoch_pivot_table(
     metrics_disp = [metric_display[m] for m in metrics]
 
     index = pd.MultiIndex.from_product(
-        [metrics_disp, enrichments],
-        names=["metric", "enrichment"]
+        [metrics_disp, enrichments], names=["metric", "enrichment"]
     )
     df = pd.DataFrame(index=index, columns=datasets, dtype=float)
 
@@ -290,13 +343,15 @@ def make_epoch_pivot_table(
                     r.get(m, np.nan)
                     for r in parser.results
                     if r[DICT_DATASET] == d
-                       and r[DICT_FEATURE_LABEL] == f
-                       and r[DICT_EPOCH] == target_epoch
+                    and r[DICT_FEATURE_LABEL] == f
+                    and r[DICT_EPOCH] == target_epoch
                 ]
                 val = vals[-1] if vals else np.nan
                 df.loc[(m_name, f_name), d] = val
 
-    save_csv_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"pivot_metrics_epoch{target_epoch}.csv")
+    save_csv_path = os.path.join(
+        SAVE_DIR_ANOMALYDAE, f"pivot_metrics_epoch{target_epoch}.csv"
+    )
     df.to_csv(save_csv_path, index=True)
     print(f"Saved: {save_csv_path}")
     print(df.to_string())
@@ -309,7 +364,7 @@ def make_epoch_pivot_table(
         float_format="%.3f",
         caption="Метрики на 100-й эпохе (AUC-ROC, Recall, Precision)",
         label="tab:metrics_epoch100",
-        bold_rows=False
+        bold_rows=False,
     )
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(latex)
@@ -321,11 +376,12 @@ def make_epoch_pivot_table(
 if __name__ == "__main__":
     # plot_loss()
     # plot_auc_roc()
-    make_epoch_pivot_table()
+    # make_epoch_pivot_table()
     # plot_recall()
     # plot_precision()
     # plot_time()
     # plot_heatmap(DICT_PRECISION, "Precision")
     # plot_heatmap(DICT_RECALL, "Recall")
     # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
+    plot_heatmap_with_models("auc_roc", "AUC-ROC", ["AnomalyDAE", "OCGNN", "CoLA"])
     # plot_heatmap(DICT_TIME, "Time")
