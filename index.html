@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Split JSON график + статус загрузки</title>
+  <title>GAD Results Page</title>
   <style>
     :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
     body { margin: 24px; background: #fafafa; }
@@ -23,13 +23,18 @@
 </head>
 <body>
 <div class="card">
-  <h1>Split JSON: датасет + метрика + энричменты (со статусом)</h1>
-  <p class="muted">Ожидаются файлы: <code>./json_metrics/&lt;dataset&gt;_&lt;metric&gt;_&lt;enrichment&gt;.json</code>, где JSON = массив <code>{ epoch, value }</code>.</p>
+  <h1>GAD results with different enrichments</h1>
 
   <div class="toolbar">
-    <label>Путь: <input id="basePath" size="28" value="./json_metrics/"></label>
-    <label>Датасет: <input id="dataset" size="16" value="BlogCatalog"></label>
-    <label>Метрика:
+    <label>Model:
+      <select id="model">
+        <option value="anomalyedae">AnomalyDAE</option>
+        <option value="cola">CoLA</option>
+        <option value="ocgnn">OCGNN</option>
+      </select>
+    </label>
+    <label>Dataset: <input id="dataset" size="16" value="BlogCatalog"></label>
+    <label>Metric:
       <select id="metric">
         <option value="aucroc">AUC-ROC</option>
         <option value="loss">Loss</option>
@@ -37,14 +42,14 @@
         <option value="recall">Recall@k</option>
       </select>
     </label>
-    <button id="btnAll">Все</button>
-    <button id="btnNone">Снять все</button>
-    <button id="btnDraw">Построить</button>
+    <button id="btnAll">Turn on all</button>
+    <button id="btnNone">Turn off all</button>
+    <button id="btnDraw">Build</button>
   </div>
 
   <div class="grid">
     <div class="model">
-      <h3>Энричменты</h3>
+      <h3>Enrichments</h3>
       <div id="enrichments" class="cb"></div>
     </div>
   </div>
@@ -57,10 +62,9 @@
 </div>
 
 <script>
-  // Список по твоему скрину — можно менять как нужно
   const ENRICHMENTS = [
     'Attr',
-    'Attr_+_Alpha1', 'Attr_+_Alpha2',
+    'Attr_+_Str',   'Attr_+_Str2', 'Attr_+_Str3',
     'Attr_+_Emd1',   'Attr_+_Emd2',
     'Attr_+_Error1', 'Attr_+_Error2'
   ];
@@ -111,7 +115,7 @@
   async function draw() {
     clearStatus();
 
-    const base = qs('#basePath').value || './json_metrics/';
+    const base = './results/' + qs('#model').value.trim();
     const dataset = qs('#dataset').value.trim();
     const metric = qs('#metric').value;
 
@@ -119,19 +123,17 @@
       .filter(cb => cb.checked)
       .map(cb => cb.getAttribute('data-feature'));
 
-    if (!dataset) { logStatus('Не указан датасет', false); return; }
-    if (checked.length === 0) { logStatus('Не выбран ни один энричмент', false); return; }
+    if (!dataset) { logStatus('No dataset', false); return; }
+    if (checked.length === 0) { logStatus('No enrichment', false); return; }
 
-    // Загружаем серии, кодируя только имя файла
     const results = await Promise.allSettled(checked.map(async enr => {
       const filename = `${dataset}_${metric}_${enr}.json`;
-      // Важно: кодируем только имя файла, чтобы не испортить слеши в basePath
       const url = base.replace(/\/?$/, '/') + encodeURIComponent(filename);
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) {
         throw new Error(`${res.status} ${res.statusText} — ${url}`);
       }
-      const arr = await res.json(); // [{epoch, value}]
+      const arr = await res.json();
       arr.sort((a,b)=>(a.epoch??0)-(b.epoch??0));
       return { enr, arr, url };
     }));
@@ -140,15 +142,15 @@
     results.forEach((r, i) => {
       const enr = checked[i];
       if (r.status === 'fulfilled') {
-        logStatus(`Загружено: ${r.value.url}`);
+        logStatus(`Loaded: ${r.value.url}`);
         series.push(r.value);
       } else {
-        logStatus(`Не удалось: ${dataset}_${metric}_${enr}.json — ${r.reason}`, false);
+        logStatus(`Exception: ${dataset}_${metric}_${enr}.json — ${r.reason}`, false);
       }
     });
 
     if (series.length === 0) {
-      logStatus('Нечего рисовать: все загрузки упали', false);
+      logStatus('All downloads down', false);
       const c = ensureChart();
       c.data.labels = [];
       c.data.datasets = [];
@@ -173,7 +175,6 @@
     c.update();
   }
 
-  // UI
   buildEnrichmentCheckboxes();
   qs('#btnAll').addEventListener('click', ()=>{ qsa('input[type="checkbox"][data-feature]').forEach(cb=>cb.checked=true); });
   qs('#btnNone').addEventListener('click', ()=>{ qsa('input[type="checkbox"][data-feature]').forEach(cb=>cb.checked=false); });

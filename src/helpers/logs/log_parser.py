@@ -2,8 +2,9 @@
 log_parser.py
 This file generates log dictionaries from .txt result files.
 """
-
+import json
 import logging
+from collections import defaultdict
 from typing import Dict, Any, List
 
 from src.helpers.config.const import *
@@ -19,6 +20,7 @@ class LogParser:
     def __init__(self, log_dir: Path):
         self.log_dir = log_dir
         self.results: List[Dict[str, Any]] = []
+        self.output_dir = log_dir
 
     def parse_logs(self):
         logging.info("Parsing logs...")
@@ -71,3 +73,32 @@ class LogParser:
 
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
+
+
+    def export_metric_jsons(self):
+        metrics = {
+            "aucroc": DICT_AUC_ROC,
+            "loss": DICT_LOSS,
+            "precision": DICT_PRECISION,
+            "recall": DICT_RECALL,
+        }
+
+        data_map = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+
+        for r in self.results:
+            dataset = r[DICT_DATASET]
+            feature = r[DICT_FEATURE_LABEL]
+            epoch = r[DICT_EPOCH]
+            for name, key in metrics.items():
+                value = r[key]
+                data_map[dataset][feature][name].append({"epoch": epoch, "value": value})
+
+        for dataset, feat_map in data_map.items():
+            for feature, mdata in feat_map.items():
+                for metric_name, arr in mdata.items():
+                    arr.sort(key=lambda x: x["epoch"])
+                    safe_feat = feature.replace(" ", "_").replace("/", "_")
+                    out_path = self.output_dir / f"{dataset}_{metric_name}_{safe_feat}.json"
+                    with out_path.open("w", encoding="utf-8") as f:
+                        json.dump(arr, f, ensure_ascii=False, indent=2)
+                    logging.info(f"Saved {out_path}")

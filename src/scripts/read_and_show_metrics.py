@@ -62,6 +62,14 @@ def plot_recall():
     plot2()
     plot3()
 
+def plot_loss():
+    from src.scripts.anomalydae.read_and_show_metrics import plot_loss as plot1
+    from src.scripts.cola.read_and_show_metrics import plot_loss as plot2
+    from src.scripts.ocgnn.read_and_show_metrics import plot_loss as plot3
+    plot1()
+    plot2()
+    plot3()
+
 
 def plot_precision():
     from src.scripts.anomalydae.read_and_show_metrics import plot_precision as plot1
@@ -191,12 +199,10 @@ def plot_heatmap_recall():
 
 
 if __name__ == "__main__":
-    # plot_loss()
-    # plot_auc_roc()
-    # plot_recall()
-    # plot_precision()
-    # plot_time()
-    plot_heatmap_auc_roc()
-    plot_heatmap_precision()
-    plot_heatmap_recall()
+    plot_loss()
+    plot_auc_roc()
+    plot_recall()
+    plot_precision()
+    plot_time()
+
 
