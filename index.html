@@ -115,7 +115,7 @@
   async function draw() {
     clearStatus();
 
-    const base = './results/' + qs('#model').value.trim();
+    const base = './results/' + qs('#model').value.trim() + '/json';
     const dataset = qs('#dataset').value.trim();
     const metric = qs('#metric').value;
 

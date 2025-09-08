@@ -20,7 +20,7 @@ class LogParser:
     def __init__(self, log_dir: Path):
         self.log_dir = log_dir
         self.results: List[Dict[str, Any]] = []
-        self.output_dir = log_dir
+        self.output_dir = log_dir / "json"
 
     def parse_logs(self):
         logging.info("Parsing logs...")
@@ -74,6 +74,7 @@ class LogParser:
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
 
+        self.export_metric_jsons()
 
     def export_metric_jsons(self):
         metrics = {
