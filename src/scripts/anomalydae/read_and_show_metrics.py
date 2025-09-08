@@ -265,8 +265,9 @@ def make_epoch_pivot_table(
     return df
 
 if __name__ == "__main__":
-    plot_loss()
-    plot_auc_roc()
-    plot_recall()
-    plot_precision()
-    plot_time()
+    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
+    parser.parse_logs()
+    parser = LogParser(log_dir=RESULTS_DIR_COLA)
+    parser.parse_logs()
+    parser = LogParser(log_dir=RESULTS_DIR_OCGNN)
+    parser.parse_logs()

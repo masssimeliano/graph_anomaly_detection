@@ -1,0 +1,42 @@
+[
+  {
+    "epoch": 10,
+    "value": 0.1639
+  },
+  {
+    "epoch": 20,
+    "value": 0.1339
+  },
+  {
+    "epoch": 30,
+    "value": 0.12
+  },
+  {
+    "epoch": 40,
+    "value": 0.1729
+  },
+  {
+    "epoch": 50,
+    "value": 0.143
+  },
+  {
+    "epoch": 60,
+    "value": 0.155
+  },
+  {
+    "epoch": 70,
+    "value": 0.186
+  },
+  {
+    "epoch": 80,
+    "value": 0.1522
+  },
+  {
+    "epoch": 90,
+    "value": 0.1576
+  },
+  {
+    "epoch": 100,
+    "value": 0.1639
+  }
+]
