@@ -70,6 +70,11 @@
   ];
   const ENRICHMENT_LABELS = Object.fromEntries(ENRICHMENTS.map(x => [x, x]));
 
+  function colorFor(idx, alpha = 1){
+    const h = (idx * 137.508) % 360, s = 72, l = 47;
+    return alpha === 1 ? `hsl(${h}, ${s}%, ${l}%)` : `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
+  }
+
   const qs = (s, r=document)=>r.querySelector(s);
   const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
 
@@ -161,16 +166,19 @@
     const labels = [...new Set(series.flatMap(s => s.arr.map(p => p.epoch ?? 0)))].sort((a,b)=>a-b);
     const c = ensureChart();
     c.data.labels = labels;
-    c.data.datasets = series.map(s => ({
+    c.data.datasets = series.map((s, idx) => ({
       label: ENRICHMENT_LABELS[s.enr] || s.enr,
       data: labels.map(ep => {
         const p = s.arr.find(x => (x.epoch ?? 0) === ep);
         return p ? (p.value ?? null) : null;
       }),
       borderWidth: 2,
-      tension: 0.25,
+      tension: 0,          // прямые
+      // stepped: true,    // ← если хочешь «ступеньки», раскомментируй
       pointRadius: 2,
-      spanGaps: true
+      spanGaps: true,
+      borderColor: colorFor(idx, 1),
+      backgroundColor: colorFor(idx, 0.2),
     }));
     c.update();
   }
