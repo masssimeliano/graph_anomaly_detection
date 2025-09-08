@@ -22,6 +22,7 @@ Before running any experiments, make sure to extract the dataset files:
 
 1. Go to the `graph_anomaly_detection/` directory.
 2. Unzip the archive `datasets.zip` from the same directory containing the `.mat` files.
+3. Relative path to the file with datasets in the repository: [Direct link](https://github.com/masssimeliano/graph_anomaly_detection/blob/master/datasets.zip)
 
 The expected structure after extraction:
 
@@ -111,4 +112,3 @@ The following literature and resources were used or referenced during the resear
 
 5. Datasets with labeled anomalies for Graph AD.  
    https://github.com/mala-lab/Awesome-Deep-Graph-Anomaly-Detection#Datasets
-

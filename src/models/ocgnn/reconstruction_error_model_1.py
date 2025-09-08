@@ -10,6 +10,7 @@ from torch_geometric.utils import from_networkx
 from src.helpers.config.const import FEATURE_LABEL_ERROR1
 from src.helpers.config.training_config import *
 from src.helpers.time.timed import timed
+from src.models.anomalydae.reconstruction_error_model_1 import compare_anomaly_reconstruction_error
 from src.models.encoder.node_feature_autoencoder import NodeFeatureAutoencoder
 from src.models.ocgnn.base_train import base_train
 
@@ -91,40 +92,3 @@ def add_error_features(nx_graph: nx.Graph):
         nx_graph.nodes[node]["x"] = torch.cat(
             [original_node_features, node_error_features]
         )
-
-
-def compare_anomaly_reconstruction_error(nx_graph: nx.Graph, labels: List[int]):
-    logging.info("Comparing reconstruction error between normal and anomaly nodes 1...")
-
-    features = [nx_graph.nodes[node]["x"] for node in nx_graph.nodes()]
-    node_features_tensor = torch.stack(features).float()
-
-    model = NodeFeatureAutoencoder(in_dim=node_features_tensor.shape[1], hid_dim=16)
-    model.eval()
-
-    with torch.no_grad():
-        reconstructed_node_features_tensor = model(node_features_tensor)
-        node_errors = (
-            F.mse_loss(
-                input=node_features_tensor,
-                target=reconstructed_node_features_tensor,
-                reduction="none",
-            )
-            .mean(dim=1)
-            .cpu()
-            .numpy()
-        )
-
-    labels_np_array = np.array(labels)
-    errors_np_array = np.array(node_errors)
-
-    normal_errors = node_errors[labels_np_array == 0]
-    anomaly_errors = node_errors[errors_np_array == 1]
-
-    logging.info(f"Normal nodes:")
-    logging.info(f"Mean error: {normal_errors.mean():.4f}")
-    logging.info(f"Median error: {np.median(normal_errors):.4f}")
-
-    logging.info(f"Anomaly nodes:")
-    logging.info(f"Mean error: {anomaly_errors.mean():.4f}")
-    logging.info(f"Median error: {np.median(anomaly_errors):.4f}")

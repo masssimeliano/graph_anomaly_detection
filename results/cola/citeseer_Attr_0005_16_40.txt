@@ -1,0 +1,6 @@
+CoLA(epoch=40, lr=0.005, hid_dim=16)
+Epoch: 40 - AUC-ROC (Attr): 0.6081
+Loss (Attr): 0.3598
+Recall@k (Attr) for k=150: 0.0556
+Precision@k (Attr) for k=150: 0.0556
+Time: 0.6905

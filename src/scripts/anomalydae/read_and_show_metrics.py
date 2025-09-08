@@ -8,7 +8,6 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
@@ -134,110 +133,6 @@ def create_metric_plot(
         plot.savefig(save_path, dpi=300)
         plot.show()
 
-
-def plot_heatmap_with_models(
-    metric_name: str, title: str, models: list[str], cmap: str = "viridis"
-):
-    parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
-    parser_1.parse_logs()
-    parser_2 = LogParser(log_dir=RESULTS_DIR_COLA)
-    parser_2.parse_logs()
-    parser_3 = LogParser(log_dir=RESULTS_DIR_OCGNN)
-    parser_3.parse_logs()
-
-    results = parser_1.results + parser_2.results + parser_3.results
-
-    datasets = sorted(set(r[DICT_DATASET] for r in results))
-    target_epoch = 100
-
-    # собираем матрицу (строки = фичи, колонки = датасеты*модели)
-    values = []
-    for feature_label in FEATURE_LABELS:
-        row = []
-        for ds in datasets:
-            for model in models:
-                items = [
-                    r
-                    for r in results
-                    if r[DICT_DATASET] == ds
-                    and r.get("model") == model
-                    and r[DICT_FEATURE_LABEL] == feature_label
-                    and r[DICT_EPOCH] == target_epoch
-                ]
-                row.append(items[0].get(metric_name, np.nan) if items else np.nan)
-        values.append(row)
-
-    # === ТРАНСПОНИРУЕМ ===
-    values = np.array(values).T  # теперь строки = датасеты*модели, колонки = фичи
-
-    # индексы по X теперь фичи
-    x_index = [FEATURE_LABELS_DICT[l] for l in FEATURE_LABELS]
-
-    fig, ax = plot.subplots(figsize=(36, 50))
-    sns.heatmap(
-        values,
-        cmap=cmap,
-        cbar=True,
-        annot=False,
-        linewidths=0.5,
-        xticklabels=x_index,
-        yticklabels=False,
-        ax=ax,
-    )
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right", fontsize=20)
-
-    n_datasets = len(datasets)
-    m = len(models)
-    nrows = n_datasets * m
-
-    row_centers = np.arange(nrows) + 0.5
-
-    # --- теперь по Y делаем подписи ---
-    # крупные: датасеты
-    group_centers = np.arange(n_datasets) * m + (m / 2) + 0.5
-    ax.set_yticks(group_centers)
-    ax.set_yticklabels(datasets, rotation=0, va="center", fontsize=20)
-
-    # мелкие: модели
-    ax.set_yticks(row_centers, minor=True)
-    ax.set_yticklabels(
-        [models[j % m] for j in range(nrows)],
-        minor=True,
-        rotation=0,
-        va="center",
-        fontsize=20,
-    )
-
-    ax.tick_params(
-        axis="y",
-        which="major",
-        left=True,
-        right=False,
-        labelleft=True,
-        labelright=False,
-        pad=2,
-    )
-    ax.tick_params(
-        axis="y",
-        which="minor",
-        left=True,
-        right=False,
-        labelleft=True,
-        labelright=False,
-        pad=80,
-    )
-
-    # жирный заголовок
-    plot.title(f"{title} (Epoch {target_epoch})", fontweight="bold")
-    plot.tight_layout()
-
-    save_path = os.path.join(
-        SAVE_DIR_COLA, f"heatmap_{metric_name}_epoch{target_epoch}_swapped.png"
-    )
-    plot.savefig(save_path, dpi=300)
-    plot.show()
-
-
 def get_max_value_for_dataset_and_metric(
     dataset: str, parser: LogParser, metric_name: str
 ) -> float:
@@ -353,35 +248,25 @@ def make_epoch_pivot_table(
         SAVE_DIR_ANOMALYDAE, f"pivot_metrics_epoch{target_epoch}.csv"
     )
     df.to_csv(save_csv_path, index=True)
-    print(f"Saved: {save_csv_path}")
-    print(df.to_string())
 
     out_path = "pivot_metrics_epoch100.tex"
     latex = df.to_latex(
-        index=True,  # нужны строки metric → enrichment
-        multirow=True,  # многострочные ячейки для MultiIndex строк
+        index=True,
+        multirow=True,
         escape=False,
         float_format="%.3f",
-        caption="Метрики на 100-й эпохе (AUC-ROC, Recall, Precision)",
+        caption="Metrics at the 100th epoch (AUC-ROC, Recall, Precision)",
         label="tab:metrics_epoch100",
         bold_rows=False,
     )
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(latex)
-    print(f"Saved LaTeX: {out_path}")
 
     return df
 
-
 if __name__ == "__main__":
-    # plot_loss()
-    # plot_auc_roc()
-    # make_epoch_pivot_table()
-    # plot_recall()
-    # plot_precision()
-    # plot_time()
-    # plot_heatmap(DICT_PRECISION, "Precision")
-    # plot_heatmap(DICT_RECALL, "Recall")
-    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    plot_heatmap_with_models("auc_roc", "AUC-ROC", ["AnomalyDAE", "OCGNN", "CoLA"])
-    # plot_heatmap(DICT_TIME, "Time")
+    plot_loss()
+    plot_auc_roc()
+    plot_recall()
+    plot_precision()
+    plot_time()

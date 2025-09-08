@@ -246,12 +246,8 @@ def plot_time():
 
 
 if __name__ == "__main__":
-    # plot_loss()
+    plot_loss()
     plot_auc_roc()
-    # plot_recall()
-    # plot_precision()
-    # plot_time()
-    # plot_heatmap(DICT_PRECISION, "Precision")
-    # plot_heatmap(DICT_RECALL, "Recall")
-    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    # plot_heatmap(DICT_TIME, "Time")
+    plot_recall()
+    plot_precision()
+    plot_time()

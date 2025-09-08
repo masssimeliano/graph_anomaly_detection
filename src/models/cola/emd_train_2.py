@@ -11,6 +11,7 @@ from src.helpers.config.dir_config import *
 from src.helpers.config.training_config import *
 from src.helpers.loaders.emd_loader import load_emd_model_anomalydae
 from src.helpers.time.timed import timed
+from src.models.anomalydae.emd_train_2 import extract_embedding_features
 
 
 @timed
@@ -116,32 +117,3 @@ def get_message_for_write_and_log(
     )
 
     return result
-
-
-def extract_embedding_features(
-    graph: nx.Graph,
-    labels: List[int],
-    learning_rate: float,
-    hid_dim: int,
-    epoch: int,
-    dataset: str,
-):
-    logging.info("Loading embedding features to graph nodes...")
-
-    emd_model = load_emd_model_anomalydae(
-        dataset=dataset.replace(".mat", ""),
-        labels=labels,
-        feature_label=FEATURE_LABEL_ALPHA2,
-        learning_rate=learning_rate,
-        hid_dim=hid_dim,
-        epoch=epoch,
-    )
-
-    for i, node in enumerate(graph.nodes()):
-        original_node_features = graph.nodes[node]["x"]
-        embedding_node_features = emd_model[i]
-        graph.nodes[node]["x"] = (
-            torch.cat([original_node_features, embedding_node_features])
-            .detach()
-            .clone()
-        )

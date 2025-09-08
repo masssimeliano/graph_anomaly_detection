@@ -1,6 +1,3 @@
-"""AnomalyDAE: Dual autoencoder for anomaly detection
-on attributed networks"""
-
 import time
 import warnings
 
@@ -266,7 +263,7 @@ class AnomalyDAE(DeepDetector):
         return self
 
     # custom fit() method that works with same epochs value,
-    # but calculates every resulting metric only once
+    # but calculates every resulting metric only once at the end of all epochs
     def fit_emd(self, data):
         start_time = time.time()
         self.process_graph(data)
@@ -363,6 +360,7 @@ class AnomalyDAE(DeepDetector):
         self._process_decision_score()
         return self.evaluate(data)
 
+    # transforms model in the eval() mode and calculates the metrics correctly
     def evaluate(self, data):
         self.model.eval()
         with torch.no_grad():

@@ -35,6 +35,7 @@ class LogParser:
                     (f for f in FEATURE_LABELS if f in file.stem),
                     FEATURE_LABEL_STANDARD,
                 )
+
                 # e.g. string 0001 -> float 0.001
                 lr = int(parts[2]) / (10 ** (len(parts[2]) - 1))
                 hid_dim = int(parts[3])
@@ -50,8 +51,6 @@ class LogParser:
                         model = "CoLA"
                     else:
                         model = "OCGNN"
-
-                print(model)
 
                 self.results.append(
                     {

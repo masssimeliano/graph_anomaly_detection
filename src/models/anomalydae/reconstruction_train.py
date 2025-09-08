@@ -152,18 +152,6 @@ def get_reconstruction_errors(
         attribute_error_std,
     ) = model.fit_emd(di_graph)
 
-    # Проверка на NaN/Inf в ошибках
-    for name, tensor in [
-        ("structural_error_mean", structural_error_mean),
-        ("structural_error_std", structural_error_std),
-        ("attribute_error_mean", attribute_error_mean),
-        ("attribute_error_std", attribute_error_std),
-    ]:
-        if torch.isnan(tensor).any():
-            print(f"⚠️ В {name} найдены NaN")
-        if torch.isinf(tensor).any():
-            print(f"⚠️ В {name} найдены Inf")
-
     for i, node in enumerate(graph.nodes()):
         original_node_features = graph.nodes[node]["x"]
         node_error_features = torch.tensor(
@@ -176,21 +164,9 @@ def get_reconstruction_errors(
             dtype=torch.float32,
         )
 
-        # Проверка перед конкатенацией
-        if torch.isnan(node_error_features).any():
-            print(f"⚠️ Узел {i} ({node}): NaN в node_error_features")
-        if torch.isinf(node_error_features).any():
-            print(f"⚠️ Узел {i} ({node}): Inf в node_error_features")
-
         new_x = (
             torch.cat([original_node_features, node_error_features]).detach().clone()
         )
-
-        # Проверка после конкатенации
-        if torch.isnan(new_x).any():
-            print(f"⚠️ Узел {i} ({node}): NaN после конкатенации признаков")
-        if torch.isinf(new_x).any():
-            print(f"⚠️ Узел {i} ({node}): Inf после конкатенации признаков")
 
         graph.nodes[node]["x"] = new_x
 

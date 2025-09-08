@@ -35,10 +35,12 @@ def read_all():
 
 def train_all():
     import src.scripts.anomalydae.check_train as check_train_1
+    import src.scripts.cola.check_train as check_train_2
+    import src.scripts.ocgnn.check_train as check_train_3
 
     check_train_1.train_all()
-    # check_train_2.train_all()
-    # check_train_3.train_all()
+    check_train_2.train_all()
+    check_train_3.train_all()
 
 
 if __name__ == "__main__":

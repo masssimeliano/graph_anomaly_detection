@@ -6,7 +6,9 @@ This config file contains:
 
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parents[3]
+RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR_ANOMALYDAE = BASE_DIR / "results" / "anomalyedae"
 RESULTS_DIR_COLA = BASE_DIR / "results" / "cola"
 RESULTS_DIR_OCGNN = BASE_DIR / "results" / "ocgnn"

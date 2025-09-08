@@ -2,9 +2,10 @@
 read_and_show_metrics.py
 This file contains script to calculate and plot all metrics from .txt result files.
 """
+import os
 
-from collections import defaultdict
-
+import numpy as np
+import seaborn as sns
 from matplotlib import pyplot as plot
 
 from src.helpers.config.const import *
@@ -44,187 +45,158 @@ FEATURE_LABELS_DICT = {
 }
 
 
-def create_metric_plot(
-        metric_name: str, y_axis_label: str,
-        baseline_dict_1: dict[str, float] = None,
-        baseline_dict_2: dict[str, float] = None
+def plot_auc_roc():
+    from src.scripts.anomalydae.read_and_show_metrics import plot_auc_roc as plot1
+    from src.scripts.cola.read_and_show_metrics import plot_auc_roc as plot2
+    from src.scripts.ocgnn.read_and_show_metrics import plot_auc_roc as plot3
+    plot1()
+    plot2()
+    plot3()
+
+
+def plot_recall():
+    from src.scripts.anomalydae.read_and_show_metrics import plot_recall as plot1
+    from src.scripts.cola.read_and_show_metrics import plot_recall as plot2
+    from src.scripts.ocgnn.read_and_show_metrics import plot_recall as plot3
+    plot1()
+    plot2()
+    plot3()
+
+
+def plot_precision():
+    from src.scripts.anomalydae.read_and_show_metrics import plot_precision as plot1
+    from src.scripts.cola.read_and_show_metrics import plot_precision as plot2
+    from src.scripts.ocgnn.read_and_show_metrics import plot_precision as plot3
+    plot1()
+    plot2()
+    plot3()
+
+
+def plot_time():
+    from src.scripts.anomalydae.read_and_show_metrics import plot_time as plot1
+    from src.scripts.cola.read_and_show_metrics import plot_time as plot2
+    from src.scripts.ocgnn.read_and_show_metrics import plot_time as plot3
+    plot1()
+    plot2()
+    plot3()
+
+
+def plot_heatmap_with_models(
+        metric_name: str,
+        title: str,
+        models: list[str] = ["AnomalyDAE", "OCGNN", "CoLA"],
+        cmap: str = "viridis"
 ):
     parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser_1.parse_logs()
     parser_2 = LogParser(log_dir=RESULTS_DIR_COLA)
     parser_2.parse_logs()
+    parser_3 = LogParser(log_dir=RESULTS_DIR_OCGNN)
+    parser_3.parse_logs()
 
-    results_1 = sorted(parser_1.results, key=lambda x: x[DICT_DATASET])
-    parser_1.results = results_1
+    results = parser_1.results + parser_2.results + parser_3.results
 
-    results_2 = sorted(parser_2.results, key=lambda x: x[DICT_DATASET])
-    parser_2.results = results_2
+    datasets = sorted(set(r[DICT_DATASET] for r in results))
+    target_epoch = EPOCH_TO_LEARN
 
-    datasets = [result[DICT_DATASET] for result in results_1]
-    datasets = list(set(datasets))
-
-    for dataset in datasets:
-        for i in range(0, 2):
-            if i == 0:
-                parser = parser_1
-            else:
-                parser = parser_2
-            max_value = get_max_value_for_dataset_and_metric(
-                dataset=dataset, parser=parser, metric_name=metric_name
-            )
-            min_value = get_min_value_for_dataset_and_metric(
-                dataset=dataset, parser=parser, metric_name=metric_name
-            )
-
-            plot.figure(figsize=(10, 6))
-
-            for feature_label in FEATURE_LABELS:
-                filtered_feature_labels = [
-                    result
-                    for result in parser.results
-                    if result[DICT_DATASET] == dataset
-                       and result[DICT_FEATURE_LABEL] == feature_label
+    values = []
+    for feature_label in FEATURE_LABELS:
+        row = []
+        for ds in datasets:
+            for model in models:
+                items = [
+                    r
+                    for r in results
+                    if r[DICT_DATASET] == ds
+                    and r.get("model") == model
+                    and r[DICT_FEATURE_LABEL] == feature_label
+                    and r[DICT_EPOCH] == target_epoch
                 ]
-                if not filtered_feature_labels:
-                    continue
+                row.append(items[0].get(metric_name, np.nan) if items else np.nan)
+        values.append(row)
 
-                value_per_epochs = defaultdict(float)
-                for result in filtered_feature_labels:
-                    epoch = result[DICT_EPOCH]
-                    value = result.get(metric_name, 0)
-                    value_per_epochs[epoch] = value
+    values = np.array(values).T
 
-                if not value_per_epochs:
-                    continue
+    x_index = [FEATURE_LABELS_DICT[l] for l in FEATURE_LABELS]
 
-                values = [value_per_epochs[epoch] for epoch in EPOCHS]
-                plot.plot(
-                    EPOCHS,
-                    values,
-                    marker="o",
-                    label=FEATURE_LABELS_DICT[feature_label],
-                    color=FEATURE_COLORS_DICT[feature_label],
-                )
+    fig, ax = plot.subplots(figsize=(36, 50))
+    sns.heatmap(
+        values,
+        cmap=cmap,
+        cbar=True,
+        annot=False,
+        linewidths=0.5,
+        xticklabels=x_index,
+        yticklabels=False,
+        ax=ax,
+    )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right", fontsize=20)
 
-            if i == 0:
-                plot.title(f"AnomalyDAE - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
-            else:
-                plot.title(f"CoLA - {y_axis_label} vs {VALUE_EPOCH} ({dataset})")
-            plot.xlabel(VALUE_EPOCH)
-            if y_axis_label == VALUE_TIME:
-                plot.ylabel(y_axis_label + " in s")
-            else:
-                plot.ylabel(y_axis_label)
+    n_datasets = len(datasets)
+    m = len(models)
+    nrows = n_datasets * m
 
-            # normalizing
-            if metric_name == DICT_LOSS or metric_name == DICT_TIME:
-                plot.ylim(min_value, max_value)
-                plot.yscale("log")
+    row_centers = np.arange(nrows) + 0.5
 
-            plot.grid(True)
-            plot.tight_layout()
+    group_centers = np.arange(n_datasets) * m + (m / 2) + 0.5
+    ax.set_yticks(group_centers)
+    ax.set_yticklabels(datasets, rotation=0, va="center", fontsize=20)
 
-            if metric_name == DICT_AUC_ROC:
-                y = 0.5
-                label = "Baseline (0.5)"
-                # if benchmark result is given
-                if i == 0:
-                    baseline_dict = baseline_dict_1
-                else:
-                    baseline_dict = baseline_dict_2
-                if baseline_dict is not None and dataset in baseline_dict:
-                    y = baseline_dict[dataset]
-                    label = f"Baseline ({baseline_dict[dataset]})"
-                plot.axhline(y=y, color="purple", linestyle="--", label=label)
-            plot.subplots_adjust(bottom=0.3)
-            plot.legend(
-                loc="upper center",
-                bbox_to_anchor=(0.5, -0.2),
-                ncol=2,
-                frameon=True,
-                fontsize="small",
-                borderaxespad=0.0,
-            )
-
-            plot.show()
-
-
-def get_max_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
-) -> float:
-    max_value = 0
-
-    for feature_label in FEATURE_LABELS:
-        filtered_parser_result = [
-            result
-            for result in parser.results
-            if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
-        ]
-        if not filtered_parser_result:
-            continue
-
-        for result in filtered_parser_result:
-            value = result.get(metric_name, 0)
-            if value > max_value:
-                max_value = value
-
-    return max_value
-
-
-def get_min_value_for_dataset_and_metric(
-        dataset: str, parser: LogParser, metric_name: str
-) -> float:
-    min_value = get_max_value_for_dataset_and_metric(
-        dataset=dataset, parser=parser, metric_name=metric_name
+    ax.set_yticks(row_centers, minor=True)
+    ax.set_yticklabels(
+        [models[j % m] for j in range(nrows)],
+        minor=True,
+        rotation=0,
+        va="center",
+        fontsize=20,
     )
 
-    for feature_label in FEATURE_LABELS:
-        filtered_parser_result = [
-            result
-            for result in parser.results
-            if result[DICT_DATASET] == dataset
-               and result[DICT_FEATURE_LABEL] == feature_label
-        ]
-        if not filtered_parser_result:
-            continue
-
-        for result in filtered_parser_result:
-            value = result.get(metric_name, 0)
-            if value < min_value:
-                min_value = value
-
-    return min_value
-
-
-def plot_loss():
-    create_metric_plot(metric_name=DICT_LOSS, y_axis_label=VALUE_LOSS)
-
-
-def plot_auc_roc():
-    create_metric_plot(
-        metric_name=DICT_AUC_ROC,
-        y_axis_label=VALUE_AUC_ROC,
-        baseline_dict_1=AUC_ROC_PAPER_ANOMALYDAE,
-        baseline_dict_2=AUC_ROC_PAPER_COLA,
+    ax.tick_params(
+        axis="y",
+        which="major",
+        left=True,
+        right=False,
+        labelleft=True,
+        labelright=False,
+        pad=2,
+    )
+    ax.tick_params(
+        axis="y",
+        which="minor",
+        left=True,
+        right=False,
+        labelleft=True,
+        labelright=False,
+        pad=80,
     )
 
+    plot.title(f"{title} (Epoch {target_epoch})", fontweight="bold")
+    plot.tight_layout()
 
-def plot_recall():
-    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL)
+    save_path = os.path.join(
+        RESULTS_DIR, f"heatmap_{metric_name}_epoch{target_epoch}_swapped.png"
+    )
+    plot.savefig(save_path, dpi=300)
+    plot.show()
 
 
-def plot_precision():
-    create_metric_plot(metric_name=DICT_PRECISION, y_axis_label=VALUE_PRECISION)
+def plot_heatmap_auc_roc():
+    plot_heatmap_with_models(DICT_AUC_ROC, VALUE_AUC_ROC)
 
+def plot_heatmap_precision():
+    plot_heatmap_with_models(DICT_PRECISION, VALUE_PRECISION)
 
-def plot_time():
-    create_metric_plot(metric_name=DICT_TIME, y_axis_label=VALUE_TIME)
+def plot_heatmap_recall():
+    plot_heatmap_with_models(DICT_RECALL, VALUE_RECALL)
 
 
 if __name__ == "__main__":
     # plot_loss()
-    plot_auc_roc()
+    # plot_auc_roc()
     # plot_recall()
     # plot_precision()
     # plot_time()
+    plot_heatmap_auc_roc()
+    plot_heatmap_precision()
+    plot_heatmap_recall()
+

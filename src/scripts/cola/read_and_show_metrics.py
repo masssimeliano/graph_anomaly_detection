@@ -12,13 +12,13 @@ from src.helpers.logs.log_parser import LogParser
 
 FEATURE_LABELS = [
     FEATURE_LABEL_STANDARD,
-    # FEATURE_LABEL_STR,
-    # FEATURE_LABEL_STR2,
-    # FEATURE_LABEL_STR3,
-    # FEATURE_LABEL_ERROR1,
-    # FEATURE_LABEL_ERROR2,
-    # FEATURE_LABEL_EMD1,
-    # FEATURE_LABEL_EMD2,
+    FEATURE_LABEL_STR,
+    FEATURE_LABEL_STR2,
+    FEATURE_LABEL_STR3,
+    FEATURE_LABEL_ERROR1,
+    FEATURE_LABEL_ERROR2,
+    FEATURE_LABEL_EMD1,
+    FEATURE_LABEL_EMD2,
 ]
 FEATURE_COLORS_DICT = {
     FEATURE_LABEL_STANDARD: "blue",
@@ -248,12 +248,8 @@ def plot_time():
 
 
 if __name__ == "__main__":
-    # plot_loss()
+    plot_loss()
     plot_auc_roc()
-    # plot_recall()
-    # plot_precision()
-    # plot_time()
-    # plot_heatmap(DICT_PRECISION, "Precision")
-    # plot_heatmap(DICT_RECALL, "Recall")
-    # plot_heatmap(DICT_AUC_ROC, "AUC-ROC")
-    # plot_heatmap(DICT_TIME, "Time")
+    plot_recall()
+    plot_precision()
+    plot_time()
