@@ -74,8 +74,6 @@ class LogParser:
             except Exception as e:
                 logging.warning(f"Failed to parse {file.name}: {e}")
 
-        self.export_metric_jsons()
-
     def export_metric_jsons(self):
         metrics = {
             "aucroc": DICT_AUC_ROC,

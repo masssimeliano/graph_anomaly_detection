@@ -116,7 +116,7 @@ def plot_heatmap_with_models(
                     r
                     for r in results
                     if r[DICT_DATASET] == ds
-                    and r.get("model") == model
+                    and r[DICT_MODEL] == model
                     and r[DICT_FEATURE_LABEL] == feature_label
                     and r[DICT_EPOCH] == target_epoch
                 ]
