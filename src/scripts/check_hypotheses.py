@@ -479,18 +479,16 @@ def is_enrichment_1_better_then_enrichment_2_through_recall(enrichment_1, enrich
     return set(max_items.keys())
 
 
-def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc():
-    results = all_results
+def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(datasets=all_datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
 
     counts = Counter(["learned", "precomputed"])
     counts = dict(counts)
     for k, v in counts.items():
         counts[k] = 0
 
-    for dataset in all_datasets:
+    for dataset in datasets:
         for model in all_models:
-            maximum = 0
-
             result_current = [
                 result
                 for result in results
@@ -515,18 +513,16 @@ def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc():
     return set(max_items.keys())
 
 
-def is_learned_enrichment_better_than_precomputed_enrichment_through_precision():
-    results = all_results
+def is_learned_enrichment_better_than_precomputed_enrichment_through_precision(datasets=all_datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
 
     counts = Counter(["learned", "precomputed"])
     counts = dict(counts)
     for k, v in counts.items():
         counts[k] = 0
 
-    for dataset in all_datasets:
+    for dataset in datasets:
         for model in all_models:
-            maximum = -1
-
             result_current = [
                 result
                 for result in results
@@ -551,18 +547,16 @@ def is_learned_enrichment_better_than_precomputed_enrichment_through_precision()
     return set(max_items.keys())
 
 
-def is_learned_enrichment_better_than_precomputed_enrichment_through_recall():
-    results = all_results
+def is_learned_enrichment_better_than_precomputed_enrichment_through_recall(datasets=all_datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
 
     counts = Counter(["learned", "precomputed"])
     counts = dict(counts)
     for k, v in counts.items():
         counts[k] = 0
 
-    for dataset in all_datasets:
+    for dataset in datasets:
         for model in all_models:
-            maximum = -1
-
             result_current = [
                 result
                 for result in results
@@ -667,6 +661,30 @@ def is_enrichment_1_better_then_enrichment_2(enrichment_1, enrichment_2):
             return -1
 
 
+def is_learned_enrichment_better_than_precomputed_enrichment_for_group(datasets, group_name):
+    print(f"If learned enrichment is better than precomputed enrichment in {group_name}?")
+    set_1 = is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(datasets)
+    set_2 = is_learned_enrichment_better_than_precomputed_enrichment_through_recall(datasets)
+    set_3 = is_learned_enrichment_better_than_precomputed_enrichment_through_precision(datasets)
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if len(set_all) == 0:
+        print("Not yes, nor no")
+    else:
+        has_learned = any(item.startswith("learned") for item in set_all)
+        has_precomputed = any(item.startswith("precomputed") for item in set_all)
+        if has_learned and has_precomputed:
+            print("Both")
+        else:
+            if has_learned:
+                print("Yes")
+            else:
+                print("No")
+    print("\n\n")
+
+
 def is_learned_enrichment_better_than_precomputed_enrichment():
     set_1 = is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc()
     set_2 = is_learned_enrichment_better_than_precomputed_enrichment_through_recall()
@@ -721,6 +739,19 @@ def main():
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR2, FEATURE_LABEL_STANDARD) # Not given
 
     # is_learned_enrichment_better_than_precomputed_enrichment()  # Yes
+
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_SOCIAL_NETWORKS,
+    #                                                                    'social_networks')  # Yes
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_CO_PURCHASE,
+    #                                                                    'co_purchase')  # Yes
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_CITATION_NETWORKS,
+    #                                                                    'citation_networks')  # No
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_USER_SUBREDDIT,
+    #                                                                    'user_subreddit')  # Not given
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_UNDER_SAME_HASHTAG,
+    #                                                                    'under_same_hashtag')  # Yes
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_WORK_COLLABORATION,
+    #                                                                    'work_collaboration')  # Yes
 
 
 if __name__ == "__main__":
