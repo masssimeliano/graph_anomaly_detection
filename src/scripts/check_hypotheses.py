@@ -1,12 +1,14 @@
 """
-check_train.py
-This file contains script to run all given models and then plot results of their learning.
+check_hypotheses.py
+This file contains script to calculate and answer the common research questions.
 """
 
 import logging
+from collections import Counter
 
 from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
+from src.helpers.config.training_config import EPOCH_TO_LEARN
 from src.helpers.logs.log_parser import LogParser
 
 logging.basicConfig(level=logging.INFO)
@@ -15,8 +17,21 @@ DATASETS_CITATION_NETWORKS = ["cora", "citeseer"]
 DATASETS_SOCIAL_NETWORKS = ["BlogCatalog", "Flickr"]
 DATASETS_UNDER_SAME_HASHTAG = ["weibo"]
 DATASETS_WORK_COLLABORATION = ["tolokers"]
-DATASETS_CO_PURCHASE = ["Disney", "books"]
+DATASETS_CO_PURCHASE = ["Disney", "book"]
 DATASETS_USER_SUBREDDIT = ["Reddit"]
+
+PRECOMPUTED_ENRICHMENTS = [
+    FEATURE_LABEL_STR2,
+    FEATURE_LABEL_STR3,
+    FEATURE_LABEL_STR
+]
+LEARNED_ENRICHMENTS = [
+    FEATURE_LABEL_EMD1,
+    FEATURE_LABEL_EMD2,
+    FEATURE_LABEL_ERROR1,
+    FEATURE_LABEL_ERROR2
+]
+
 
 def load_all_results():
     parser_1 = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
@@ -30,211 +45,682 @@ def load_all_results():
     all_results = [
         result
         for result in all_results
-        if (result[DICT_EPOCH] == 100) and
-           (result[DICT_FEATURE_LABEL] != "Attr + Alpha1") and
-           (result[DICT_FEATURE_LABEL] != "Attr + Alpha2")
+        if (result[DICT_EPOCH] == EPOCH_TO_LEARN) and
+           (result[DICT_FEATURE_LABEL] != FEATURE_LABEL_ALPHA1) and
+           (result[DICT_FEATURE_LABEL] != FEATURE_LABEL_ALPHA2)
     ]
     all_datasets = set(result[DICT_DATASET] for result in all_results)
 
     return all_results, all_datasets
 
+
 all_results, all_datasets = load_all_results()
 all_models = ["AnomalyDAE", "CoLA", "OCGNN"]
+all_enrichments = [
+    FEATURE_LABEL_STR2,
+    FEATURE_LABEL_STR3,
+    FEATURE_LABEL_STR,
+    FEATURE_LABEL_EMD1,
+    FEATURE_LABEL_EMD2,
+    FEATURE_LABEL_ERROR1,
+    FEATURE_LABEL_ERROR2,
+    FEATURE_LABEL_STANDARD,
+]
 
-def get_results_of_some_datasets(some_datasets = all_datasets, results = all_results):
+
+def get_results_of_some_datasets(datasets, results):
     return [
         result
         for result in results
-        if result[DICT_DATASET] in some_datasets
+        if result[DICT_DATASET] in datasets
     ]
 
-def get_results_of_some_models(some_models, results = all_results):
+
+def get_results_of_some_models(models, results):
     return [
         result
         for result in results
-        if result[DICT_MODEL] in some_models
+        if result[DICT_MODEL] in models
     ]
 
-def find_best_model_in_some_results(results = all_results):
-    set_auc_roc = find_best_model_through_auc_roc_in_some_results(results)
-    set_recall = find_best_model_through_recall_in_some_results(results)
-    set_precision = find_best_model_through_precision_in_some_results(results)
 
-    intersection = set_auc_roc & set_recall & set_precision
-
-    if len(intersection) == 0:
-        print("     - Through all 3 metrics: Not found")
-        print(f"        Through AUC-ROC {set_auc_roc}")
-        print(f"        Through Precision {set_precision}")
-        print(f"        Through Recall {set_recall}")
-    else:
-        print(f"     - Through all 3 metrics: Found {intersection}")
-
-def find_best_enrichment_in_some_results(results = all_results):
-    set_auc_roc = find_best_enrichment_through_auc_roc_in_some_results(results)
-    set_recall = find_best_enrichment_through_recall_in_some_results(results)
-    set_precision = find_best_enrichment_through_precision_in_some_results(results)
-
-    intersection = set_auc_roc & set_recall & set_precision
-
-    if len(intersection) == 0:
-        print("     - Through all 3 metrics: Not found")
-        print(f"        Through AUC-ROC {set_auc_roc}")
-        print(f"        Through Precision {set_precision}")
-        print(f"        Through Recall {set_recall}")
-    else:
-        print(f"     - Through all 3 metrics: Found {intersection}")
+def get_results_of_some_enrichments(enrichments, results):
+    return [
+        result
+        for result in results
+        if result[DICT_FEATURE_LABEL] in enrichments
+    ]
 
 
-def find_best_model_through_some_metric_in_some_results(some_metric, results = all_results):
-    models = []
-    if (some_metric != DICT_AUC_ROC):
-        max = -1
-    else:
-        max = 0
+def find_enrichment_through_auc_roc_for_domain(datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
 
-    for result in results:
-        if (some_metric == DICT_AUC_ROC):
-            metric_result = abs(0.5 - result.get(some_metric))
-        else:
-            metric_result = result.get(some_metric)
-        if metric_result > max:
-            max = metric_result
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
 
-    for result in results:
-        if (some_metric == DICT_AUC_ROC):
-            metric_result = abs(0.5 - result.get(some_metric))
-        else:
-            metric_result = result.get(some_metric)
-        if metric_result == max:
-            models.append(result.get(DICT_MODEL))
+    for dataset in datasets:
+        for model in all_models:
+            max_current = 0
 
-    return set(models)
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_auc_roc = abs(0.5 - result_current[DICT_AUC_ROC])
+                if result_current_auc_roc > max_current:
+                    max_current = result_current_auc_roc
 
-def find_best_enrichment_through_some_metric_in_some_results(some_metric, results = all_results):
-    enrichments = []
-    if (some_metric != DICT_AUC_ROC):
-        max = -1
-    else:
-        max = 0
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_auc_roc = abs(0.5 - result_current[DICT_AUC_ROC])
+                if result_current_auc_roc == max_current:
+                    counts[enrichment] += 1
 
-    for result in results:
-        if (some_metric == DICT_AUC_ROC):
-            metric_result = abs(0.5 - result.get(some_metric))
-        else:
-            metric_result = result.get(some_metric)
-        if metric_result > max:
-            max = metric_result
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
 
-    for result in results:
-        if (some_metric == DICT_AUC_ROC):
-            metric_result = abs(0.5 - result.get(some_metric))
-        else:
-            metric_result = result.get(some_metric)
-        if metric_result == max:
-            enrichments.append(result.get(DICT_FEATURE_LABEL))
-
-    return set(enrichments)
-
-def find_best_model_through_precision_in_some_results(results = all_results):
-    return find_best_model_through_some_metric_in_some_results(DICT_PRECISION, results)
-
-def find_best_model_through_auc_roc_in_some_results(results = all_results):
-    return find_best_model_through_some_metric_in_some_results(DICT_AUC_ROC, results)
-
-def find_best_model_through_recall_in_some_results(results = all_results):
-    return find_best_model_through_some_metric_in_some_results(DICT_RECALL, results)
-
-def find_best_enrichment_through_precision_in_some_results(results = all_results):
-    return find_best_enrichment_through_some_metric_in_some_results(DICT_PRECISION, results)
-
-def find_best_enrichment_through_auc_roc_in_some_results(results = all_results):
-    return find_best_enrichment_through_some_metric_in_some_results(DICT_AUC_ROC, results)
-
-def find_best_enrichment_through_recall_in_some_results(results = all_results):
-    return find_best_enrichment_through_some_metric_in_some_results(DICT_RECALL, results)
-
-def find_best_model_through_for_some_datasets(datasets = all_datasets):
-    results = get_results_of_some_datasets(datasets)
-    find_best_model_in_some_results(results)
-
-def find_best_enrichment_through_for_some_datasets(datasets = all_datasets):
-    results = get_results_of_some_datasets(datasets)
-    find_best_enrichment_in_some_results(results)
+    print(f"    - By AUC-ROC: {max_items}")
+    return set(max_items.keys())
 
 
+def find_enrichment_through_precision_for_domain(datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
+
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in datasets:
+        for model in all_models:
+            max_current = -1
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_precision = result_current[DICT_PRECISION]
+                if result_current_precision > max_current:
+                    max_current = result_current_precision
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_precision = result_current[DICT_PRECISION]
+                if result_current_precision == max_current:
+                    counts[enrichment] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Precision: {max_items}")
+    return set(max_items.keys())
 
 
-def find_best_model_through_for_citation_networks():
-    print("Best for citation networks")
-    find_best_model_through_for_some_datasets(DATASETS_CITATION_NETWORKS)
+def find_enrichment_through_recall_for_domain(datasets):
+    results = get_results_of_some_datasets(datasets, all_results)
 
-def find_best_model_through_for_social_networks():
-    print("Best for social networks")
-    find_best_model_through_for_some_datasets(DATASETS_SOCIAL_NETWORKS)
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
 
-def find_best_model_through_for_under_same_hashtag():
-    print("Best for under same hashtag")
-    find_best_model_through_for_some_datasets(DATASETS_UNDER_SAME_HASHTAG)
+    for dataset in datasets:
+        for enrichment in all_enrichments:
+            max_current = -1
 
-def find_best_model_through_for_work_collaboration():
-    print("Best for under work collaboration")
-    find_best_model_through_for_some_datasets(DATASETS_WORK_COLLABORATION)
+            for model in all_models:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_recall = result_current[DICT_RECALL]
+                if result_current_recall > max_current:
+                    max_current = result_current_recall
 
-def find_best_model_through_for_co_purchase():
-    print("Best for under co purchase")
-    find_best_enrichment_through_for_some_datasets(DATASETS_CO_PURCHASE)
+            for model in all_models:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_recall = result_current[DICT_RECALL]
+                if result_current_recall == max_current:
+                    counts[enrichment] += 1
 
-def find_best_model_through_for_user_subreddit():
-    print("Best for under user subreddit")
-    find_best_model_through_for_some_datasets(DATASETS_USER_SUBREDDIT)
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
 
-def find_best_enrichment_through_for_citation_networks():
-    print("Best for citation networks")
-    find_best_enrichment_through_for_some_datasets(DATASETS_CITATION_NETWORKS)
+    print(f"    - By Recall: {max_items}")
+    return set(max_items.keys())
 
-def find_best_enrichment_through_for_social_networks():
-    print("Best for social networks")
-    find_best_enrichment_through_for_some_datasets(DATASETS_SOCIAL_NETWORKS)
 
-def find_best_enrichment_through_for_under_same_hashtag():
-    print("Best for under same hashtag")
-    find_best_enrichment_through_for_some_datasets(DATASETS_UNDER_SAME_HASHTAG)
+def find_enrichment_through_auc_roc_for_model(model):
+    results = get_results_of_some_models([model], all_results)
 
-def find_best_enrichment_through_for_work_collaboration():
-    print("Best for under work collaboration")
-    find_best_enrichment_through_for_some_datasets(DATASETS_WORK_COLLABORATION)
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
 
-def find_best_enrichment_through_for_co_purchase():
-    print("Best for under co purchase")
-    find_best_enrichment_through_for_some_datasets(DATASETS_CO_PURCHASE)
+    for dataset in all_datasets:
+        max_current = 0
 
-def find_best_enrichment_through_for_user_subreddit():
-    print("Best for under user subreddit")
-    find_best_enrichment_through_for_some_datasets(DATASETS_USER_SUBREDDIT)
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = abs(0.5 - result_current[DICT_AUC_ROC])
+            if result_current_auc_roc > max_current:
+                max_current = result_current_auc_roc
 
-def find_best_models_for_domains():
-    find_best_model_through_for_co_purchase()
-    find_best_model_through_for_under_same_hashtag()
-    find_best_model_through_for_citation_networks()
-    find_best_model_through_for_social_networks()
-    find_best_model_through_for_work_collaboration()
-    find_best_model_through_for_user_subreddit()
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = abs(0.5 - result_current[DICT_AUC_ROC])
+            if result_current_auc_roc == max_current:
+                counts[enrichment] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By AUC-ROC: {max_items}")
+    return set(max_items.keys())
+
+
+def find_enrichment_through_precision_for_model(model):
+    results = get_results_of_some_models([model], all_results)
+
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        max_current = -1
+
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = result_current[DICT_PRECISION]
+            if result_current_auc_roc > max_current:
+                max_current = result_current_auc_roc
+
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = result_current[DICT_PRECISION]
+            if result_current_auc_roc == max_current:
+                counts[enrichment] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Precision: {max_items}")
+    return set(max_items.keys())
+
+
+def find_enrichment_through_recall_for_model(model):
+    results = get_results_of_some_models([model], all_results)
+
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        max_current = -1
+
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = result_current[DICT_RECALL]
+            if result_current_auc_roc > max_current:
+                max_current = result_current_auc_roc
+
+        for enrichment in all_enrichments:
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment)
+            ][0]
+            result_current_auc_roc = result_current[DICT_RECALL]
+            if result_current_auc_roc == max_current:
+                counts[enrichment] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Recall: {max_items}")
+    return set(max_items.keys())
+
+
+def is_enrichment_1_better_then_enrichment_2_through_auc_roc(enrichment_1, enrichment_2):
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], all_results)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = abs(0.5 - result_current_1[DICT_RECALL])
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = abs(0.5 - result_current_2[DICT_RECALL])
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By AUC-ROC: {max_items}")
+    return set(max_items.keys())
+
+
+def is_enrichment_1_better_then_enrichment_2_through_precision(enrichment_1, enrichment_2):
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], all_results)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = result_current_1[DICT_PRECISION]
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = result_current_2[DICT_PRECISION]
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Precision: {max_items}")
+    return set(max_items.keys())
+
+
+def is_enrichment_1_better_then_enrichment_2_through_recall(enrichment_1, enrichment_2):
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], all_results)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = result_current_1[DICT_RECALL]
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = result_current_2[DICT_RECALL]
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Recall: {max_items}")
+    return set(max_items.keys())
+
+
+def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc():
+    results = all_results
+
+    counts = Counter(["learned", "precomputed"])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            maximum = 0
+
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model)]
+            result_current_auc_roc = [
+                abs(0.5 - result[DICT_AUC_ROC])
+                for result in result_current]
+
+            maximum = max(result_current_auc_roc)
+            for result in result_current:
+                if abs(0.5 - result[DICT_AUC_ROC]) == maximum:
+                    if result[DICT_FEATURE_LABEL] in LEARNED_ENRICHMENTS:
+                        counts["learned"] += 1
+                    if result[DICT_FEATURE_LABEL] in PRECOMPUTED_ENRICHMENTS:
+                        counts["precomputed"] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By AUC-ROC: {max_items}")
+    return set(max_items.keys())
+
+
+def is_learned_enrichment_better_than_precomputed_enrichment_through_precision():
+    results = all_results
+
+    counts = Counter(["learned", "precomputed"])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            maximum = -1
+
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model)]
+            result_current_auc_roc = [
+                result[DICT_PRECISION]
+                for result in result_current]
+
+            maximum = max(result_current_auc_roc)
+            for result in result_current:
+                if result[DICT_PRECISION] == maximum:
+                    if result[DICT_FEATURE_LABEL] in LEARNED_ENRICHMENTS:
+                        counts["learned"] += 1
+                    if result[DICT_FEATURE_LABEL] in PRECOMPUTED_ENRICHMENTS:
+                        counts["precomputed"] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Precision: {max_items}")
+    return set(max_items.keys())
+
+
+def is_learned_enrichment_better_than_precomputed_enrichment_through_recall():
+    results = all_results
+
+    counts = Counter(["learned", "precomputed"])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in all_datasets:
+        for model in all_models:
+            maximum = -1
+
+            result_current = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model)]
+            result_current_auc_roc = [
+                result[DICT_RECALL]
+                for result in result_current]
+
+            maximum = max(result_current_auc_roc)
+            for result in result_current:
+                if result[DICT_RECALL] == maximum:
+                    if result[DICT_FEATURE_LABEL] in LEARNED_ENRICHMENTS:
+                        counts["learned"] += 1
+                    if result[DICT_FEATURE_LABEL] in PRECOMPUTED_ENRICHMENTS:
+                        counts["precomputed"] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Recall: {max_items}")
+    return set(max_items.keys())
+
+
+def find_best_enrichment_for_domain(datasets, domain_name):
+    print("Best enrichment for " + domain_name + ":")
+    set_1 = find_enrichment_through_auc_roc_for_domain(datasets)
+    has_error_1 = any(item.startswith("Attr + Error") for item in set_1)
+    has_emd_1 = any(item.startswith("Attr + Emd") for item in set_1)
+    has_str_1 = any(item.startswith("Attr + Str") for item in set_1)
+    set_2 = find_enrichment_through_precision_for_domain(datasets)
+    has_error_2 = any(item.startswith("Attr + Error") for item in set_2)
+    has_emd_2 = any(item.startswith("Attr + Emd") for item in set_2)
+    has_str_2 = any(item.startswith("Attr + Str") for item in set_2)
+    set_3 = find_enrichment_through_recall_for_domain(datasets)
+    has_error_3 = any(item.startswith("Attr + Error") for item in set_3)
+    has_emd_3 = any(item.startswith("Attr + Emd") for item in set_3)
+    has_str_3 = any(item.startswith("Attr + Str") for item in set_3)
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if len(set_all) == 0:
+        if has_error_1 and has_error_2 and has_error_3:
+            print("Additional result: Error")
+        if has_str_1 and has_str_2 and has_str_3:
+            print("Additional result: Str")
+        if has_emd_1 and has_emd_2 and has_emd_3:
+            print("Additional result: Emd")
     print("\n\n")
 
-def find_best_enrichments_for_domains():
-    find_best_enrichment_through_for_co_purchase()
-    find_best_enrichment_through_for_under_same_hashtag()
-    find_best_enrichment_through_for_citation_networks()
-    find_best_enrichment_through_for_social_networks()
-    find_best_enrichment_through_for_work_collaboration()
-    find_best_enrichment_through_for_user_subreddit()
+
+def find_best_enrichment_for_model(model):
+    print("Best enrichment for " + model + ":")
+    set_1 = find_enrichment_through_auc_roc_for_model(model)
+    has_error_1 = any(item.startswith("Attr + Error") for item in set_1)
+    has_emd_1 = any(item.startswith("Attr + Emd") for item in set_1)
+    has_str_1 = any(item.startswith("Attr + Str") for item in set_1)
+    set_2 = find_enrichment_through_precision_for_model(model)
+    has_error_2 = any(item.startswith("Attr + Error") for item in set_2)
+    has_emd_2 = any(item.startswith("Attr + Emd") for item in set_2)
+    has_str_2 = any(item.startswith("Attr + Str") for item in set_2)
+    set_3 = find_enrichment_through_recall_for_model(model)
+    has_error_3 = any(item.startswith("Attr + Error") for item in set_3)
+    has_emd_3 = any(item.startswith("Attr + Emd") for item in set_3)
+    has_str_3 = any(item.startswith("Attr + Str") for item in set_3)
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if len(set_all) == 0:
+        if has_error_1 and has_error_2 and has_error_3:
+            print("Additional result: Error")
+        if has_str_1 and has_str_2 and has_str_3:
+            print("Additional result: Str")
+        if has_emd_1 and has_emd_2 and has_emd_3:
+            print("Additional result: Emd")
     print("\n\n")
 
+
+def is_enrichment_1_better_then_enrichment_2(enrichment_1, enrichment_2):
+    print(f"If enrichment {enrichment_1} is better than enrichment {enrichment_2}?")
+    set_1 = is_enrichment_1_better_then_enrichment_2_through_auc_roc(enrichment_1, enrichment_2)
+    set_2 = is_enrichment_1_better_then_enrichment_2_through_recall(enrichment_1, enrichment_2)
+    set_3 = is_enrichment_1_better_then_enrichment_2_through_precision(enrichment_1, enrichment_2)
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if (len(set_all) == 2) or (len(set_all) == 0):
+        print("Not yes, nor no")
+        print("\n\n")
+        return 0
+    else:
+        if (len(set_all) == 1) and (len(set_all & set([enrichment_1])) == 1):
+            print("Yes")
+            print("\n\n")
+            return 1
+        else:
+            print("No")
+            print("\n\n")
+            return -1
+
+
+def is_learned_enrichment_better_than_precomputed_enrichment():
+    set_1 = is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc()
+    set_2 = is_learned_enrichment_better_than_precomputed_enrichment_through_recall()
+    set_3 = is_learned_enrichment_better_than_precomputed_enrichment_through_precision()
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if len(set_all) == 0:
+        print("Not yes, nor no")
+    else:
+        has_learned = any(item.startswith("learned") for item in set_all)
+        has_precomputed = any(item.startswith("precomputed") for item in set_all)
+        if has_learned and has_precomputed:
+            print("Both")
+        else:
+            if has_learned:
+                print("Yes")
+            else:
+                print("No")
+    print("\n\n")
 
 
 def main():
-    find_best_enrichments_for_domains()
+    print("Checking")
+
+    # find_best_enrichment_for_domain(DATASETS_SOCIAL_NETWORKS, 'social_networks') # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_domain(DATASETS_CO_PURCHASE, 'co_purchase') # Not given
+    # find_best_enrichment_for_domain(DATASETS_CITATION_NETWORKS, 'citation_networks') # Additional result: Str
+    # find_best_enrichment_for_domain(DATASETS_USER_SUBREDDIT, 'user_subreddit') # Not given
+    # find_best_enrichment_for_domain(DATASETS_UNDER_SAME_HASHTAG, 'under_same_hashtag') # Result: {'Attr + Str', 'Attr + Emd2'}
+    # find_best_enrichment_for_domain(DATASETS_WORK_COLLABORATION, 'work_collaboration') # Result: {'Attr + Emd2'}
+
+    # find_best_enrichment_for_model("AnomalyDAE") # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_model("CoLA") # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_model("OCGNN") # Result: {'Attr + Str'}
+
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STR2) # Not given
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STR3) # Yes
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR2, FEATURE_LABEL_STR3) # Not given
+
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR1, FEATURE_LABEL_ERROR2) # Not given
+
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD1, FEATURE_LABEL_EMD2)  # Not given
+
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STANDARD) # Not given
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD) # Not given
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD) # Not given
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD1, FEATURE_LABEL_STANDARD) # Yes
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD2, FEATURE_LABEL_STANDARD) # Yes
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR1, FEATURE_LABEL_STANDARD) # Not given
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR2, FEATURE_LABEL_STANDARD) # Not given
+
+    # is_learned_enrichment_better_than_precomputed_enrichment()  # Yes
 
 
 if __name__ == "__main__":
