@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Functional Interface for PyGOD"""
-# Author: Kay Liu <zliu234@uic.edu>, Yingtong Dou <ytongdou@gmail.com>
-# License: BSD 2 clause
-
 import math
 
 import torch
@@ -10,12 +5,13 @@ import torch.nn.functional as F
 from scipy.linalg import sqrtm
 
 
+# adjusted loss function of AnomalyDAE
 def double_recon_loss(
-    x, x_, s, s_, weight=0.5, pos_weight_a=0.5, pos_weight_s=0.5, bce_s=False
+        x, x_, s, s_, weight=0.5, pos_weight_a=0.5, pos_weight_s=0.5, bce_s=False
 ):
     assert 0 <= weight <= 1, "weight must be a float between 0 and 1."
     assert (
-        0 <= pos_weight_a <= 1 and 0 <= pos_weight_s <= 1
+            0 <= pos_weight_a <= 1 and 0 <= pos_weight_s <= 1
     ), "positive weight must be a float between 0 and 1."
 
     # attribute reconstruction loss
@@ -76,13 +72,13 @@ def KL_neighbor_loss(predictions, targets, mask_len, device):
     cov_x2 = cov_x2 + eye
 
     KL_loss = 0.5 * (
-        math.log(torch.det(cov_x1) / torch.det(cov_x2))
-        - h_dim
-        + torch.trace(torch.inverse(cov_x2).matmul(cov_x1))
-        + (mean_x2 - mean_x1)
-        .reshape(1, -1)
-        .matmul(torch.inverse(cov_x2))
-        .matmul(mean_x2 - mean_x1)
+            math.log(torch.det(cov_x1) / torch.det(cov_x2))
+            - h_dim
+            + torch.trace(torch.inverse(cov_x2).matmul(cov_x1))
+            + (mean_x2 - mean_x1)
+            .reshape(1, -1)
+            .matmul(torch.inverse(cov_x2))
+            .matmul(mean_x2 - mean_x1)
     )
     KL_loss = KL_loss.to(device)
     return KL_loss
