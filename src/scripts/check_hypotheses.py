@@ -20,6 +20,10 @@ DATASETS_WORK_COLLABORATION = ["tolokers"]
 DATASETS_CO_PURCHASE = ["Disney", "book"]
 DATASETS_USER_SUBREDDIT = ["Reddit"]
 
+ONLY_ATTR_ANOMALY_DATASETS = ["tolokers"]
+STR_OR_ATTR_ANOMALY_DATASET = ["BlogCatalog", "citeseer", "cora", "Flickr"]
+STR_AND_ATTR_ANOMALY_DATASETS = ["Disney", "book", "computers", "cs", "photo", "weibo", "Reddit"]
+
 PRECOMPUTED_ENRICHMENTS = [
     FEATURE_LABEL_STR2,
     FEATURE_LABEL_STR3,
@@ -718,6 +722,13 @@ def main():
     # find_best_enrichment_for_domain(DATASETS_UNDER_SAME_HASHTAG, 'under_same_hashtag') # Result: {'Attr + Str', 'Attr + Emd2'}
     # find_best_enrichment_for_domain(DATASETS_WORK_COLLABORATION, 'work_collaboration') # Result: {'Attr + Emd2'}
 
+    # find_best_enrichment_for_domain(ONLY_ATTR_ANOMALY_DATASETS,
+    # 'ONLY_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Emd2'}
+    # find_best_enrichment_for_domain(STR_OR_ATTR_ANOMALY_DATASET,
+    # 'STR_OR_ATTR_ANOMALY_DATASET')  # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_domain(STR_AND_ATTR_ANOMALY_DATASETS,
+    # 'STR_AND_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
+
     # find_best_enrichment_for_model("AnomalyDAE") # Result: {'Attr + Error2'}
     # find_best_enrichment_for_model("CoLA") # Result: {'Attr + Error2'}
     # find_best_enrichment_for_model("OCGNN") # Result: {'Attr + Str'}
@@ -752,6 +763,13 @@ def main():
     #                                                                    'under_same_hashtag')  # Yes
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_WORK_COLLABORATION,
     #                                                                    'work_collaboration')  # Yes
+
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(ONLY_ATTR_ANOMALY_DATASETS,
+    #                                                                    'ONLY_ATTR_ANOMALY_DATASETS')  # Yes
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(STR_OR_ATTR_ANOMALY_DATASET,
+    #                                                                    'STR_OR_ATTR_ANOMALY_DATASET')  # Yes
+    # is_learned_enrichment_better_than_precomputed_enrichment_for_group(STR_AND_ATTR_ANOMALY_DATASETS,
+    #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Yes
 
 
 if __name__ == "__main__":
