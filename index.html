@@ -1,206 +1,300 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>GAD Results Page</title>
-  <style>
-    :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-    body { margin: 24px; background: #fafafa; }
-    .card { max-width: 1100px; margin: 0 auto; background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 6px 18px rgba(0,0,0,.05); }
-    .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .toolbar label { display:flex; gap:6px; align-items:center; }
-    input, select, button { padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
-    .grid { display:grid; gap:10px; grid-template-columns: repeat(3, minmax(220px, 1fr)); margin-top:10px; }
-    .model { border:1px solid #e5e7eb; border-radius:14px; padding:10px; }
-    .cb { display:grid; grid-template-columns: repeat(2, 1fr); gap:6px 10px; }
-    label.cb-item { display:inline-flex; align-items:center; gap:8px; padding:6px 8px; border:1px solid #e5e7eb; border-radius:999px; cursor:pointer; font-size:13px; }
-    .muted { color:#6b7280; font-size:14px; }
-    #status { margin-top:12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:10px; max-height:240px; overflow:auto; white-space:pre-wrap; }
-    .ok { color:#065f46; } .err { color:#7f1d1d; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>GAD Results Page</title>
+    <style>
+        :root {
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        }
+
+        body {
+            margin: 24px;
+            background: #fafafa;
+        }
+
+        .card {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .05);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar label {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        input, select, button {
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(3, minmax(220px, 1fr));
+            margin-top: 10px;
+        }
+
+        .model {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 10px;
+        }
+
+        .cb {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px 10px;
+        }
+
+        label.cb-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        #status {
+            margin-top: 12px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px;
+            max-height: 240px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+
+        .ok {
+            color: #065f46;
+        }
+
+        .err {
+            color: #7f1d1d;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="card">
-  <h1>GAD results with different enrichments</h1>
+    <h1>GAD results with different enrichments</h1>
 
-  <div class="toolbar">
-    <label>Model:
-      <select id="model">
-        <option value="anomalyedae">AnomalyDAE</option>
-        <option value="cola">CoLA</option>
-        <option value="ocgnn">OCGNN</option>
-      </select>
-    </label>
-    <label>Metric:
-      <select id="dataset">
-        <option value="Disney">Disney</option>
-        <option value="book">book</option>
-        <option value="BlogCatalog">BlogCatalog</option>
-        <option value="citeseer">citeseer</option>
-        <option value="computers">computers</option>
-        <option value="cora">cora</option>
-        <option value="cs">cs</option>
-        <option value="photo">photo</option>
-        <option value="weibo">weibo</option>
-        <option value="Flickr">Flickr</option>
-        <option value="Reddit">Reddit</option>
-        <option value="tolokers">tolokers</option>
-      </select>
-    </label>
-    <label>Metric:
-      <select id="metric">
-        <option value="aucroc">AUC-ROC</option>
-        <option value="loss">Loss</option>
-        <option value="precision">Precision@k</option>
-        <option value="recall">Recall@k</option>
-      </select>
-    </label>
-    <button id="btnAll">Turn on all</button>
-    <button id="btnNone">Turn off all</button>
-    <button id="btnDraw">Build</button>
-  </div>
-
-  <div class="grid">
-    <div class="model">
-      <h3>Enrichments</h3>
-      <div id="enrichments" class="cb"></div>
+    <div class="toolbar">
+        <label>Model:
+            <select id="model">
+                <option value="anomalyedae">AnomalyDAE</option>
+                <option value="cola">CoLA</option>
+                <option value="ocgnn">OCGNN</option>
+            </select>
+        </label>
+        <label>Dataset:
+            <select id="dataset">
+                <option value="Disney">Disney</option>
+                <option value="book">book</option>
+                <option value="BlogCatalog">BlogCatalog</option>
+                <option value="citeseer">citeseer</option>
+                <option value="computers">computers</option>
+                <option value="cora">cora</option>
+                <option value="cs">cs</option>
+                <option value="photo">photo</option>
+                <option value="weibo">weibo</option>
+                <option value="Flickr">Flickr</option>
+                <option value="Reddit">Reddit</option>
+                <option value="tolokers">tolokers</option>
+            </select>
+        </label>
+        <label>Metric:
+            <select id="metric">
+                <option value="aucroc">AUC-ROC</option>
+                <option value="loss">Loss</option>
+                <option value="precision">Precision@k</option>
+                <option value="recall">Recall@k</option>
+            </select>
+        </label>
+        <button id="btnAll">Turn on all</button>
+        <button id="btnNone">Turn off all</button>
+        <button id="btnDraw">Build</button>
     </div>
-  </div>
 
-  <div style="margin-top:14px;">
-    <canvas id="chart" height="140"></canvas>
-  </div>
+    <div class="grid">
+        <div class="model">
+            <h3>Enrichments</h3>
+            <div id="enrichments" class="cb"></div>
+        </div>
+    </div>
 
-  <div id="status" aria-live="polite"></div>
+    <div style="margin-top:14px;">
+        <canvas id="chart" height="140"></canvas>
+    </div>
+
+    <div id="status" aria-live="polite"></div>
 </div>
 
 <script>
-  const ENRICHMENTS = [
-    'Attr',
-    'Attr_+_Str',   'Attr_+_Str2', 'Attr_+_Str3',
-    'Attr_+_Emd1',   'Attr_+_Emd2',
-    'Attr_+_Error1', 'Attr_+_Error2'
-  ];
-  const ENRICHMENT_LABELS = Object.fromEntries(ENRICHMENTS.map(x => [x, x]));
+    const ENRICHMENTS = [
+        'Attr',
+        'Attr_+_Str', 'Attr_+_Str2', 'Attr_+_Str3',
+        'Attr_+_Emd1', 'Attr_+_Emd2',
+        'Attr_+_Error1', 'Attr_+_Error2'
+    ];
+    const ENRICHMENT_LABELS = Object.fromEntries(ENRICHMENTS.map(x => [x, x]));
 
-  function colorFor(idx, alpha = 1){
-    const h = (idx * 137.508) % 360, s = 72, l = 47;
-    return alpha === 1 ? `hsl(${h}, ${s}%, ${l}%)` : `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
-  }
-
-  const qs = (s, r=document)=>r.querySelector(s);
-  const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
-
-  let chart;
-
-  function ensureChart() {
-    const ctx = qs('#chart');
-    if (chart) return chart;
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: { labels: [], datasets: [] },
-      options: {
-        responsive: true,
-        interaction: { mode: 'nearest', intersect: false },
-        animation: false,
-        plugins: { legend: { display: true }, tooltip: { enabled: true } },
-        scales: { x: { title: { display: true, text: 'Epoch' } }, y: { beginAtZero: false } }
-      }
-    });
-    return chart;
-  }
-
-  function buildEnrichmentCheckboxes() {
-    const box = qs('#enrichments');
-    box.innerHTML = '';
-    ENRICHMENTS.forEach(eKey => {
-      const id = `enr-${eKey}`;
-      const label = document.createElement('label');
-      label.className = 'cb-item';
-      label.innerHTML = `<input type="checkbox" id="${id}" data-feature="${eKey}" checked> ${ENRICHMENT_LABELS[eKey] || eKey}`;
-      box.appendChild(label);
-    });
-  }
-
-  function logStatus(msg, ok=true) {
-    const line = document.createElement('div');
-    line.className = ok ? 'ok' : 'err';
-    line.textContent = (ok ? 'OK  ' : 'ERR ') + msg;
-    qs('#status').appendChild(line);
-  }
-  function clearStatus() { qs('#status').innerHTML = ''; }
-
-  async function draw() {
-    clearStatus();
-
-    const base = './results/' + qs('#model').value.trim() + '/json';
-    const dataset = qs('#dataset').value.trim();
-    const metric = qs('#metric').value;
-
-    const checked = qsa('input[type="checkbox"][data-feature]')
-      .filter(cb => cb.checked)
-      .map(cb => cb.getAttribute('data-feature'));
-
-    if (!dataset) { logStatus('No dataset', false); return; }
-    if (checked.length === 0) { logStatus('No enrichment', false); return; }
-
-    const results = await Promise.allSettled(checked.map(async enr => {
-      const filename = `${dataset}_${metric}_${enr}.json`;
-      const url = base.replace(/\/?$/, '/') + encodeURIComponent(filename);
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`${res.status} ${res.statusText} — ${url}`);
-      }
-      const arr = await res.json();
-      arr.sort((a,b)=>(a.epoch??0)-(b.epoch??0));
-      return { enr, arr, url };
-    }));
-
-    const series = [];
-    results.forEach((r, i) => {
-      const enr = checked[i];
-      if (r.status === 'fulfilled') {
-        logStatus(`Loaded: ${r.value.url}`);
-        series.push(r.value);
-      } else {
-        logStatus(`Exception: ${dataset}_${metric}_${enr}.json — ${r.reason}`, false);
-      }
-    });
-
-    if (series.length === 0) {
-      logStatus('All downloads down', false);
-      const c = ensureChart();
-      c.data.labels = [];
-      c.data.datasets = [];
-      c.update();
-      return;
+    function colorFor(idx, alpha = 1) {
+        const h = (idx * 137.508) % 360, s = 72, l = 47;
+        return alpha === 1 ? `hsl(${h}, ${s}%, ${l}%)` : `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
     }
 
-    const labels = [...new Set(series.flatMap(s => s.arr.map(p => p.epoch ?? 0)))].sort((a,b)=>a-b);
-    const c = ensureChart();
-    c.data.labels = labels;
-    c.data.datasets = series.map((s, idx) => ({
-      label: ENRICHMENT_LABELS[s.enr] || s.enr,
-      data: labels.map(ep => {
-        const p = s.arr.find(x => (x.epoch ?? 0) === ep);
-        return p ? (p.value ?? null) : null;
-      }),
-      borderWidth: 2,
-      tension: 0,
-      pointRadius: 2,
-      spanGaps: true,
-      borderColor: colorFor(idx, 1),
-      backgroundColor: colorFor(idx, 0.2),
-    }));
-    c.update();
-  }
+    const qs = (s, r = document) => r.querySelector(s);
+    const qsa = (s, r = document) => [...r.querySelectorAll(s)];
 
-  buildEnrichmentCheckboxes();
-  qs('#btnAll').addEventListener('click', ()=>{ qsa('input[type="checkbox"][data-feature]').forEach(cb=>cb.checked=true); });
-  qs('#btnNone').addEventListener('click', ()=>{ qsa('input[type="checkbox"][data-feature]').forEach(cb=>cb.checked=false); });
-  qs('#btnDraw').addEventListener('click', draw);
+    let chart;
+
+    function ensureChart() {
+        const ctx = qs('#chart');
+        if (chart) return chart;
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {labels: [], datasets: []},
+            options: {
+                responsive: true,
+                interaction: {mode: 'nearest', intersect: false},
+                animation: false,
+                plugins: {legend: {display: true}, tooltip: {enabled: true}},
+                scales: {x: {title: {display: true, text: 'Epoch'}}, y: {beginAtZero: false}}
+            }
+        });
+        return chart;
+    }
+
+    function buildEnrichmentCheckboxes() {
+        const box = qs('#enrichments');
+        box.innerHTML = '';
+        ENRICHMENTS.forEach(eKey => {
+            const id = `enr-${eKey}`;
+            const label = document.createElement('label');
+            label.className = 'cb-item';
+            label.innerHTML = `<input type="checkbox" id="${id}" data-feature="${eKey}" checked> ${ENRICHMENT_LABELS[eKey] || eKey}`;
+            box.appendChild(label);
+        });
+    }
+
+    function logStatus(msg, ok = true) {
+        const line = document.createElement('div');
+        line.className = ok ? 'ok' : 'err';
+        line.textContent = (ok ? 'OK  ' : 'ERR ') + msg;
+        qs('#status').appendChild(line);
+    }
+
+    function clearStatus() {
+        qs('#status').innerHTML = '';
+    }
+
+    async function draw() {
+        clearStatus();
+
+        const base = './results/' + qs('#model').value.trim() + '/json';
+        const dataset = qs('#dataset').value.trim();
+        const metric = qs('#metric').value;
+
+        const checked = qsa('input[type="checkbox"][data-feature]')
+            .filter(cb => cb.checked)
+            .map(cb => cb.getAttribute('data-feature'));
+
+        if (!dataset) {
+            logStatus('No dataset', false);
+            return;
+        }
+        if (checked.length === 0) {
+            logStatus('No enrichment', false);
+            return;
+        }
+
+        const results = await Promise.allSettled(checked.map(async enr => {
+            const filename = `${dataset}_${metric}_${enr}.json`;
+            const url = base.replace(/\/?$/, '/') + encodeURIComponent(filename);
+            const res = await fetch(url, {cache: 'no-store'});
+            if (!res.ok) {
+                throw new Error(`${res.status} ${res.statusText} — ${url}`);
+            }
+            const arr = await res.json();
+            arr.sort((a, b) => (a.epoch ?? 0) - (b.epoch ?? 0));
+            return {enr, arr, url};
+        }));
+
+        const series = [];
+        results.forEach((r, i) => {
+            const enr = checked[i];
+            if (r.status === 'fulfilled') {
+                logStatus(`Loaded: ${r.value.url}`);
+                series.push(r.value);
+            } else {
+                logStatus(`Exception: ${dataset}_${metric}_${enr}.json — ${r.reason}`, false);
+            }
+        });
+
+        if (series.length === 0) {
+            logStatus('All downloads down', false);
+            const c = ensureChart();
+            c.data.labels = [];
+            c.data.datasets = [];
+            c.update();
+            return;
+        }
+
+        const labels = [...new Set(series.flatMap(s => s.arr.map(p => p.epoch ?? 0)))].sort((a, b) => a - b);
+        const c = ensureChart();
+        c.data.labels = labels;
+        c.data.datasets = series.map((s, idx) => ({
+            label: ENRICHMENT_LABELS[s.enr] || s.enr,
+            data: labels.map(ep => {
+                const p = s.arr.find(x => (x.epoch ?? 0) === ep);
+                return p ? (p.value ?? null) : null;
+            }),
+            borderWidth: 2,
+            tension: 0,
+            pointRadius: 2,
+            spanGaps: true,
+            borderColor: colorFor(idx, 1),
+            backgroundColor: colorFor(idx, 0.2),
+        }));
+        c.update();
+    }
+
+    buildEnrichmentCheckboxes();
+    qs('#btnAll').addEventListener('click', () => {
+        qsa('input[type="checkbox"][data-feature]').forEach(cb => cb.checked = true);
+    });
+    qs('#btnNone').addEventListener('click', () => {
+        qsa('input[type="checkbox"][data-feature]').forEach(cb => cb.checked = false);
+    });
+    qs('#btnDraw').addEventListener('click', draw);
 </script>
 </body>
 </html>
