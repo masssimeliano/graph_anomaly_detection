@@ -483,6 +483,143 @@ def is_enrichment_1_better_then_enrichment_2_through_recall(enrichment_1, enrich
     return set(max_items.keys())
 
 
+def is_enrichment_1_better_then_enrichment_2_through_auc_roc_in_domain(enrichment_1, enrichment_2, domain):
+    results_before = get_results_of_some_datasets(domain, all_results)
+    print(results_before)
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], results_before)
+    print(results)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in domain:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = abs(0.5 - result_current_1[DICT_RECALL])
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = abs(0.5 - result_current_2[DICT_RECALL])
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By AUC-ROC: {max_items}")
+    return set(max_items.keys())
+
+
+def is_enrichment_1_better_then_enrichment_2_through_precision_in_domain(enrichment_1, enrichment_2, domain):
+    results_before = get_results_of_some_datasets(domain, all_results)
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], results_before)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in domain:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = result_current_1[DICT_PRECISION]
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = result_current_2[DICT_PRECISION]
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Precision: {max_items}")
+    return set(max_items.keys())
+
+
+def is_enrichment_1_better_then_enrichment_2_through_recall_in_domain(enrichment_1, enrichment_2, domain):
+    results_before = get_results_of_some_datasets(domain, all_results)
+    results = get_results_of_some_enrichments([enrichment_1, enrichment_2], results_before)
+
+    counts = Counter([enrichment_1, enrichment_2])
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in domain:
+        for model in all_models:
+            result_current_1 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_1)
+            ][0]
+            result_current_auc_roc_1 = result_current_1[DICT_RECALL]
+
+            result_current_2 = [
+                result
+                for result in results
+                if (result[DICT_DATASET] == dataset) and
+                   (result[DICT_MODEL] == model) and
+                   (result[DICT_FEATURE_LABEL] == enrichment_2)
+            ][0]
+            result_current_auc_roc_2 = result_current_2[DICT_RECALL]
+
+            if result_current_auc_roc_1 > result_current_auc_roc_2:
+                counts[enrichment_1] += 1
+            else:
+                if result_current_auc_roc_1 == result_current_auc_roc_2:
+                    counts[enrichment_1] += 1
+                    counts[enrichment_2] += 1
+                else:
+                    counts[enrichment_2] += 1
+
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Recall: {max_items}")
+    return set(max_items.keys())
+
+
 def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(datasets=all_datasets):
     results = get_results_of_some_datasets(datasets, all_results)
 
@@ -665,6 +802,30 @@ def is_enrichment_1_better_then_enrichment_2(enrichment_1, enrichment_2):
             return -1
 
 
+def is_enrichment_1_better_then_enrichment_2_in_domain(enrichment_1, enrichment_2, domain):
+    print(f"If enrichment {enrichment_1} is better than enrichment {enrichment_2} in {domain}?")
+    set_1 = is_enrichment_1_better_then_enrichment_2_through_auc_roc_in_domain(enrichment_1, enrichment_2, domain)
+    set_2 = is_enrichment_1_better_then_enrichment_2_through_recall_in_domain(enrichment_1, enrichment_2, domain)
+    set_3 = is_enrichment_1_better_then_enrichment_2_through_precision_in_domain(enrichment_1, enrichment_2, domain)
+
+    set_all = set_1 & set_2 & set_3
+
+    print("Result: " + str(set_all))
+    if (len(set_all) == 2) or (len(set_all) == 0):
+        print("Not yes, nor no")
+        print("\n\n")
+        return 0
+    else:
+        if (len(set_all) == 1) and (len(set_all & set([enrichment_1])) == 1):
+            print("Yes")
+            print("\n\n")
+            return 1
+        else:
+            print("No")
+            print("\n\n")
+            return -1
+
+
 def is_learned_enrichment_better_than_precomputed_enrichment_for_group(datasets, group_name):
     print(f"If learned enrichment is better than precomputed enrichment in {group_name}?")
     set_1 = is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(datasets)
@@ -770,6 +931,17 @@ def main():
     #                                                                    'STR_OR_ATTR_ANOMALY_DATASET')  # Yes
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(STR_AND_ATTR_ANOMALY_DATASETS,
     #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Yes
+
+    # find_best_enrichment_for_domain(["BlogCatalog"], 'WEB GRAPHS')  # Result: {'Attr + Emd1', 'Attr + Error2'}
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
+    #                                                   ["BlogCatalog"])  # Not given
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
+    #                                                   ["BlogCatalog"])  # Not given
+
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
+    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
+    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
 
 
 if __name__ == "__main__":
