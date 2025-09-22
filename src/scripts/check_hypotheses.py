@@ -8,7 +8,8 @@ from collections import Counter
 
 from src.helpers.config.const import *
 from src.helpers.config.dir_config import *
-from src.helpers.config.training_config import EPOCH_TO_LEARN
+from src.helpers.config.training_config import EPOCH_TO_LEARN, AUC_ROC_PAPER_OCGNN, AUC_ROC_PAPER_ANOMALYDAE, \
+    AUC_ROC_PAPER_COLA
 from src.helpers.logs.log_parser import LogParser
 
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,9 @@ DATASETS_USER_SUBREDDIT = ["Reddit"]
 ONLY_ATTR_ANOMALY_DATASETS = ["tolokers"]
 STR_OR_ATTR_ANOMALY_DATASET = ["BlogCatalog", "citeseer", "cora", "Flickr"]
 STR_AND_ATTR_ANOMALY_DATASETS = ["Disney", "book", "computers", "cs", "photo", "weibo", "Reddit"]
+
+INSERTED_ANOMALY_DATASETS = ["cora", "citeseer", "BlogCatalog", "Flickr"]
+GENUINE_ANOMALY_DATASETS = ["tolokers", "Reddit", "weibo", "photo", "cs", "Disney", "book", "computers"]
 
 PRECOMPUTED_ENRICHMENTS = [
     FEATURE_LABEL_STR2,
@@ -191,10 +195,10 @@ def find_enrichment_through_recall_for_domain(datasets):
         counts[k] = 0
 
     for dataset in datasets:
-        for enrichment in all_enrichments:
+        for model in all_models:
             max_current = -1
 
-            for model in all_models:
+            for enrichment in all_enrichments:
                 result_current = [
                     result
                     for result in results
@@ -206,7 +210,7 @@ def find_enrichment_through_recall_for_domain(datasets):
                 if result_current_recall > max_current:
                     max_current = result_current_recall
 
-            for model in all_models:
+            for enrichment in all_enrichments:
                 result_current = [
                     result
                     for result in results
@@ -826,6 +830,45 @@ def is_enrichment_1_better_then_enrichment_2_in_domain(enrichment_1, enrichment_
             return -1
 
 
+def is_enrichment_1_better_then_benchmark_in_model(enrichment_type, model_name):
+    results = get_results_of_some_models([model_name], all_results)
+    results = get_results_of_some_enrichments([enrichment_type], results)
+
+    if model_name == "OCGNN":
+        dict_values = AUC_ROC_PAPER_OCGNN
+    else:
+        if model_name == "AnomalyDAE":
+            dict_values = AUC_ROC_PAPER_ANOMALYDAE
+        else:
+            dict_values = AUC_ROC_PAPER_COLA
+
+    datasets_count = len(dict_values.keys())
+    better_count = 0
+    for dataset in dict_values.keys():
+        result_current = [
+            result
+            for result in results
+            if (result[DICT_DATASET] == dataset)][0]
+
+        if dataset in dict_values:
+            if abs(0.5 - result_current[DICT_AUC_ROC]) > abs(0.5 - dict_values[dataset]):
+                better_count += 1
+
+    return better_count / datasets_count
+
+
+def is_enrichment_1_better_then_benchmark(enrichment_type):
+    print(f"If enrichment {enrichment_type} is better than the result from benchmark?")
+    set_1 = is_enrichment_1_better_then_benchmark_in_model(enrichment_type, "AnomalyDAE")
+    set_2 = is_enrichment_1_better_then_benchmark_in_model(enrichment_type, "CoLA")
+    set_3 = is_enrichment_1_better_then_benchmark_in_model(enrichment_type, "OCGNN")
+
+    print(f"Percentage of the models with enrichments with better result: {set_1}")
+    print(f"Percentage of the models with enrichments with better result: {set_2}")
+    print(f"Percentage of the models with enrichments with better result: {set_3}")
+    print("\n\n")
+
+
 def is_learned_enrichment_better_than_precomputed_enrichment_for_group(datasets, group_name):
     print(f"If learned enrichment is better than precomputed enrichment in {group_name}?")
     set_1 = is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(datasets)
@@ -876,12 +919,12 @@ def is_learned_enrichment_better_than_precomputed_enrichment():
 def main():
     print("Checking")
 
-    # find_best_enrichment_for_domain(DATASETS_SOCIAL_NETWORKS, 'social_networks') # Result: {'Attr + Error2'}
-    # find_best_enrichment_for_domain(DATASETS_CO_PURCHASE, 'co_purchase') # Not given
+    # find_best_enrichment_for_domain(DATASETS_SOCIAL_NETWORKS, 'social_networks')  # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_domain(DATASETS_CO_PURCHASE, 'co_purchase') # Result: {'Attr + Error2'}
     # find_best_enrichment_for_domain(DATASETS_CITATION_NETWORKS, 'citation_networks') # Additional result: Str
     # find_best_enrichment_for_domain(DATASETS_USER_SUBREDDIT, 'user_subreddit') # Not given
     # find_best_enrichment_for_domain(DATASETS_UNDER_SAME_HASHTAG, 'under_same_hashtag') # Result: {'Attr + Str', 'Attr + Emd2'}
-    # find_best_enrichment_for_domain(DATASETS_WORK_COLLABORATION, 'work_collaboration') # Result: {'Attr + Emd2'}
+    # find_best_enrichment_for_domain(DATASETS_WORK_COLLABORATION, 'work_collaboration')  # Result: {'Attr + Emd2'}
 
     # find_best_enrichment_for_domain(ONLY_ATTR_ANOMALY_DATASETS,
     # 'ONLY_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Emd2'}
@@ -889,6 +932,11 @@ def main():
     # 'STR_OR_ATTR_ANOMALY_DATASET')  # Result: {'Attr + Error2'}
     # find_best_enrichment_for_domain(STR_AND_ATTR_ANOMALY_DATASETS,
     # 'STR_AND_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
+
+    # find_best_enrichment_for_domain(INSERTED_ANOMALY_DATASETS,
+    # 'INSERTED_ANOMALY_DATASETS')  # Result: {'Attr + Error2'}
+    # find_best_enrichment_for_domain(GENUINE_ANOMALY_DATASETS,
+    # 'GENUINE_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
 
     # find_best_enrichment_for_model("AnomalyDAE") # Result: {'Attr + Error2'}
     # find_best_enrichment_for_model("CoLA") # Result: {'Attr + Error2'}
@@ -933,15 +981,32 @@ def main():
     #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Yes
 
     # find_best_enrichment_for_domain(["BlogCatalog"], 'WEB GRAPHS')  # Result: {'Attr + Emd1', 'Attr + Error2'}
+    # Hypothesis 1: Disproved, Attr 2-3 with local clustering coefficient works bad on web graphs
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
     #                                                   ["BlogCatalog"])  # Not given
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
     #                                                   ["BlogCatalog"])  # Not given
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
+    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
+    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
 
-    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
-    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
-    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
-    #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STANDARD)
+    # AnomalyDAE: 0.66, CoLA: 0.16, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STR)
+    # AnomalyDAE: 0.33, CoLA: 0, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STR2)
+    # AnomalyDAE: 0.33, CoLA: 0, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STR3)
+    # AnomalyDAE: 0.16, CoLA: 0, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_EMD1)
+    # AnomalyDAE: 0.83, CoLA: 0.16, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_EMD2)
+    # AnomalyDAE: 0.83, CoLA: 0, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_ERROR1)
+    # AnomalyDAE: 0.83, CoLA: 0, OCGNN: 0
+    # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_ERROR2)
+    # AnomalyDAE: 0.5, CoLA: 0, OCGNN: 0
 
 
 if __name__ == "__main__":

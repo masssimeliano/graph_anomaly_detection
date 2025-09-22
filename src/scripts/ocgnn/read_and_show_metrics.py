@@ -121,7 +121,7 @@ def create_metric_plot(
             borderaxespad=0.0,
         )
 
-        save_path = os.path.join(SAVE_DIR_OCGNN, f"{dataset}_{y_axis_label}.png")
+        save_path = os.path.join(SAVE_DIR_OCGNN, f"{dataset}_{y_axis_label.replace("/" + VALUE_PRECISION, "")}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 
@@ -234,11 +234,7 @@ def plot_auc_roc():
 
 
 def plot_recall():
-    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL)
-
-
-def plot_precision():
-    create_metric_plot(metric_name=DICT_PRECISION, y_axis_label=VALUE_PRECISION)
+    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL + "/" + VALUE_PRECISION)
 
 
 def plot_time():
@@ -249,5 +245,4 @@ if __name__ == "__main__":
     plot_loss()
     plot_auc_roc()
     plot_recall()
-    plot_precision()
     plot_time()

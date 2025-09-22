@@ -36,19 +36,19 @@ FEATURE_COLORS_DICT = {
     FEATURE_LABEL_EMD2: "gray",
 }
 FEATURE_LABELS_DICT = {
-    FEATURE_LABEL_STANDARD: "No enrichment",
-    FEATURE_LABEL_STR: "Structural features (pyFGLT)",
-    FEATURE_LABEL_STR2: "Structural features (NetworkX Features v1)",
-    FEATURE_LABEL_STR3: "Structural features (NetworkX Features v2)",
-    FEATURE_LABEL_ERROR1: "Reconstruction errors 1 (Simple autoencoder)",
-    FEATURE_LABEL_ERROR2: "Reconstruction errors 2 (AnomalyDAE autoencoder)",
-    FEATURE_LABEL_EMD1: "Embeddings 1 (alpha = 0 (node features))",
-    FEATURE_LABEL_EMD2: "Embeddings 2 (alpha = 1 (adjacent matrix))",
+    FEATURE_LABEL_STANDARD: "Basic node features",
+    FEATURE_LABEL_STR: "Basic node features with structural features (pyFGLT)",
+    FEATURE_LABEL_STR2: "Basic node features with structural features (NetworkX Features v1)",
+    FEATURE_LABEL_STR3: "Basic node features with structural features (NetworkX Features v2)",
+    FEATURE_LABEL_ERROR1: "Basic node features with reconstruction errors 1 (Simple autoencoder)",
+    FEATURE_LABEL_ERROR2: "Basic node features with reconstruction errors 2 (AnomalyDAE encoder)",
+    FEATURE_LABEL_EMD1: "Basic node features with embeddings 1 (AnomalyDAE with alpha = 0 (node features))",
+    FEATURE_LABEL_EMD2: "Basic node features with embeddings 2 (AnomalyDAE with alpha = 1 (adjacent matrix))",
 }
 
 
 def create_metric_plot(
-    metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
+        metric_name: str, y_axis_label: str, baseline_dict: dict[str, float] = None
 ):
     parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
     parser.parse_logs()
@@ -73,7 +73,7 @@ def create_metric_plot(
                 result
                 for result in parser.results
                 if result[DICT_DATASET] == dataset
-                and result[DICT_FEATURE_LABEL] == feature_label
+                   and result[DICT_FEATURE_LABEL] == feature_label
             ]
             if not filtered_feature_labels:
                 continue
@@ -129,12 +129,13 @@ def create_metric_plot(
             borderaxespad=0.0,
         )
 
-        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label}.png")
+        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label.replace("/" + VALUE_PRECISION, "")}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 
+
 def get_max_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     max_value = 0
 
@@ -143,7 +144,7 @@ def get_max_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -157,7 +158,7 @@ def get_max_value_for_dataset_and_metric(
 
 
 def get_min_value_for_dataset_and_metric(
-    dataset: str, parser: LogParser, metric_name: str
+        dataset: str, parser: LogParser, metric_name: str
 ) -> float:
     min_value = get_max_value_for_dataset_and_metric(
         dataset=dataset, parser=parser, metric_name=metric_name
@@ -168,7 +169,7 @@ def get_min_value_for_dataset_and_metric(
             result
             for result in parser.results
             if result[DICT_DATASET] == dataset
-            and result[DICT_FEATURE_LABEL] == feature_label
+               and result[DICT_FEATURE_LABEL] == feature_label
         ]
         if not filtered_parser_result:
             continue
@@ -194,11 +195,7 @@ def plot_auc_roc():
 
 
 def plot_recall():
-    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL)
-
-
-def plot_precision():
-    create_metric_plot(metric_name=DICT_PRECISION, y_axis_label=VALUE_PRECISION)
+    create_metric_plot(metric_name=DICT_RECALL, y_axis_label=VALUE_RECALL + "/" + VALUE_PRECISION)
 
 
 def plot_time():
@@ -206,9 +203,9 @@ def plot_time():
 
 
 def make_epoch_pivot_table(
-    target_epoch: int = 100,
-    metrics: tuple[str, ...] = (DICT_AUC_ROC, DICT_RECALL, DICT_PRECISION),
-    metric_display: dict[str, str] = None,
+        target_epoch: int = 100,
+        metrics: tuple[str, ...] = (DICT_AUC_ROC, DICT_RECALL, DICT_PRECISION),
+        metric_display: dict[str, str] = None,
 ):
     if metric_display is None:
         metric_display = {
@@ -238,8 +235,8 @@ def make_epoch_pivot_table(
                     r.get(m, np.nan)
                     for r in parser.results
                     if r[DICT_DATASET] == d
-                    and r[DICT_FEATURE_LABEL] == f
-                    and r[DICT_EPOCH] == target_epoch
+                       and r[DICT_FEATURE_LABEL] == f
+                       and r[DICT_EPOCH] == target_epoch
                 ]
                 val = vals[-1] if vals else np.nan
                 df.loc[(m_name, f_name), d] = val
@@ -265,9 +262,7 @@ def make_epoch_pivot_table(
     return df
 
 if __name__ == "__main__":
-    parser = LogParser(log_dir=RESULTS_DIR_ANOMALYDAE)
-    parser.parse_logs()
-    parser = LogParser(log_dir=RESULTS_DIR_COLA)
-    parser.parse_logs()
-    parser = LogParser(log_dir=RESULTS_DIR_OCGNN)
-    parser.parse_logs()
+    plot_loss()
+    plot_auc_roc()
+    plot_recall()
+    plot_time()
