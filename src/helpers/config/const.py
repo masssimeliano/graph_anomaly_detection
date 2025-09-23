@@ -18,15 +18,15 @@ FEATURE_LABEL_STANDARD = "Attr"
 # order is important here because in parse_logs() it must search for all feature labels through contains()
 # and before FEATURE_LABEL_STANDARD it has to check FEATURE_LABEL_STR2 e.g.
 FEATURE_LABELS = [
-    FEATURE_LABEL_STR2,
-    FEATURE_LABEL_STR3,
-    FEATURE_LABEL_STR,
+    FEATURE_LABEL_STR2, # local structure features (degree, clustering, ...)
+    FEATURE_LABEL_STR3, # local + global structure features (degree, clustering, ... + eigenvector, pagerank)
+    FEATURE_LABEL_STR, # local structure features (graphlet count)
     FEATURE_LABEL_ALPHA1,
     FEATURE_LABEL_ALPHA2,
-    FEATURE_LABEL_EMD1,
-    FEATURE_LABEL_EMD2,
-    FEATURE_LABEL_ERROR1,
-    FEATURE_LABEL_ERROR2,
+    FEATURE_LABEL_EMD1, # only attr
+    FEATURE_LABEL_EMD2, # only str
+    FEATURE_LABEL_ERROR1, # simple autoencoder
+    FEATURE_LABEL_ERROR2, # attr and str error
     FEATURE_LABEL_STANDARD,
 ]
 

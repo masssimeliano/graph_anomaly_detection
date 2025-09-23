@@ -136,6 +136,7 @@ def find_enrichment_through_auc_roc_for_domain(datasets):
                 if result_current_auc_roc == max_current:
                     counts[enrichment] += 1
 
+    # custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -179,6 +180,7 @@ def find_enrichment_through_precision_for_domain(datasets):
                 if result_current_precision == max_current:
                     counts[enrichment] += 1
 
+    # custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -227,6 +229,17 @@ def find_enrichment_through_recall_for_domain(datasets):
 
     print(f"    - By Recall: {max_items}")
     return set(max_items.keys())
+
+
+def custom_print_1(dict):
+    print(dict[FEATURE_LABEL_STANDARD])
+    print(dict[FEATURE_LABEL_STR])
+    print(dict[FEATURE_LABEL_STR2])
+    print(dict[FEATURE_LABEL_STR3])
+    print(dict[FEATURE_LABEL_EMD1])
+    print(dict[FEATURE_LABEL_EMD2])
+    print(dict[FEATURE_LABEL_ERROR1])
+    print(dict[FEATURE_LABEL_ERROR2])
 
 
 def find_enrichment_through_auc_roc_for_model(model):
@@ -937,13 +950,13 @@ def main():
     # 'STR_OR_ATTR_ANOMALY_DATASET')  # Result: {'Attr + Error2'}
     ### Why: Catches both error types
     # find_best_enrichment_for_domain(STR_AND_ATTR_ANOMALY_DATASETS,
-    # 'STR_AND_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
-    ### Why: Needs more node-specific features (structural also)
+    # 'STR_AND_ATTR_ANOMALY_DATASETS')  # Not given
+    ### Why: Hard to capture both types of errors together
 
     # find_best_enrichment_for_domain(INSERTED_ANOMALY_DATASETS,
     # 'INSERTED_ANOMALY_DATASETS')  # Result: {'Attr + Error2'}
     # find_best_enrichment_for_domain(GENUINE_ANOMALY_DATASETS,
-    # 'GENUINE_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
+    # 'GENUINE_ANOMALY_DATASETS')  # Not given
 
     # find_best_enrichment_for_model("AnomalyDAE") # Result: {'Attr + Error2'}
     ### Why: Learns to reconstruct
@@ -964,7 +977,7 @@ def main():
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STANDARD) # Not given
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD) # Not given
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD) # Not given
-    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD1, FEATURE_LABEL_STANDARD) # Yes
+    # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD1, FEATURE_LABEL_STANDARD) # Not given
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_EMD2, FEATURE_LABEL_STANDARD) # Yes
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR1, FEATURE_LABEL_STANDARD) # Not given
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR2, FEATURE_LABEL_STANDARD) # Not given
@@ -990,7 +1003,7 @@ def main():
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(STR_OR_ATTR_ANOMALY_DATASET,
     #                                                                    'STR_OR_ATTR_ANOMALY_DATASET')  # Yes
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(STR_AND_ATTR_ANOMALY_DATASETS,
-    #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Yes
+    #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Not given
 
     # find_best_enrichment_for_domain(["BlogCatalog"], 'WEB GRAPHS')  # Result: {'Attr + Emd1', 'Attr + Error2'}
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
