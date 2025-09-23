@@ -928,10 +928,13 @@ def main():
 
     # find_best_enrichment_for_domain(ONLY_ATTR_ANOMALY_DATASETS,
     # 'ONLY_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Emd2'}
+    ### Why: Gives more "normal" attributes (structural) to all nodes, which makes easier to detect
     # find_best_enrichment_for_domain(STR_OR_ATTR_ANOMALY_DATASET,
     # 'STR_OR_ATTR_ANOMALY_DATASET')  # Result: {'Attr + Error2'}
+    ### Why: Catches both error types
     # find_best_enrichment_for_domain(STR_AND_ATTR_ANOMALY_DATASETS,
     # 'STR_AND_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
+    ### Why: Needs more node-specific features (structural also)
 
     # find_best_enrichment_for_domain(INSERTED_ANOMALY_DATASETS,
     # 'INSERTED_ANOMALY_DATASETS')  # Result: {'Attr + Error2'}
@@ -939,11 +942,15 @@ def main():
     # 'GENUINE_ANOMALY_DATASETS')  # Result: {'Attr + Str'}
 
     # find_best_enrichment_for_model("AnomalyDAE") # Result: {'Attr + Error2'}
+    ### Why: Learns to reconstruct
     # find_best_enrichment_for_model("CoLA") # Result: {'Attr + Error2'}
+    ### Why: Needs more features with contrast
     # find_best_enrichment_for_model("OCGNN") # Result: {'Attr + Str'}
+    ### Why: Needs more node-specific features (structural also)
 
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STR2) # Not given
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR, FEATURE_LABEL_STR3) # Yes
+    ### Why: Maybe only local structural attributes must be calculated
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_STR2, FEATURE_LABEL_STR3) # Not given
 
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR1, FEATURE_LABEL_ERROR2) # Not given
@@ -959,6 +966,7 @@ def main():
     # is_enrichment_1_better_then_enrichment_2(FEATURE_LABEL_ERROR2, FEATURE_LABEL_STANDARD) # Not given
 
     # is_learned_enrichment_better_than_precomputed_enrichment()  # Yes
+    ### Why: We have learned during first fit() smth about data already
 
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_SOCIAL_NETWORKS,
     #                                                                    'social_networks')  # Yes
@@ -981,15 +989,16 @@ def main():
     #                                                                    'STR_AND_ATTR_ANOMALY_DATASETS')  # Yes
 
     # find_best_enrichment_for_domain(["BlogCatalog"], 'WEB GRAPHS')  # Result: {'Attr + Emd1', 'Attr + Error2'}
-    # Hypothesis 1: Disproved, Attr 2-3 with local clustering coefficient works bad on web graphs
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
     #                                                   ["BlogCatalog"])  # Not given
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
     #                                                   ["BlogCatalog"])  # Not given
+    ### Hypothesis 1: Disproved, Attr + Str2-3 with local clustering coefficient work bad on web graphs
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR2, FEATURE_LABEL_STANDARD,
     #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
     #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
+    ### Hypothesis 2: Not proved nor disproved, Attr + Str2-3 with PageRank & NodeDegree work good on social networks
 
     # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STANDARD)
     # AnomalyDAE: 0.66, CoLA: 0.16, OCGNN: 0
@@ -1007,6 +1016,7 @@ def main():
     # AnomalyDAE: 0.83, CoLA: 0, OCGNN: 0
     # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_ERROR2)
     # AnomalyDAE: 0.5, CoLA: 0, OCGNN: 0
+    ### Why: No train/test-split
 
 
 if __name__ == "__main__":

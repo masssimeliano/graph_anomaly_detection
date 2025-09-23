@@ -15,20 +15,27 @@ class DataSetSize(Enum):
 
 
 SMALL_DATASETS = [
-    "Disney.mat",
-    "book.mat",
-    "BlogCatalog.mat",
-    "citeseer.mat",
-    "computers.mat",
-    "cora.mat",
-    "cs.mat",
-    "photo.mat",
-    "weibo.mat",
+    "Disney.mat", #
+    "book.mat", #
+    "BlogCatalog.mat", #
+    "citeseer.mat", #
+    "computers.mat", #
+    "cora.mat", #
+    "cs.mat", #
+    "photo.mat", #
+    "weibo.mat", #
 ]
-MEDIUM_DATASETS = ["Flickr.mat", "Reddit.mat", "tolokers.mat"]
+MEDIUM_DATASETS = [
+    "Flickr.mat", #
+    "Reddit.mat", #
+    "tolokers.mat" # Toloka crowdsourcing platform; nodes (represent tolokers(workers) that have participated in at least one of projects); edges (workes on the same task)
+]
 LARGE_DATASETS = []
 
-ONE_CLASS_DATASETS = ["tolokers.mat"]
+ONE_CLASS_DATASETS = [
+    "tolokers.mat"
+]
+
 
 ALL_DATASETS = SMALL_DATASETS + MEDIUM_DATASETS + LARGE_DATASETS
 ALL_DATASETS_SIZE = (
