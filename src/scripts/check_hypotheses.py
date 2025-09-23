@@ -136,7 +136,7 @@ def find_enrichment_through_auc_roc_for_domain(datasets):
                 if result_current_auc_roc == max_current:
                     counts[enrichment] += 1
 
-    # custom_print_1(counts)
+    custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -180,7 +180,7 @@ def find_enrichment_through_precision_for_domain(datasets):
                 if result_current_precision == max_current:
                     counts[enrichment] += 1
 
-    # custom_print_1(counts)
+    custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -242,6 +242,16 @@ def custom_print_1(dict):
     print(dict[FEATURE_LABEL_ERROR2])
 
 
+def custom_print_2(dict):
+    print(dict["learned"])
+    print(dict["precomputed"])
+
+
+def custom_print_3(dict, enrichment):
+    print(dict[enrichment[0]])
+    print(dict[enrichment[1]])
+
+
 def find_enrichment_through_auc_roc_for_model(model):
     results = get_results_of_some_models([model], all_results)
 
@@ -277,6 +287,7 @@ def find_enrichment_through_auc_roc_for_model(model):
             if result_current_auc_roc == max_current:
                 counts[enrichment] += 1
 
+    custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -319,6 +330,7 @@ def find_enrichment_through_precision_for_model(model):
             if result_current_auc_roc == max_current:
                 counts[enrichment] += 1
 
+    custom_print_1(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -538,6 +550,7 @@ def is_enrichment_1_better_then_enrichment_2_through_auc_roc_in_domain(enrichmen
                 else:
                     counts[enrichment_2] += 1
 
+    custom_print_3(counts, [enrichment_1, enrichment_2])
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -583,6 +596,7 @@ def is_enrichment_1_better_then_enrichment_2_through_precision_in_domain(enrichm
                 else:
                     counts[enrichment_2] += 1
 
+    custom_print_3(counts, [enrichment_1, enrichment_2])
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -662,6 +676,7 @@ def is_learned_enrichment_better_than_precomputed_enrichment_through_auc_roc(dat
                     if result[DICT_FEATURE_LABEL] in PRECOMPUTED_ENRICHMENTS:
                         counts["precomputed"] += 1
 
+    custom_print_2(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
@@ -696,6 +711,7 @@ def is_learned_enrichment_better_than_precomputed_enrichment_through_precision(d
                     if result[DICT_FEATURE_LABEL] in PRECOMPUTED_ENRICHMENTS:
                         counts["precomputed"] += 1
 
+    custom_print_2(counts)
     max_value = max(counts.values())
     max_items = {k: v for k, v in counts.items() if v == max_value}
 
