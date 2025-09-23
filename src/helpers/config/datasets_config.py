@@ -27,7 +27,7 @@ SMALL_DATASETS = [
 ]
 MEDIUM_DATASETS = [
     "Flickr.mat", #
-    "Reddit.mat", #
+    "Reddit.mat", # Reddit posts, nodes (title, number of comments, score); edges (same user commented on both)
     "tolokers.mat" # Toloka crowdsourcing platform; nodes (represent tolokers(workers) that have participated in at least one of projects); edges (workes on the same task)
 ]
 LARGE_DATASETS = []
