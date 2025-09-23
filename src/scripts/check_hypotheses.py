@@ -18,7 +18,7 @@ DATASETS_CITATION_NETWORKS = ["cora", "citeseer"]
 DATASETS_SOCIAL_NETWORKS = ["BlogCatalog", "Flickr"]
 DATASETS_UNDER_SAME_HASHTAG = ["weibo"]
 DATASETS_WORK_COLLABORATION = ["tolokers"]
-DATASETS_CO_PURCHASE = ["Disney", "book"]
+DATASETS_CO_PURCHASE = ["Disney", "book", "computers", "cs", "photo",]
 DATASETS_USER_SUBREDDIT = ["Reddit"]
 
 ONLY_ATTR_ANOMALY_DATASETS = ["tolokers"]
@@ -489,9 +489,7 @@ def is_enrichment_1_better_then_enrichment_2_through_recall(enrichment_1, enrich
 
 def is_enrichment_1_better_then_enrichment_2_through_auc_roc_in_domain(enrichment_1, enrichment_2, domain):
     results_before = get_results_of_some_datasets(domain, all_results)
-    print(results_before)
     results = get_results_of_some_enrichments([enrichment_1, enrichment_2], results_before)
-    print(results)
 
     counts = Counter([enrichment_1, enrichment_2])
     counts = dict(counts)
@@ -920,15 +918,21 @@ def main():
     print("Checking")
 
     # find_best_enrichment_for_domain(DATASETS_SOCIAL_NETWORKS, 'social_networks')  # Result: {'Attr + Error2'}
-    # find_best_enrichment_for_domain(DATASETS_CO_PURCHASE, 'co_purchase') # Result: {'Attr + Error2'}
+    ### Why: Captures both str and attr (users and their "friends")
+    # find_best_enrichment_for_domain(DATASETS_CO_PURCHASE, 'co_purchase') # Not given
+    ### Why: May be no correlation between nodes and edges
     # find_best_enrichment_for_domain(DATASETS_CITATION_NETWORKS, 'citation_networks') # Additional result: Str
+    ### Why: Structure is important (Represents citation)
     # find_best_enrichment_for_domain(DATASETS_USER_SUBREDDIT, 'user_subreddit') # Not given
+    ### Why: Its hard to predict on which post a person comments
     # find_best_enrichment_for_domain(DATASETS_UNDER_SAME_HASHTAG, 'under_same_hashtag') # Result: {'Attr + Str', 'Attr + Emd2'}
+    ### Why: Structure is important (Represents same hashtag)
     # find_best_enrichment_for_domain(DATASETS_WORK_COLLABORATION, 'work_collaboration')  # Result: {'Attr + Emd2'}
+    ### Why: Gives additional info on "good structure"
 
     # find_best_enrichment_for_domain(ONLY_ATTR_ANOMALY_DATASETS,
     # 'ONLY_ATTR_ANOMALY_DATASETS')  # Result: {'Attr + Emd2'}
-    ### Why: Gives more "normal" attributes (structural) to all nodes, which makes easier to detect
+    ### Why: Gives more "normal" attributes (structural) to all nodes, which makes easier to detect (Contrastive)
     # find_best_enrichment_for_domain(STR_OR_ATTR_ANOMALY_DATASET,
     # 'STR_OR_ATTR_ANOMALY_DATASET')  # Result: {'Attr + Error2'}
     ### Why: Catches both error types
@@ -971,7 +975,7 @@ def main():
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_SOCIAL_NETWORKS,
     #                                                                    'social_networks')  # Yes
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_CO_PURCHASE,
-    #                                                                    'co_purchase')  # Yes
+    #                                                                    'co_purchase')  # Not given
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_CITATION_NETWORKS,
     #                                                                    'citation_networks')  # No
     # is_learned_enrichment_better_than_precomputed_enrichment_for_group(DATASETS_USER_SUBREDDIT,
@@ -999,6 +1003,9 @@ def main():
     # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR3, FEATURE_LABEL_STANDARD,
     #                                                   DATASETS_SOCIAL_NETWORKS)  # Not given
     ### Hypothesis 2: Not proved nor disproved, Attr + Str2-3 with PageRank & NodeDegree work good on social networks
+    # is_enrichment_1_better_then_enrichment_2_in_domain(FEATURE_LABEL_STR, FEATURE_LABEL_STANDARD,
+    #                                                   all_datasets)  # Not given
+    ### Hypothesis 3: Not proved nor disproved, Attr + Str with graphlet counts is redundant and bad
 
     # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_STANDARD)
     # AnomalyDAE: 0.66, CoLA: 0.16, OCGNN: 0
