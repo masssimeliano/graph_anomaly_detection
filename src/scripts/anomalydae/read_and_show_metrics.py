@@ -266,7 +266,9 @@ def make_epoch_pivot_table(
                 df.loc[(m_name, f_name), d] = format_mean_std(vals, vals_all)
 
     df = df.droplevel("metric", axis=0)
-    df = df.drop(columns=["BlogCatalog", "Disney", "Flickr", "Reddit", "book", "citeseer", "computers", "cora", "cs", "photo", "tolokers"], errors="ignore")
+    # df = df.drop(columns=["BlogCatalog", "Disney", "Flickr", "Reddit", "book", "computers", "cora", "cs", "photo", "tolokers"], errors="ignore")
+    # df = df.drop(columns=["BlogCatalog", "Disney", "Flickr", "Reddit", "book", "weibo", "citeseer"], errors="ignore")
+    # df = df.drop(columns=["computers", "cora", "cs", "photo", "tolokers", "citeseer", "weibo"], errors="ignore")
     save_csv_path = os.path.join(
         SAVE_DIR_ANOMALYDAE, f"pivot_metrics_epoch{target_epoch}.csv"
     )
