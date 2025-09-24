@@ -129,7 +129,8 @@ def create_metric_plot(
             borderaxespad=0.0,
         )
 
-        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{y_axis_label.replace("/" + VALUE_PRECISION, "")}.png")
+        name = y_axis_label.replace("/" + VALUE_PRECISION, "")
+        save_path = os.path.join(SAVE_DIR_ANOMALYDAE, f"{dataset}_{name}.png")
         plot.savefig(save_path, dpi=300)
         plot.show()
 
@@ -207,6 +208,17 @@ def make_epoch_pivot_table(
         metrics: tuple[str, ...] = (DICT_AUC_ROC, DICT_RECALL, DICT_PRECISION),
         metric_display: dict[str, str] = None,
 ):
+    f_dict = {
+        FEATURE_LABEL_STANDARD: " & No enrichment",
+        FEATURE_LABEL_STR: " & pyFGLT",
+        FEATURE_LABEL_STR2: " & NetworkX features v1",
+        FEATURE_LABEL_STR3: " & NetworkX features v2",
+        FEATURE_LABEL_ERROR1: " & Simple autoencoder",
+        FEATURE_LABEL_ERROR2: " & AnomalyDAE encoder",
+        FEATURE_LABEL_EMD1: " & Embedding 1",
+        FEATURE_LABEL_EMD2: " & Embedding 2",
+    }
+
     if metric_display is None:
         metric_display = {
             DICT_AUC_ROC: "AUC-ROC",
@@ -218,7 +230,7 @@ def make_epoch_pivot_table(
     parser.parse_logs()
 
     datasets = sorted(set(r[DICT_DATASET] for r in parser.results))
-    enrichments = [FEATURE_LABELS_DICT[f] for f in FEATURE_LABELS]
+    enrichments = [f_dict[f] for f in FEATURE_LABELS]
     metrics_disp = [metric_display[m] for m in metrics]
 
     index = pd.MultiIndex.from_product(
@@ -226,10 +238,17 @@ def make_epoch_pivot_table(
     )
     df = pd.DataFrame(index=index, columns=datasets, dtype=float)
 
+    def format_mean_std(values: list[float], values_all: list[float]) -> str:
+        arr = np.array([v for v in values_all if v is not None and not (isinstance(v, float) and np.isnan(v))], dtype=float)
+        if arr.size == 0:
+            return ""
+        std = float(np.nanstd(arr, ddof=0))
+        return f"{values[-1]:.2f}+-{std:.2f}"
+
     for m in metrics:
         m_name = metric_display[m]
         for f in FEATURE_LABELS:
-            f_name = FEATURE_LABELS_DICT[f]
+            f_name = f_dict[f]
             for d in datasets:
                 vals = [
                     r.get(m, np.nan)
@@ -238,9 +257,16 @@ def make_epoch_pivot_table(
                        and r[DICT_FEATURE_LABEL] == f
                        and r[DICT_EPOCH] == target_epoch
                 ]
-                val = vals[-1] if vals else np.nan
-                df.loc[(m_name, f_name), d] = val
+                vals_all = [
+                    r.get(m, np.nan)
+                    for r in parser.results
+                    if r[DICT_DATASET] == d
+                       and r[DICT_FEATURE_LABEL] == f
+                ]
+                df.loc[(m_name, f_name), d] = format_mean_std(vals, vals_all)
 
+    df = df.droplevel("metric", axis=0)
+    df = df.drop(columns=["BlogCatalog", "Disney", "Flickr", "Reddit", "book", "citeseer", "computers", "cora", "cs", "photo", "tolokers"], errors="ignore")
     save_csv_path = os.path.join(
         SAVE_DIR_ANOMALYDAE, f"pivot_metrics_epoch{target_epoch}.csv"
     )
@@ -262,7 +288,4 @@ def make_epoch_pivot_table(
     return df
 
 if __name__ == "__main__":
-    plot_loss()
-    plot_auc_roc()
-    plot_recall()
-    plot_time()
+    make_epoch_pivot_table()
