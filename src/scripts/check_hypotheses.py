@@ -100,6 +100,98 @@ def get_results_of_some_enrichments(enrichments, results):
     ]
 
 
+def find_all_max_times():
+    datasets = all_datasets
+    results = all_results
+
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in datasets:
+        for model in all_models:
+            max_current = 0
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_time = result_current[DICT_TIME]
+                if result_current_time > max_current:
+                    max_current = result_current_time
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_time = result_current[DICT_TIME]
+                if result_current_time == max_current:
+                    counts[enrichment] += 1
+
+    custom_print_1(counts)
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Time: {max_items}")
+    return set(max_items.keys())
+
+
+def find_all_min_times():
+    datasets = all_datasets
+    results = all_results
+
+    counts = Counter(all_enrichments)
+    counts = dict(counts)
+    for k, v in counts.items():
+        counts[k] = 0
+
+    for dataset in datasets:
+        for model in all_models:
+            min_current = -1
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_time = result_current[DICT_TIME]
+                if min_current == -1:
+                    min_current = result_current_time
+                if result_current_time < min_current:
+                    min_current = result_current_time
+
+            for enrichment in all_enrichments:
+                result_current = [
+                    result
+                    for result in results
+                    if (result[DICT_DATASET] == dataset) and
+                       (result[DICT_MODEL] == model) and
+                       (result[DICT_FEATURE_LABEL] == enrichment)
+                ][0]
+                result_current_time = result_current[DICT_TIME]
+                if result_current_time == min_current:
+                    counts[enrichment] += 1
+
+    custom_print_1(counts)
+    max_value = max(counts.values())
+    max_items = {k: v for k, v in counts.items() if v == max_value}
+
+    print(f"    - By Time: {max_items}")
+    return set(max_items.keys())
+
+
 def find_enrichment_through_auc_roc_for_domain(datasets):
     results = get_results_of_some_datasets(datasets, all_results)
 
@@ -1053,6 +1145,9 @@ def main():
     # is_enrichment_1_better_then_benchmark(FEATURE_LABEL_ERROR2)
     # AnomalyDAE: 0.5, CoLA: 0, OCGNN: 0
     ### Why: No train/test-split
+
+    find_all_min_times()
+    find_all_max_times()
 
 
 if __name__ == "__main__":
