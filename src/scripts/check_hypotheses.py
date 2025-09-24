@@ -1146,8 +1146,8 @@ def main():
     # AnomalyDAE: 0.5, CoLA: 0, OCGNN: 0
     ### Why: No train/test-split
 
-    find_all_min_times()
-    find_all_max_times()
+    # find_all_min_times()
+    # find_all_max_times()
 
 
 if __name__ == "__main__":
